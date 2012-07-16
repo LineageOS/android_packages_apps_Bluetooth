@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAU3///8I\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 3296
+      },
+      "writtenOn": "2012-07-16T13:55:07Z",
+      "side": 1,
+      "message": "Translation revised and supplemented. Unicode supplemented.\n\nOder etwas in der Richtung.",
+      "revId": "206c16935eb73ee66e7955fee5b279f2ec179783",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAU3///8Y\u003d",
+        "filename": "res/values-de/strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 3296
+      },
+      "writtenOn": "2012-07-16T13:55:07Z",
+      "side": 1,
+      "message": "Blutooth-Download-Manager ist etwas zuviele Bindestriche mir gefällt das nicht wirklich.",
+      "revId": "206c16935eb73ee66e7955fee5b279f2ec179783",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAU3///8U\u003d",
+        "filename": "res/values-de/strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 3296
+      },
+      "writtenOn": "2012-07-16T13:55:07Z",
+      "side": 1,
+      "message": "\"Bluetooth-Freigabe:\" könnte man eigentlich ganz weg lassen oder es durch \"Sende:\" ersetzen, denn es verschwendet den ganzen Platz in der Statusbar, sodass man nicht mehr in der Lage ist zu sehen was man empfangt.\nJedenfalls ist das Geschmackssache.",
+      "revId": "206c16935eb73ee66e7955fee5b279f2ec179783",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAU3///8Q\u003d",
+        "filename": "res/values-de/strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 3296
+      },
+      "writtenOn": "2012-07-16T13:55:07Z",
+      "side": 1,
+      "message": "Whitespace bzw \" zu früh gesetzt?",
+      "revId": "206c16935eb73ee66e7955fee5b279f2ec179783",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAU3///8M\u003d",
+        "filename": "res/values-de/strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 3296
+      },
+      "writtenOn": "2012-07-16T13:55:07Z",
+      "side": 1,
+      "message": "\"gesendete Dateien\" \"Empfangene Dateien\" Großkleinschreibung",
+      "revId": "206c16935eb73ee66e7955fee5b279f2ec179783",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
