@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAa3//+lw\u003d",
+        "filename": "res/values-nl/strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 2248
+      },
+      "writtenOn": "2012-11-07T13:47:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAa3//+sk\u003d",
+      "revId": "50f2255125fc0c76ed6a846ae9f8d2db8ddda555",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAa3//+sg\u003d",
         "filename": "res/values-nl/strings.xml",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2012-11-07T03:45:16Z",
       "side": 1,
       "message": "deze ook nog?\n\nik vind deze zin sowieso erg onduidelijk, kan het niet anders?\n\n- \"Staat het ontvangen van informatie over gegevensoverdrachtstatus toe voor bluetooth.\"\n\n\"Allows receiving handover transfer status information from Bluetooth.\"",
+      "revId": "50f2255125fc0c76ed6a846ae9f8d2db8ddda555",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAa3//+l0\u003d",
+        "filename": "res/values-nl/strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 2248
+      },
+      "writtenOn": "2012-11-07T13:47:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAa3//+sg\u003d",
       "revId": "50f2255125fc0c76ed6a846ae9f8d2db8ddda555",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
