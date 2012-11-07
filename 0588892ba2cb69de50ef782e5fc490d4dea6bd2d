@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAa3//+gQ\u003d",
+        "filename": "res/values-nl/strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 2248
+      },
+      "writtenOn": "2012-11-07T20:00:00Z",
+      "side": 1,
+      "message": "applicatie -\u003e app",
+      "revId": "0588892ba2cb69de50ef782e5fc490d4dea6bd2d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
