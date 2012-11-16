@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAa3//8MA\u003d",
+        "filename": "src/com/android/bluetooth/map/BluetoothMns.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 4245
+      },
+      "writtenOn": "2012-11-16T03:57:31Z",
+      "side": 1,
+      "message": "I do not like idea of using reflection to create client instances.\nWhy not to get reference to BluetoothMasService via context and add/use some service function to create all default instances and return list back?\n\nJust a thought: looks like a factory needed somewhere to register supported clients and instantiate them, instead of using static list with class names and reflection API.",
+      "revId": "a130f0e738dbcffc9b550d288f3fe6dfd39f6aaa",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
