@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAa3//6kA\u003d",
+        "filename": "res/values-es/strings_map.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 3134
+      },
+      "writtenOn": "2012-11-24T07:59:18Z",
+      "side": 1,
+      "message": "Introducir clave de sesión ... or Introducir la clave de sesión ...",
+      "revId": "067958e87c5c1fbaae3bf4f2d84e088ca9692493",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAa3//6j8\u003d",
+        "filename": "res/values-es/strings_map.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 3134
+      },
+      "writtenOn": "2012-11-24T07:59:18Z",
+      "side": 1,
+      "message": "Solicitud de autenticación Obex",
+      "revId": "067958e87c5c1fbaae3bf4f2d84e088ca9692493",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAa3//6j4\u003d",
+        "filename": "res/values-es/strings_map.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 3134
+      },
+      "writtenOn": "2012-11-24T07:59:18Z",
+      "side": 1,
+      "message": "\"para perfil Acceso a mensajes\"\nor\n\"para perfil MAP\"",
+      "revId": "067958e87c5c1fbaae3bf4f2d84e088ca9692493",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAa3//6j0\u003d",
+        "filename": "res/values-es/strings_map.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 3134
+      },
+      "writtenOn": "2012-11-24T07:59:18Z",
+      "side": 1,
+      "message": "Se permite el ...\n\nor \n\nAcceso a  la carpeta raíz permitido para ...",
+      "revId": "067958e87c5c1fbaae3bf4f2d84e088ca9692493",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAa3//6jw\u003d",
+        "filename": "res/values-es/strings_map.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 3134
+      },
+      "writtenOn": "2012-11-24T07:59:18Z",
+      "side": 1,
+      "message": "Fallo la conexión Bluetooth para el perfil MAP\n\nor \n\nFallo la conexión Bluetooth para el perfil Acceso a mensajes",
+      "revId": "067958e87c5c1fbaae3bf4f2d84e088ca9692493",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
