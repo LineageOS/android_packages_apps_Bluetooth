@@ -19,6 +19,74 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3///jk\u003d",
+        "filename": "res/values-de/strings_map.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2013-01-21T21:48:07Z",
+      "side": 1,
+      "message": "Ich würde hier \u0027phone folders\u0027 auch etwas frei als \u0027Nachrichten\u0027 übersetzen. Die englischen Originaltexte sind nicht wirklich gut.",
+      "revId": "f6bb5cf177b8273b2d9526f093fc2390b62c22ca",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3///jg\u003d",
+        "filename": "res/values-de/strings_map.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2013-01-21T21:48:07Z",
+      "side": 1,
+      "message": "Nicht auf, sondern von.\n\n\u0027Bei der Verbindung mit %1$s ist eine Zeitüberschreitung aufgetreten\u0027",
+      "revId": "f6bb5cf177b8273b2d9526f093fc2390b62c22ca",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3///jY\u003d",
+        "filename": "res/values-de/strings_map.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2013-01-21T21:48:07Z",
+      "side": 1,
+      "message": "Satzbau, siehe oben:\nBei der Eingabe des Sitzungsschlüssels für %1$s ist eine Zeitüberschreitung aufgetreten",
+      "revId": "f6bb5cf177b8273b2d9526f093fc2390b62c22ca",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3///jo\u003d",
+        "filename": "res/values-de/strings_map.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2013-01-21T21:48:07Z",
+      "side": 1,
+      "message": "root folder access würde ich eher als \u0027Zugriff auf den Root-Ordner verstehen\u0027 als \u0027Root-Zugriff auf Ordner\u0027.\n\nIch würde da aber wahrscheinlich ohnehin eher \u0027%1$s Zugriff auf ihre Nachrichten erlauben\u0027 schreiben.",
+      "revId": "f6bb5cf177b8273b2d9526f093fc2390b62c22ca",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3///ts\u003d",
         "filename": "res/values-de/strings_map.xml",
         "patchSetId": 2
@@ -30,6 +98,24 @@
       "writtenOn": "2013-01-21T15:35:36Z",
       "side": 1,
       "message": "MAP Verbindung muss um es einheitlich zu halten dann auch mit einem Bindestrich verbunden werden. \n\nMAP-Verbindung",
+      "revId": "f6bb5cf177b8273b2d9526f093fc2390b62c22ca",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3///j8\u003d",
+        "filename": "res/values-de/strings_map.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2013-01-21T21:48:07Z",
+      "side": 1,
+      "message": "Und um\u0027s komplett zu machen, auch ein Bindestrich davor: Bluetooth-MAP-Verbindung.",
+      "parentUuid": "AAAAc3///ts\u003d",
       "revId": "f6bb5cf177b8273b2d9526f093fc2390b62c22ca",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
