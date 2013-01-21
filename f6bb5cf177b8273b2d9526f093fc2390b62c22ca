@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3///ts\u003d",
+        "filename": "res/values-de/strings_map.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 4884
+      },
+      "writtenOn": "2013-01-21T15:35:36Z",
+      "side": 1,
+      "message": "MAP Verbindung muss um es einheitlich zu halten dann auch mit einem Bindestrich verbunden werden. \n\nMAP-Verbindung",
+      "revId": "f6bb5cf177b8273b2d9526f093fc2390b62c22ca",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
