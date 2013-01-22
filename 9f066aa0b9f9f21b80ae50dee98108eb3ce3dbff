@@ -52,6 +52,24 @@
       "revId": "9f066aa0b9f9f21b80ae50dee98108eb3ce3dbff",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3///eM\u003d",
+        "filename": "res/values-de/strings_map.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 4884
+      },
+      "writtenOn": "2013-01-22T02:19:21Z",
+      "side": 1,
+      "message": "Ich bin grad am compilen, guck es mir dann noch mal genau an.",
+      "parentUuid": "AAAAc3///eU\u003d",
+      "revId": "9f066aa0b9f9f21b80ae50dee98108eb3ce3dbff",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
     }
   ]
 }
