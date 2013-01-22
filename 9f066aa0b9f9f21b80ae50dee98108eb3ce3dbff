@@ -16,6 +16,24 @@
       "revId": "9f066aa0b9f9f21b80ae50dee98108eb3ce3dbff",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3///eg\u003d",
+        "filename": "res/values-de/strings_map.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 4884
+      },
+      "writtenOn": "2013-01-22T02:12:24Z",
+      "side": 1,
+      "message": "Müsste es aber sowiso nicht \u0027%1$s erbittet Zugriff auf Ihre Nachrichten.\\n\\n%2$s den Zugriff erlauben?\u0027 heißen?\n\nKann man das \u0027%2$s\u0027 nicht auch weglassen und einfach nur \u0027Zugriff erlauben?\u0027 schreiben?",
+      "parentUuid": "AAAAc3///es\u003d",
+      "revId": "9f066aa0b9f9f21b80ae50dee98108eb3ce3dbff",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
     }
   ]
 }
