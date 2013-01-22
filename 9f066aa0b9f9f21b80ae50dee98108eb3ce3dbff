@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3///es\u003d",
+        "filename": "res/values-de/strings_map.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2013-01-22T02:04:04Z",
+      "side": 1,
+      "message": "Ich glaube, hier ist ein Fragezeichen zu viel drin ;)",
+      "revId": "9f066aa0b9f9f21b80ae50dee98108eb3ce3dbff",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
