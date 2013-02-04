@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//7IY\u003d",
+        "filename": "res/values-nl/strings_map.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 2881
+      },
+      "writtenOn": "2013-02-04T07:02:18Z",
+      "side": 1,
+      "message": "- Aanvraag sessiesleutel voor MAP",
+      "revId": "11748444390d4f5528ee79ebbdf1b1b5de731f2d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
