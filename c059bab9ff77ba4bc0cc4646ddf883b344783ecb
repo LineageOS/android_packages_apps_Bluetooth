@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//+SA\u003d",
+        "filename": "res/values-fi/strings_map.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 2597
+      },
+      "writtenOn": "2013-02-10T01:25:13Z",
+      "side": 1,
+      "message": "Replace \u0027a with diaeresis\u0027  with \\u00E4",
+      "revId": "c059bab9ff77ba4bc0cc4646ddf883b344783ecb",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
