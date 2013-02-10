@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//+LA\u003d",
+        "filename": "res/values-fi/strings_map.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3211
+      },
+      "writtenOn": "2013-02-10T13:46:18Z",
+      "side": 1,
+      "message": "remove leading whitespace",
+      "revId": "4327260400da8f37414ab6700fd35d3e65686d7b",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
