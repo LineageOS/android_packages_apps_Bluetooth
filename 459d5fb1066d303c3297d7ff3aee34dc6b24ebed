@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAen///QU\u003d",
+        "filename": "res/values-fr/strings_map.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 4045
+      },
+      "writtenOn": "2013-04-03T21:33:03Z",
+      "side": 1,
+      "message": "ne serait-ce pas \u0027veut\u0027 ici ? \u0027veux\u0027 uniquement pour 2eme p singulier",
+      "revId": "459d5fb1066d303c3297d7ff3aee34dc6b24ebed",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
