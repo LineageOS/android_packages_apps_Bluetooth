@@ -16,6 +16,24 @@
       "revId": "c9383f23ce4cd6aea15ae543d481b88955313b96",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAen///LE\u003d",
+        "filename": "res/values-fr/strings_map.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 4808
+      },
+      "writtenOn": "2013-04-04T02:49:07Z",
+      "side": 1,
+      "message": "Je n\u0027ai pas fait attention mais effectivement, je suis d\u0027accord",
+      "parentUuid": "AAAAen///LQ\u003d",
+      "revId": "c9383f23ce4cd6aea15ae543d481b88955313b96",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
     }
   ]
 }
