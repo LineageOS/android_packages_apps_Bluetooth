@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAfH///Tw\u003d",
+        "filename": "res/values-nl/cm_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 2881
+      },
+      "writtenOn": "2013-04-27T23:33:35Z",
+      "side": 1,
+      "message": "- Altijd toestaan?",
+      "revId": "7bfe93b5ffc333c8b9c0cd38e6da94882fd2896d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
