@@ -16,6 +16,24 @@
       "revId": "7bfe93b5ffc333c8b9c0cd38e6da94882fd2896d",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAfH///Tc\u003d",
+        "filename": "res/values-nl/cm_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 2248
+      },
+      "writtenOn": "2013-04-27T23:38:27Z",
+      "side": 1,
+      "message": "Ik had precies hetzelfde gevoel. Maar ik denk toch dat toegestaan correct is: je wilt dat iets altijd wordt toegestaan. Maar ik twijfel wel...",
+      "parentUuid": "AAAAfH///Tw\u003d",
+      "revId": "7bfe93b5ffc333c8b9c0cd38e6da94882fd2896d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
     }
   ]
 }
