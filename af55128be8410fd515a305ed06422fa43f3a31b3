@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aca2d91_cb863013",
+        "filename": "src/com/android/bluetooth/a2dp/Avrcp.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2013-08-03T22:27:50Z",
+      "side": 1,
+      "message": "TextUtils.isEmpty(mMetadata.artist)",
+      "revId": "af55128be8410fd515a305ed06422fa43f3a31b3",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
