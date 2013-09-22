@@ -34,6 +34,24 @@
       "revId": "b7d1721d066ffa3117926be3bf38c9c3b1a36ec5",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5afe65bd_8beb91b0",
+        "filename": "res/values-nl/cm_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 2881
+      },
+      "writtenOn": "2013-09-22T06:35:22Z",
+      "side": 1,
+      "message": "hmm Google maakt er weer een zooitje van dus :p",
+      "parentUuid": "5afe65bd_4b923959",
+      "revId": "b7d1721d066ffa3117926be3bf38c9c3b1a36ec5",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
     }
   ]
 }
