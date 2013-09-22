@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5afe65bd_abfd2d70",
+        "filename": "res/values-es/cm_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 3134
+      },
+      "writtenOn": "2013-09-22T06:50:10Z",
+      "side": 1,
+      "message": "Ok. But this is a notification, so we need to put \"ha sido rechazado\" before the file name. Other case a long name will hide that the file was rejected.",
+      "parentUuid": "5afe65bd_4b37d9e3",
+      "revId": "34a90a4b3b6c141ee0bd72e579d91219572bf44f",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5afe65bd_6b417539",
         "filename": "res/values-es/cm_strings.xml",
         "patchSetId": 1
