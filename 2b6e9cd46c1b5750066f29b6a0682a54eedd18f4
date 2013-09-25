@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3afb71cf_6d686dbb",
+        "filename": "res/values-fr/cm_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 6563
+      },
+      "writtenOn": "2013-09-25T20:25:48Z",
+      "side": 1,
+      "message": "de taille nulle \u003d\u003e vide ?\nC\u0027est plus court",
+      "revId": "2b6e9cd46c1b5750066f29b6a0682a54eedd18f4",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
