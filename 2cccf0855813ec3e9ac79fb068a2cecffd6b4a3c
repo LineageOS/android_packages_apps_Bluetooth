@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da37b569_04a0b8f3",
+        "filename": "res/values-pt/cm_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 2597
+      },
+      "writtenOn": "2013-09-28T06:30:00Z",
+      "side": 1,
+      "message": "Just \u0027\u003cxliff:g id\u003d\"file\"\u003e%1$s\u003c/xliff:g\u003e\u0027 should be fine",
+      "revId": "2cccf0855813ec3e9ac79fb068a2cecffd6b4a3c",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
