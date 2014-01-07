@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a5ae5dd_0ebf8ad1",
+        "filename": "src/com/android/bluetooth/hfp/HeadsetPhoneState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2014-01-07T22:51:07Z",
+      "side": 1,
+      "message": "This shouldn\u0027t be merged. We already have a fix for that (see line 192), and I\u0027m not sure whether one is guaranteed to get an onSignalStrengthsChanged callback _after_ onServiceStateChanged.",
+      "revId": "408475f53bf1c8b41ecfcf2c9b8d39c350071b67",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a5ae5dd_aeb3d609",
+        "filename": "src/com/android/bluetooth/pbap/BluetoothPbapUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2014-01-07T22:51:07Z",
+      "side": 1,
+      "message": "I wonder what CAF is thinking this assignment is doing...",
+      "revId": "408475f53bf1c8b41ecfcf2c9b8d39c350071b67",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
