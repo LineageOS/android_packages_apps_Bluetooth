@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a5ae5dd_df791031",
+        "filename": "src/com/android/bluetooth/pbap/BluetoothPbapVcardComposer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2014-01-17T22:21:27Z",
+      "side": 1,
+      "message": "Given the vcard library now does the pause/wait translation by itself and that it does non-digit stripping if the callback isn\u0027t passed (frameworks/opt/vcard/java/com/android/vcard/VCardBuilder.java, line 850 onwards): Can you try to just drop the whole callback and see if that fixes the problem as well?",
+      "revId": "afe61a9f5d4f78bd72f90d432dbb3d855f93cb40",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
