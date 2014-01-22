@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a57f1b5_8434c64a",
+        "filename": "src/com/android/bluetooth/pbap/BluetoothPbapVcardComposer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2014-01-22T04:32:48Z",
+      "side": 0,
+      "message": "Err, waitasecond. You should just remove the callback (pass null), not remove encoding phone numbers altogether ;-)\nWith the patch as-is, the PBAP phonebook will contain everything except phone numbers.",
+      "revId": "c80c21628685544eb275c817419bbfe6c361861a",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
