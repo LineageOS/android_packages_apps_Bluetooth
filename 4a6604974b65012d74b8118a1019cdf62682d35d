@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7af24918_b94b0859",
+        "filename": "src/com/android/bluetooth/map/BluetoothMapContentObserver.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2014-04-14T20:23:32Z",
+      "side": 1,
+      "message": "String newFolder \u003d type \u003c folderSms.length ? folderSms[type] : \"unknown\";\nString oldFolder \u003d msg.type \u003c folderSms.length ? folderSms[msg.type] : \"unknown\";\n\nBoth shorter and follows the naming conventions.",
+      "revId": "4a6604974b65012d74b8118a1019cdf62682d35d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7af24918_9948cc5d",
+        "filename": "src/com/android/bluetooth/map/BluetoothMapContentObserver.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2014-04-14T20:23:32Z",
+      "side": 1,
+      "message": "Additional parens not needed.",
+      "revId": "4a6604974b65012d74b8118a1019cdf62682d35d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7af24918_f973d0b2",
+        "filename": "src/com/android/bluetooth/map/BluetoothMapContentObserver.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2014-04-14T20:23:32Z",
+      "side": 1,
+      "message": "See above.",
+      "revId": "4a6604974b65012d74b8118a1019cdf62682d35d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
