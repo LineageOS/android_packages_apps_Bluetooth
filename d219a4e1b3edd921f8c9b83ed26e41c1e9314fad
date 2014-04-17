@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7af24918_ef781efb",
+        "filename": "src/com/android/bluetooth/map/BluetoothMapContentObserver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2014-04-17T20:33:11Z",
+      "side": 1,
+      "message": "100 chars ;)",
+      "revId": "d219a4e1b3edd921f8c9b83ed26e41c1e9314fad",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7af24918_cf7d62e9",
+        "filename": "src/com/android/bluetooth/map/BluetoothMapContentObserver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2014-04-17T20:33:11Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "d219a4e1b3edd921f8c9b83ed26e41c1e9314fad",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
