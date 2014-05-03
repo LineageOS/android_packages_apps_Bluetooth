@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3afc51ec_bce82118",
+        "filename": "src/com/android/bluetooth/opp/BluetoothOppObexServerSession.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 4449
+      },
+      "writtenOn": "2014-05-03T00:33:52Z",
+      "side": 1,
+      "message": "broken indentation?",
+      "revId": "7e7958243fbc2314125eab5174d0a246dead8528",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
