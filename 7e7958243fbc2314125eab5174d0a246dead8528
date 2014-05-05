@@ -16,6 +16,24 @@
       "revId": "7e7958243fbc2314125eab5174d0a246dead8528",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3afc51ec_9c6285ac",
+        "filename": "src/com/android/bluetooth/opp/BluetoothOppObexServerSession.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 6574
+      },
+      "writtenOn": "2014-05-05T01:11:41Z",
+      "side": 1,
+      "message": "no its one line... is only one to long here see line number, but when you see in file direct when picked, all is ok",
+      "parentUuid": "3afc51ec_bce82118",
+      "revId": "7e7958243fbc2314125eab5174d0a246dead8528",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
     }
   ]
 }
