@@ -34,6 +34,23 @@
       "revId": "9e3698232c1e81712569ac8a2e7febe1bbfb2b80",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aa08908_bb78d3f3",
+        "filename": "res/values/cm_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1063
+      },
+      "writtenOn": "2015-01-09T23:39:43Z",
+      "side": 1,
+      "message": "This actually is used in the context of OPP, so probably would be better as something among the lines of \u0027Can\u0027t share via Bluetooth while airplane mode is enabled\u0027 (with the string name being adapted accordingly)",
+      "revId": "9e3698232c1e81712569ac8a2e7febe1bbfb2b80",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
     }
   ]
 }
