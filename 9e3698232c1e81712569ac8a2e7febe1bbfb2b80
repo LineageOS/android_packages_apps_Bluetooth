@@ -16,6 +16,24 @@
       "revId": "9e3698232c1e81712569ac8a2e7febe1bbfb2b80",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aa08908_80a482a6",
+        "filename": "res/values/cm_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 5574
+      },
+      "writtenOn": "2015-01-09T14:09:58Z",
+      "side": 1,
+      "message": "Let\u0027s change it to \"Unable to send file, retrying\\u2026\" (similar to what I did in Mms)",
+      "parentUuid": "7aa08908_409a9a64",
+      "revId": "9e3698232c1e81712569ac8a2e7febe1bbfb2b80",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
     }
   ]
 }
