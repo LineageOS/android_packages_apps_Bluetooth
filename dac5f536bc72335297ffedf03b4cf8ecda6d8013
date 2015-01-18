@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a9d85d2_c0ba43c0",
+        "filename": "src/com/android/bluetooth/opp/BluetoothOppLauncherActivity.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2015-01-18T18:12:46Z",
+      "side": 1,
+      "message": "Looking at the commit log, this is for CMCC and is disabled by default. I wonder if we should ditch this, since there is already a way to stop bluetooth from being automatically enabled in airplane mode (look at the code below)",
+      "revId": "dac5f536bc72335297ffedf03b4cf8ecda6d8013",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
