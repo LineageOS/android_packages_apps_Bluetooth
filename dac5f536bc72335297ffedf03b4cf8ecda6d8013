@@ -16,6 +16,24 @@
       "revId": "dac5f536bc72335297ffedf03b4cf8ecda6d8013",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a9d85d2_db5d16ee",
+        "filename": "src/com/android/bluetooth/opp/BluetoothOppLauncherActivity.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 5574
+      },
+      "writtenOn": "2015-01-19T04:13:56Z",
+      "side": 1,
+      "message": "What is CMCC btw?\n\nI\u0027d say we should ditch all duplicated functionality and keep it close to AOSP.",
+      "parentUuid": "5a9d85d2_c0ba43c0",
+      "revId": "dac5f536bc72335297ffedf03b4cf8ecda6d8013",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
     }
   ]
 }
