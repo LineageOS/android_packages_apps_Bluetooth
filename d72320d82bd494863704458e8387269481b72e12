@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad55976_3bd8a8ef",
+        "filename": "src/com/android/bluetooth/btservice/AdapterService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1779,
+      "author": {
+        "id": 10094
+      },
+      "writtenOn": "2015-01-26T12:14:42Z",
+      "side": 1,
+      "message": "You\u0027ll need to check the return value of commit anyway.  If it fails to commit, you\u0027ll throw again.",
+      "revId": "d72320d82bd494863704458e8387269481b72e12",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
