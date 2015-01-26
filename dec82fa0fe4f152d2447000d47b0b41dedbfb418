@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad55976_9bf27499",
+        "filename": "src/com/android/bluetooth/btservice/AdapterService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1778,
+      "author": {
+        "id": 10094
+      },
+      "writtenOn": "2015-01-26T11:42:45Z",
+      "side": 1,
+      "message": "You should check the return value of commit to ensure you don\u0027t get stuck in an infinite loop.  Better yet, just return the value persisted rather than loop this function again.",
+      "revId": "dec82fa0fe4f152d2447000d47b0b41dedbfb418",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
