@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "5ac665da_158f6924",
+        "filename": "src/com/android/bluetooth/opp/BluetoothOppObexClientSession.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 2936
+      },
+      "writtenOn": "2015-03-30T06:56:30Z",
+      "side": 1,
+      "message": "Yeah, the entry point is here.",
+      "revId": "f025c73fbe1400905dc4d4c6c0313907a2ede57a",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5ac665da_75cb3d73",
         "filename": "src/com/android/bluetooth/opp/BluetoothOppObexClientSession.java",
         "patchSetId": 4
@@ -31,6 +48,23 @@
       "side": 1,
       "message": "No, I don\u0027t think so. It\u0027s on the client thread. There\u0027s a similar Thread.sleep a bit further down, and a couple of other places in here.",
       "parentUuid": "5ac665da_75cb3d73",
+      "revId": "f025c73fbe1400905dc4d4c6c0313907a2ede57a",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5ac665da_b573f54c",
+        "filename": "src/com/android/bluetooth/opp/BluetoothOppTransport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 2936
+      },
+      "writtenOn": "2015-03-30T06:56:30Z",
+      "side": 1,
+      "message": "Normally you\u0027d do some parsing in here to make it not a crappy return code. This looks like it should return a boolean.",
       "revId": "f025c73fbe1400905dc4d4c6c0313907a2ede57a",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
