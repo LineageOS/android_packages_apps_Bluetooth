@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5ac665da_75cb3d73",
+        "filename": "src/com/android/bluetooth/opp/BluetoothOppObexClientSession.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 2936
+      },
+      "writtenOn": "2015-03-30T06:28:35Z",
+      "side": 1,
+      "message": "This weirds me out. Is this on the main thread?",
+      "revId": "f025c73fbe1400905dc4d4c6c0313907a2ede57a",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
