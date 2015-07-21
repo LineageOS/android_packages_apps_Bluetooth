@@ -67,7 +67,9 @@ import java.util.ArrayList;
 import com.android.bluetooth.sdp.SdpManager;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-
+import android.bluetooth.BluetoothA2dp;
+import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothDevice;
 
 /**
  * Performs the background Bluetooth OPP transfer. It also starts thread to
@@ -151,6 +153,8 @@ public class BluetoothOppService extends Service {
      */
     private BluetoothOppObexServerSession mServerSession;
 
+    private BluetoothOppManager mOppManager = null;
+
     @Override
     public IBinder onBind(Intent arg0) {
         throw new UnsupportedOperationException("Cannot bind to Bluetooth OPP Service");
@@ -179,9 +183,12 @@ public class BluetoothOppService extends Service {
             }
         }.start();
 
+        mOppManager = BluetoothOppManager.getInstance(this);
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
+        filter.addAction(BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED);
         registerReceiver(mBluetoothReceiver, filter);
 
         synchronized (BluetoothOppService.this) {
@@ -457,7 +464,7 @@ public class BluetoothOppService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-
+            if (D) Log.d(TAG," action :" + action);
             if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 if (D) Log.d(TAG, "Adapter state = " + mAdapter.getState());
                 switch (mAdapter.getState()) {
@@ -489,6 +496,37 @@ public class BluetoothOppService extends Service {
             } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 isScreenOff = false;
                 if (V) Log.v(TAG, "ACTION_SCREEN_ON ");
+            } else if (action.equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)) {
+                if (V) {
+                    int newState = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
+                        BluetoothA2dp.STATE_NOT_PLAYING);
+                    BluetoothDevice device = intent.getParcelableExtra(
+                        BluetoothDevice.EXTRA_DEVICE);
+                    Log.v(TAG,"device: " + device + " newState: " + newState);
+                }
+                if (mOppManager != null) {
+                    if (V) Log.v(TAG," Mark A2DP state as not playing");
+                    mOppManager.isA2DPPlaying = false;
+                }
+            } else if (action.equals(BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED)) {
+                int newState = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
+                    BluetoothA2dp.STATE_NOT_PLAYING);
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (V) Log.v(TAG,"device: " + device + " newState: " + newState);
+
+                if (device == null) {
+                    return;
+                }
+                if (mOppManager != null) {
+                    if (newState == BluetoothA2dp.STATE_PLAYING) {
+                        if (V) Log.v(TAG," Mark A2DP state as playing");
+                        mOppManager.isA2DPPlaying = true;
+                    }
+                    else {
+                        if (V) Log.v(TAG," Mark A2DP state as not playing");
+                        mOppManager.isA2DPPlaying = false;
+                    }
+                }
             }
         }
     };

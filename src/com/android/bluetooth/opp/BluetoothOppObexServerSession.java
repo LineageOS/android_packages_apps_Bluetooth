@@ -103,6 +103,10 @@ public class BluetoothOppObexServerSession extends ServerRequestHandler implemen
 
     private long position;
 
+    private BluetoothOppManager mOppManager;
+
+    private static final int OPP_A2DP_SCO_CONCURRENCY_REDUCED_MTU_SIZE = 8192;
+
     public BluetoothOppObexServerSession(Context context, ObexTransport transport) {
         mContext = context;
         mTransport = transport;
@@ -122,7 +126,12 @@ public class BluetoothOppObexServerSession extends ServerRequestHandler implemen
         try {
             if (D) Log.d(TAG, "Create ServerSession with transport " + mTransport.toString());
             mSession = new ServerSession(mTransport, this, null);
-        } catch (IOException e) {
+            mOppManager = BluetoothOppManager.getInstance(mContext);
+            if(mOppManager.isA2DPPlaying) {
+                mSession.reduceMTU(true);
+            }
+
+         } catch (IOException e) {
             Log.e(TAG, "Create server session error" + e);
         }
     }
