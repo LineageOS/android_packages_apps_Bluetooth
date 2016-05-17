@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5faad753_1aafed94",
+        "filename": "src/com/android/bluetooth/opp/BluetoothOppUtility.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 9813
+      },
+      "writtenOn": "2016-05-17T20:39:30Z",
+      "side": 1,
+      "message": "weird that there isn\u0027t a constant for this.",
+      "range": {
+        "startLine": 207,
+        "startChar": 12,
+        "endLine": 207,
+        "endChar": 53
+      },
+      "revId": "403a2f40d054e9525b9e406d47b16eaec2ab0d56",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
