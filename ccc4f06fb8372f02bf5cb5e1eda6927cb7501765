@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5faad753_cc3ad1ca",
+        "filename": "src/com/android/bluetooth/map/BluetoothMapService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 629,
+      "author": {
+        "id": 10094
+      },
+      "writtenOn": "2016-06-07T16:48:11Z",
+      "side": 1,
+      "message": "probably should be after the new registerReceiver.",
+      "range": {
+        "startLine": 629,
+        "startChar": 16,
+        "endLine": 629,
+        "endChar": 46
+      },
+      "revId": "ccc4f06fb8372f02bf5cb5e1eda6927cb7501765",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
