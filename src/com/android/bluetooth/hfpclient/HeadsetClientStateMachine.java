@@ -683,8 +683,8 @@ public class HeadsetClientStateMachine extends StateMachine {
         mIndicatorNetworkSignal = 0;
         mIndicatorBatteryLevel = 0;
 
-        mMaxAmVcVol = sAudioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL);
-        mMinAmVcVol = sAudioManager.getStreamMinVolume(AudioManager.STREAM_VOICE_CALL);
+        mMaxAmVcVol = sAudioManager.getStreamMaxVolume(AudioManager.STREAM_BLUETOOTH_SCO);
+        mMinAmVcVol = sAudioManager.getStreamMinVolume(AudioManager.STREAM_BLUETOOTH_SCO);
 
         mOperatorName = null;
         mSubscriberInfo = null;
@@ -1003,7 +1003,7 @@ public class HeadsetClientStateMachine extends StateMachine {
                     }
                     transitionTo(mConnected);
 
-                    int amVol = sAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
+                    int amVol = sAudioManager.getStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO);
                     sendMessage(
                             obtainMessage(HeadsetClientStateMachine.SET_SPEAKER_VOLUME, amVol, 0));
                     // Mic is either in ON state (full volume) or OFF state. There is no way in
@@ -1314,7 +1314,7 @@ public class HeadsetClientStateMachine extends StateMachine {
                             if (event.valueInt == HeadsetClientHalConstants.VOLUME_TYPE_SPK) {
                                 mCommandedSpeakerVolume = hfToAmVol(event.valueInt2);
                                 Log.d(TAG, "AM volume set to " + mCommandedSpeakerVolume);
-                                sAudioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL,
+                                sAudioManager.setStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO,
                                         +mCommandedSpeakerVolume, AudioManager.FLAG_SHOW_UI);
                             } else if (event.valueInt
                                     == HeadsetClientHalConstants.VOLUME_TYPE_MIC) {
@@ -1428,7 +1428,7 @@ public class HeadsetClientStateMachine extends StateMachine {
 
                     // We need to set the volume after switching into HFP mode as some Audio HALs
                     // reset the volume to a known-default on mode switch.
-                    final int amVol = sAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
+                    final int amVol = sAudioManager.getStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO);
                     final int hfVol = amToHfVol(amVol);
 
                     if (DBG) {
