@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5faad753_ba1afec8",
+        "filename": "jni/com_android_bluetooth_a2dp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 14769
+      },
+      "writtenOn": "2016-06-26T05:33:00Z",
+      "side": 1,
+      "message": "It is never a good idea to call callbacks while holding a lock due to dead-locks caused by wrong locking order, which cannot be fixed by any work-arounds. The callback always gets the internal lock (mMutex) locked first, but when you call other methods from other threads, the internal lock is locked last. Better is to (in this order):\n\n1) take a lock,\n2) check value for NULL,\n2a) if non-NULL: make local copy of the variable, call AddGlobalRef, unlock, do a callback with local copy and call RemoveGlobalRef,\n2b) if NULL: unlock, make a log entry.\n\nSame applies to all callbacks in this file below.",
+      "revId": "4924f5960eeb7c8333d2050b8196e96355055c07",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
