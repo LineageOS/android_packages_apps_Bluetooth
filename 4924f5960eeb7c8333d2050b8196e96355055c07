@@ -34,6 +34,24 @@
       "revId": "4924f5960eeb7c8333d2050b8196e96355055c07",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3fa7e38b_04f29607",
+        "filename": "jni/com_android_bluetooth_a2dp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 14769
+      },
+      "writtenOn": "2016-06-26T17:48:10Z",
+      "side": 1,
+      "message": "I would leave this one out until a better fix is made.",
+      "parentUuid": "3fa7e38b_c411de55",
+      "revId": "4924f5960eeb7c8333d2050b8196e96355055c07",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
     }
   ]
 }
