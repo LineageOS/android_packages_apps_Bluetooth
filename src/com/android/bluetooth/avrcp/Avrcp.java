@@ -154,6 +154,10 @@ public final class Avrcp {
     private static final int MESSAGE_CHANGE_PLAY_POS = 12;
     private static final int MESSAGE_SET_A2DP_AUDIO_STATE = 13;
     private static final int MESSAGE_SET_ADDR_PLAYER_REQ_TIMEOUT = 14;
+    private static final int MESSAGE_DEVICE_RC_CLEANUP = 15;
+
+    private static final int STACK_CLEANUP = 0;
+    private static final int APP_CLEANUP = 1;
 
     private static final int AVRCP_BR_RSP_TIMEOUT = 2000;
     private static final int MESSAGE_SEND_PASS_THROUGH_CMD = 2001;
@@ -751,16 +755,10 @@ public final class Avrcp {
     public void doQuit() {
         if (DEBUG)
             Log.v(TAG, "doQuit");
-        mHandler.removeCallbacksAndMessages(null);
-        Looper looper = mHandler.getLooper();
-        if (looper != null) {
-            looper.quit();
-        }
-        mMediaSessionManager.removeOnActiveSessionsChangedListener(mSessionChangeListener);
-        clearDeviceDependentFeature();
-        for (int i = 0; i < maxAvrcpConnections; i++) {
-            cleanupDeviceFeaturesIndex(i);
-        }
+        Message msg = mHandler.obtainMessage(MESSAGE_DEVICE_RC_CLEANUP, APP_CLEANUP,
+               0, null);
+        mHandler.sendMessage(msg);
+
         mAvrcpBipRsp.stop();
         try {
             mContext.unregisterReceiver(mIntentReceiver);
@@ -773,6 +771,13 @@ public final class Avrcp {
             if (DEBUG)
                 Log.v(TAG, "Addressed player message cleanup as part of doQuit");
         }
+
+        mHandler.removeCallbacksAndMessages(null);
+        Looper looper = mHandler.getLooper();
+        if (looper != null) {
+            looper.quit();
+        }
+        mMediaSessionManager.removeOnActiveSessionsChangedListener(mSessionChangeListener);
     }
 
     public void clearDeviceDependentFeature() {
@@ -1513,6 +1518,31 @@ public final class Avrcp {
                 updateA2dpAudioState(msg.arg1, (BluetoothDevice)msg.obj);
                 break;
 
+            case MESSAGE_DEVICE_RC_CLEANUP:
+                if (DEBUG)
+                    Log.v(TAG,"MESSAGE_DEVICE_RC_CLEANUP: " + msg.arg1);
+                if (msg.arg1 == STACK_CLEANUP) {
+                    deviceIndex = getIndexForDevice((BluetoothDevice) msg.obj);
+                    if (deviceIndex == INVALID_DEVICE_INDEX) {
+                        Log.e(TAG,"invalid device index for cleanup");
+                        break;
+                    }
+                    cleanupDeviceFeaturesIndex(deviceIndex);
+                } else if (msg.arg1 == APP_CLEANUP) {
+                    if (msg.obj == null) {
+                        clearDeviceDependentFeature();
+                        for (int i = 0; i < maxAvrcpConnections; i++) {
+                            cleanupDeviceFeaturesIndex(i);
+                        }
+                    } else {
+                        Log.v(TAG, "Invalid message params");
+                        break;
+                    }
+                } else {
+                    Log.v(TAG, "Invalid Arguments to MESSAGE_DEVICE_RC_CLEANUP");
+                }
+                break;
+
             case MSG_UPDATE_RCC_CHANGE:
                 Log.v(TAG, "MSG_UPDATE_RCC_CHANGE");
                 String callingPackageName = (String)msg.obj;
@@ -1703,7 +1733,7 @@ public final class Avrcp {
         deviceFeatures[deviceIndex].mCurrentPlayState = state;
 
         if ((deviceFeatures[deviceIndex].mPlayStatusChangedNT == NOTIFICATION_TYPE_INTERIM) &&
-               (oldPlayStatus != newPlayStatus)) {
+               (oldPlayStatus != newPlayStatus) && deviceFeatures[deviceIndex].mCurrentDevice != null) {
             deviceFeatures[deviceIndex].mPlayStatusChangedNT = NOTIFICATION_TYPE_CHANGED;
             registerNotificationRspPlayStatusNative(
                     deviceFeatures[deviceIndex].mPlayStatusChangedNT,
@@ -5614,11 +5644,11 @@ public final class Avrcp {
             if (deviceFeatures[i].mCurrentDevice !=null &&
                     deviceFeatures[i].mCurrentDevice.equals(device)) {
                 // initiate cleanup for all variables;
-
+                Message msg = mHandler.obtainMessage(MESSAGE_DEVICE_RC_CLEANUP, STACK_CLEANUP,
+                       0, device);
+                mHandler.sendMessage(msg);
                 Log.i(TAG,"Device removed is " + device);
                 Log.i(TAG,"removed at " + i);
-                deviceFeatures[i].mCurrentDevice = null;
-                cleanupDeviceFeaturesIndex(i);
                 /* device is disconnect and some response form music app was
                  * pending for this device clear it.*/
                 if (mBrowserDevice != null &&
