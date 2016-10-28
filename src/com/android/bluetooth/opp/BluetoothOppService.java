@@ -142,6 +142,8 @@ public class BluetoothOppService extends Service {
     private ObexTransport mPendingConnection = null;
     private int mOppSdpHandle = -1;
 
+    private boolean isScreenOff = false;
+
     /*
      * TODO No support for queue incoming from multiple devices.
      * Make an array list of server session to support receiving queue from
@@ -167,6 +169,8 @@ public class BluetoothOppService extends Service {
         mNotifier = new BluetoothOppNotification(this);
         mNotifier.mNotificationMgr.cancelAll();
         mNotifier.updateNotification();
+        mPowerManager = (PowerManager)getSystemService(POWER_SERVICE);
+        isScreenOff = !mPowerManager.isInteractive();
 
         final ContentResolver contentResolver = getContentResolver();
         new Thread("trimDatabase") {
@@ -176,6 +180,8 @@ public class BluetoothOppService extends Service {
         }.start();
 
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_SCREEN_ON);
         registerReceiver(mBluetoothReceiver, filter);
 
         synchronized (BluetoothOppService.this) {
@@ -262,7 +268,18 @@ public class BluetoothOppService extends Service {
                        mTransfer =null;
                     }
                     synchronized (BluetoothOppService.this) {
+                        if (D) Log.d(TAG, "STOP_LISTENER :" + mUpdateThread);
                         if (mUpdateThread == null) {
+                            stopSelf();
+                        } else {
+                            try {
+                                mUpdateThread.interrupt();
+                                mUpdateThread.join();
+                                if (D) Log.d(TAG, "Stop after join");
+                            } catch (InterruptedException e) {
+                                Log.e(TAG, "Interrupted", e);
+                            }
+                            mUpdateThread = null;
                             stopSelf();
                         }
                     }
@@ -466,6 +483,12 @@ public class BluetoothOppService extends Service {
 
                         break;
                 }
+            } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+                isScreenOff = true;
+                if (V) Log.v(TAG, "ACTION_SCREEN_OFF ");
+            } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
+                isScreenOff = false;
+                if (V) Log.v(TAG, "ACTION_SCREEN_ON ");
             }
         }
     };
@@ -475,7 +498,10 @@ public class BluetoothOppService extends Service {
             mPendingUpdate = true;
             if ((mUpdateThread == null) && (mAdapter != null)
                 && mAdapter.isEnabled()) {
-                mPowerManager = (PowerManager)getSystemService(POWER_SERVICE);
+                if (mPowerManager == null) {
+                    mPowerManager = (PowerManager)getSystemService(POWER_SERVICE);
+                    isScreenOff = !mPowerManager.isInteractive();
+                }
                 if (V) Log.v(TAG, "Starting a new thread");
                 mUpdateThread = new UpdateThread();
                 mUpdateThread.start();
@@ -484,8 +510,17 @@ public class BluetoothOppService extends Service {
     }
 
     private class UpdateThread extends Thread {
+        private boolean isInterrupted ;
         public UpdateThread() {
             super("Bluetooth Share Service");
+            isInterrupted = false;
+        }
+
+        @Override
+        public void interrupt() {
+            isInterrupted = true;
+            if (D) Log.d(TAG, "Interrupted :" + isInterrupted);
+            super.interrupt();
         }
 
         @Override
@@ -493,14 +528,15 @@ public class BluetoothOppService extends Service {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
             boolean keepService = false;
-            for (;;) {
+            for (; !isInterrupted;) {
                 synchronized (BluetoothOppService.this) {
                     if (mUpdateThread != this) {
                         throw new IllegalStateException(
                                 "multiple UpdateThreads in BluetoothOppService");
                     }
                     if (V) Log.v(TAG, "pendingUpdate is " + mPendingUpdate + " keepUpdateThread is "
-                                + keepService + " sListenStarted is " + mListenStarted);
+                        + keepService + " sListenStarted is " + mListenStarted + " isInterrupted :"
+                        + isInterrupted + " isScreenOff:" + isScreenOff);
                     if (!mPendingUpdate) {
                         mUpdateThread = null;
                         if (!keepService && !mListenStarted) {
@@ -512,12 +548,12 @@ public class BluetoothOppService extends Service {
                         return;
                     }
                     try {
-                        if (!mPowerManager.isInteractive())
-                            Thread.sleep(10);
+                        if (isScreenOff && !isInterrupted) {
+                            Thread.sleep(1000);
+                        }
                     } catch (InterruptedException e) {
                             Log.e(TAG, "Interrupted", e);
                     }
-
                     mPendingUpdate = false;
                 }
                 Cursor cursor;
