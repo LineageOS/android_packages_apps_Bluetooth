@@ -754,6 +754,9 @@ static bool initNative(JNIEnv* env, jobject obj) {
             sBluetoothInterface = NULL;
             return JNI_FALSE;
         }
+
+        /*disable these os_callout settings, so that native wake_lock will be enabled*/
+#if 0
         ret = sBluetoothInterface->set_os_callouts(&sBluetoothOsCallouts);
         if (ret != BT_STATUS_SUCCESS) {
             ALOGE("Error while setting Bluetooth callouts: %d\n", ret);
@@ -761,7 +764,7 @@ static bool initNative(JNIEnv* env, jobject obj) {
             sBluetoothInterface = NULL;
             return JNI_FALSE;
         }
-
+#endif
         if ( (sBluetoothSocketInterface = (btsock_interface_t *)
                   sBluetoothInterface->get_profile_interface(BT_PROFILE_SOCKETS_ID)) == NULL) {
                 ALOGE("Error getting socket interface");
