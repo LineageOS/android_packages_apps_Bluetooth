@@ -2119,9 +2119,9 @@ public class AdapterService extends Service {
 
             case BluetoothProfile.A2DP:
                 A2dpService a2dpService = A2dpService.getA2dpService();
-                deviceList = a2dpService.getConnectedDevices();
                 if ((a2dpService != null) &&
                     (BluetoothProfile.PRIORITY_AUTO_CONNECT != a2dpService.getPriority(device))){
+                     deviceList = a2dpService.getConnectedDevices();
                      adjustOtherSinkPriorities(a2dpService, deviceList);
                      a2dpService.setPriority(device,BluetoothProfile.PRIORITY_AUTO_CONNECT);
                 }
