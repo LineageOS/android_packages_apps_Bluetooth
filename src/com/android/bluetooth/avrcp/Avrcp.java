@@ -5044,16 +5044,17 @@ public final class Avrcp {
         int playStatus = PLAYSTATUS_ERROR;
         switch (state.getState()) {
             case PlaybackState.STATE_PLAYING:
-            case PlaybackState.STATE_BUFFERING:
                 playStatus = PLAYSTATUS_PLAYING;
                 break;
 
             case PlaybackState.STATE_STOPPED:
+            case PlaybackState.STATE_CONNECTING:
             case PlaybackState.STATE_NONE:
                 playStatus = PLAYSTATUS_STOPPED;
                 break;
 
             case PlaybackState.STATE_PAUSED:
+            case PlaybackState.STATE_BUFFERING:
                 playStatus = PLAYSTATUS_PAUSED;
                 break;
 
@@ -5093,6 +5094,14 @@ public final class Avrcp {
             return;
         }
         long playPositionMs = getPlayPosition(deviceFeatures[i].mCurrentDevice);
+        int currPlayStatus = convertPlayStateToPlayStatus(deviceFeatures[i].mCurrentPlayState);
+
+        // Some remote devices are going to bad state when sending play position
+        // as ffff for non-playing state
+        if (playPositionMs == -1L && currPlayStatus != PLAYSTATUS_PLAYING) {
+           if (DEBUG) Log.d(TAG, " Don't send invalid play position notification for non-playing state");
+           return;
+        }
 
         // mNextPosMs is set to -1 when the previous position was invalid
         // so this will be true if the new position is valid & old was invalid.
