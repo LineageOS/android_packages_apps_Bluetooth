@@ -140,9 +140,13 @@ public class BluetoothPbapVcardManager {
      * @param vcardType21
      * @return
      */
-    private final String getOwnerPhoneNumberVcardFromProfile(final boolean vcardType21, final byte[] filter) {
+    private final String getOwnerPhoneNumberVcardFromProfile(final boolean vcardType21,
+                                            boolean ignorefilter, final byte[] filter) {
         // Currently only support Generic Vcard 2.1 and 3.0
         int vcardType;
+        String vcard = null;
+        VCardFilter vcardfilter = new VCardFilter(ignorefilter ? null : filter);
+
         if (vcardType21) {
             vcardType = VCardConfig.VCARD_TYPE_V21_GENERIC;
         } else {
@@ -153,13 +157,19 @@ public class BluetoothPbapVcardManager {
             vcardType |= VCardConfig.FLAG_REFRAIN_IMAGE_EXPORT;
         }
 
-        return BluetoothPbapUtils.createProfileVCard(mContext, vcardType,filter);
+        vcard = BluetoothPbapUtils.createProfileVCard(mContext, vcardType, filter);
+        if ((vcard != null) && !ignorefilter) {
+            vcard = vcardfilter.apply(vcard, vcardType21);
+        }
+        return vcard;
+
     }
 
-    public final String getOwnerPhoneNumberVcard(final boolean vcardType21, final byte[] filter) {
+    public final String getOwnerPhoneNumberVcard(final boolean vcardType21,
+                                boolean ignorefilter, final byte[] filter) {
         //Owner vCard enhancement: Use "ME" profile if configured
         if (BluetoothPbapConfig.useProfileForOwnerVcard()) {
-            String vcard = getOwnerPhoneNumberVcardFromProfile(vcardType21, filter);
+            String vcard = getOwnerPhoneNumberVcardFromProfile(vcardType21, ignorefilter, filter);
             if (vcard != null && vcard.length() != 0) {
                 return vcard;
             }
