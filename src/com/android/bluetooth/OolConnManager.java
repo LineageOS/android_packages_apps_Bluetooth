@@ -86,8 +86,9 @@ public class OolConnManager {
 
     public static void saveOppSdpRecord(SdpOppOpsRecord sdpRec, BluetoothDevice btDevice) {
 
-        Log.v(TAG,"saveOppSdpRecord"+ btDevice.getAddress());
-        if ((mAddress != null) && mAddress.equalsIgnoreCase(btDevice.getAddress())) {
+        Log.i(TAG, "saveOppSdpRecord" + btDevice.getAddress() + " sdpRec:" + sdpRec);
+        if (sdpRec != null && (mAddress != null) && mAddress.
+                equalsIgnoreCase(btDevice.getAddress())) {
            channel = sdpRec.getL2capPsm();
            sdpDone = true;
            Log.d(TAG,"saveOppSdpRecord channel "+ channel);
