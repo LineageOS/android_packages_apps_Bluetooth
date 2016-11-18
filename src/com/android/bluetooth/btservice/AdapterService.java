@@ -1754,6 +1754,12 @@ public class AdapterService extends Service {
        }
     }
 
+     private void cancelDiscoveryforautoConnect(){
+        if (mAdapterProperties.isDiscovering() == true) {
+            cancelDiscovery();
+        }
+    }
+
      private void autoConnectHeadset(){
         HeadsetService  hsService = HeadsetService.getHeadsetService();
 
@@ -1763,6 +1769,7 @@ public class AdapterService extends Service {
         }
         for (BluetoothDevice device : bondedDevices) {
             if (hsService.getPriority(device) == BluetoothProfile.PRIORITY_AUTO_CONNECT ){
+                cancelDiscoveryforautoConnect();
                 debugLog("autoConnectHeadset() - Connecting HFP with " + device.toString());
                 hsService.connect(device);
             }
@@ -1777,6 +1784,7 @@ public class AdapterService extends Service {
         }
         for (BluetoothDevice device : bondedDevices) {
             if (a2dpSservice.getPriority(device) == BluetoothProfile.PRIORITY_AUTO_CONNECT ){
+                cancelDiscoveryforautoConnect();
                 debugLog("autoConnectA2dp() - Connecting A2DP with " + device.toString());
                 a2dpSservice.connect(device);
             }
@@ -1808,6 +1816,7 @@ public class AdapterService extends Service {
 
          for (BluetoothDevice device : bondedDevices) {
              if (a2dpSinkService.getPriority(device) == BluetoothProfile.PRIORITY_AUTO_CONNECT) {
+                 cancelDiscoveryforautoConnect();
                  debugLog("autoConnectA2dpSink() - Connecting A2DP Sink with " + device.toString());
                  a2dpSinkService.connect(device);
              }
