@@ -1800,9 +1800,10 @@ public class AdapterService extends Service {
 
         for (BluetoothDevice device : bondedDevices) {
             if (headsetClientService.getPriority(device) == BluetoothProfile.PRIORITY_AUTO_CONNECT){
-            debugLog("autoConnectHeadsetClient() - Connecting Headset Client with " +
-                device.toString());
-            headsetClientService.connect(device);
+                cancelDiscoveryforautoConnect();
+                debugLog("autoConnectHeadsetClient() - Connecting Headset Client with " +
+                          device.toString());
+                headsetClientService.connect(device);
             }
         }
     }
@@ -1831,6 +1832,7 @@ public class AdapterService extends Service {
          }
          for (BluetoothDevice device : bondedDevices) {
              if (pbapClientService.getPriority(device) == BluetoothProfile.PRIORITY_AUTO_CONNECT) {
+                 cancelDiscoveryforautoConnect();
                  debugLog("autoConnectPbapClient() - Connecting PBAP Client with " +
                          device.toString());
                  pbapClientService.connect(device);
