@@ -184,7 +184,12 @@ static void initNative(JNIEnv *env, jobject object, jint maxA2dpConnections,
     const char *offload_capabilities;
     bt_status_t status;
 
-    offload_capabilities = env->GetStringUTFChars(offload_cap, NULL);
+    if (offload_cap != NULL) {
+        offload_capabilities = env->GetStringUTFChars(offload_cap, NULL);
+    } else {
+        ALOGW("offload_cap is NULL");
+        offload_capabilities = NULL;
+    }
 
     if ( (btInf = getBluetoothInterface()) == NULL) {
         ALOGE("Bluetooth module is not loaded");
