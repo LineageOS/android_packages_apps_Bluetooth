@@ -547,12 +547,9 @@ public class AdapterService extends Service {
         return mBinder;
     }
     public boolean onUnbind(Intent intent) {
-        if (getState() == BluetoothAdapter.STATE_OFF) {
-            Log.w(TAG, "onUnbind, calling cleanup");
-            cleanup();
-            return super.onUnbind(intent);
-        }
-        return false;
+        Log.w(TAG, "onUnbind, calling cleanup");
+        cleanup();
+        return super.onUnbind(intent);
     }
 
     public void onDestroy() {
