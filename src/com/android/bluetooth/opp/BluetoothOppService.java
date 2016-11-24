@@ -675,8 +675,9 @@ public class BluetoothOppService extends Service {
                         }
                     }
                 }
-
-                mNotifier.updateNotification();
+                if (mListenStarted ) {
+                    mNotifier.updateNotification();
+                }
 
                 cursor.close();
                 cursor = null;
