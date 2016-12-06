@@ -726,7 +726,6 @@ static jboolean cindResponseNative(JNIEnv *env, jobject object,
     return (status == BT_STATUS_SUCCESS) ? JNI_TRUE : JNI_FALSE;
 }
 
-
 static jboolean atResponseStringNative(JNIEnv *env, jobject object, jstring response_str,
                                                  jbyteArray address) {
     jbyte *addr;
