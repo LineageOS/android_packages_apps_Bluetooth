@@ -1643,7 +1643,10 @@ public class AdapterService extends Service {
             Log.i(TAG,"A2dp Multicast is Ongoing, ignore discovery");
             return false;
         }
-
+        if (mAdapterProperties.isDiscovering()) {
+            Log.i(TAG,"discovery already active, ignore startDiscovery");
+            return false;
+        }
         return startDiscoveryNative();
     }
 
@@ -1651,6 +1654,10 @@ public class AdapterService extends Service {
         enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                        "Need BLUETOOTH ADMIN permission");
 
+        if (!mAdapterProperties.isDiscovering()) {
+            Log.i(TAG,"discovery not active, ignore cancelDiscovery");
+            return false;
+        }
         return cancelDiscoveryNative();
     }
 
@@ -1754,6 +1761,12 @@ public class AdapterService extends Service {
        }
     }
 
+     private void cancelDiscoveryforautoConnect(){
+        if (mAdapterProperties.isDiscovering() == true) {
+            cancelDiscovery();
+        }
+    }
+
      private void autoConnectHeadset(){
         HeadsetService  hsService = HeadsetService.getHeadsetService();
 
@@ -1763,6 +1776,7 @@ public class AdapterService extends Service {
         }
         for (BluetoothDevice device : bondedDevices) {
             if (hsService.getPriority(device) == BluetoothProfile.PRIORITY_AUTO_CONNECT ){
+                cancelDiscoveryforautoConnect();
                 debugLog("autoConnectHeadset() - Connecting HFP with " + device.toString());
                 hsService.connect(device);
             }
@@ -1777,6 +1791,7 @@ public class AdapterService extends Service {
         }
         for (BluetoothDevice device : bondedDevices) {
             if (a2dpSservice.getPriority(device) == BluetoothProfile.PRIORITY_AUTO_CONNECT ){
+                cancelDiscoveryforautoConnect();
                 debugLog("autoConnectA2dp() - Connecting A2DP with " + device.toString());
                 a2dpSservice.connect(device);
             }
@@ -1792,9 +1807,10 @@ public class AdapterService extends Service {
 
         for (BluetoothDevice device : bondedDevices) {
             if (headsetClientService.getPriority(device) == BluetoothProfile.PRIORITY_AUTO_CONNECT){
-            debugLog("autoConnectHeadsetClient() - Connecting Headset Client with " +
-                device.toString());
-            headsetClientService.connect(device);
+                cancelDiscoveryforautoConnect();
+                debugLog("autoConnectHeadsetClient() - Connecting Headset Client with " +
+                          device.toString());
+                headsetClientService.connect(device);
             }
         }
     }
@@ -1808,6 +1824,7 @@ public class AdapterService extends Service {
 
          for (BluetoothDevice device : bondedDevices) {
              if (a2dpSinkService.getPriority(device) == BluetoothProfile.PRIORITY_AUTO_CONNECT) {
+                 cancelDiscoveryforautoConnect();
                  debugLog("autoConnectA2dpSink() - Connecting A2DP Sink with " + device.toString());
                  a2dpSinkService.connect(device);
              }
@@ -1822,6 +1839,7 @@ public class AdapterService extends Service {
          }
          for (BluetoothDevice device : bondedDevices) {
              if (pbapClientService.getPriority(device) == BluetoothProfile.PRIORITY_AUTO_CONNECT) {
+                 cancelDiscoveryforautoConnect();
                  debugLog("autoConnectPbapClient() - Connecting PBAP Client with " +
                          device.toString());
                  pbapClientService.connect(device);
@@ -2101,9 +2119,9 @@ public class AdapterService extends Service {
 
             case BluetoothProfile.A2DP:
                 A2dpService a2dpService = A2dpService.getA2dpService();
-                deviceList = a2dpService.getConnectedDevices();
                 if ((a2dpService != null) &&
                     (BluetoothProfile.PRIORITY_AUTO_CONNECT != a2dpService.getPriority(device))){
+                     deviceList = a2dpService.getConnectedDevices();
                      adjustOtherSinkPriorities(a2dpService, deviceList);
                      a2dpService.setPriority(device,BluetoothProfile.PRIORITY_AUTO_CONNECT);
                 }

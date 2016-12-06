@@ -1391,9 +1391,20 @@ public class GattService extends ProfileService {
     }
 
     void unregAll() {
-        for(ClientMap.App app:mClientMap.mApps){
-            if (DBG) Log.d(TAG, "unreg:" + app.id);
-            unregisterClient(app.id);
+        int clientCount = mClientMap.mApps.size();
+        int counter = 0;
+        while ((counter < clientCount) && (mClientMap.mApps.size() > 0)) {
+            if (DBG) Log.d(TAG, "unreg client:" + mClientMap.mApps.get(0).id);
+            unregisterClient(mClientMap.mApps.get(0).id);
+            counter ++;
+        }
+
+        int serverCount = mServerMap.mApps.size();
+        counter = 0;
+        while ((counter < serverCount) && (mServerMap.mApps.size() > 0)) {
+            if (DBG) Log.d(TAG, "unreg server:" + mServerMap.mApps.get(0).id);
+            unregisterServer(mServerMap.mApps.get(0).id);
+            counter ++;
         }
     }
 
