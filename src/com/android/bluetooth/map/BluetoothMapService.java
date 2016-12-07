@@ -867,6 +867,7 @@ public class BluetoothMapService extends ProfileService {
             sendShutdownMessage();
         }
         mStartError = true;
+        setState(BluetoothMap.STATE_DISCONNECTED, BluetoothMap.RESULT_CANCELED);
         return true;
     }
 
