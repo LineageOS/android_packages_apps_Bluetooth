@@ -237,6 +237,7 @@ public class GattService extends ProfileService {
 
     boolean permissionCheck(int connId, int handle) {
         List<BluetoothGattService> db = gattClientDatabases.get(connId);
+        if (db == null) return true;
 
         for (BluetoothGattService service : db) {
             for (BluetoothGattCharacteristic characteristic: service.getCharacteristics()) {
@@ -759,7 +760,15 @@ public class GattService extends ProfileService {
     void onSearchCompleted(int connId, int status) throws RemoteException {
         if (DBG) Log.d(TAG, "onSearchCompleted() - connId=" + connId+ ", status=" + status);
         // Gatt DB is ready!
-        gattClientGetGattDbNative(connId);
+
+        // This callback was called from the jni_workqueue thread. If we make request to the stack
+        // on the same thread, it might cause deadlock. Schedule request on a new thread instead.
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                gattClientGetGattDbNative(connId);
+            }
+        });
+        t.start();
     }
 
     GattDbElement GetSampleGattDbElement() {
@@ -1391,9 +1400,20 @@ public class GattService extends ProfileService {
     }
 
     void unregAll() {
-        for(ClientMap.App app:mClientMap.mApps){
-            if (DBG) Log.d(TAG, "unreg:" + app.id);
-            unregisterClient(app.id);
+        int clientCount = mClientMap.mApps.size();
+        int counter = 0;
+        while ((counter < clientCount) && (mClientMap.mApps.size() > 0)) {
+            if (DBG) Log.d(TAG, "unreg client:" + mClientMap.mApps.get(0).id);
+            unregisterClient(mClientMap.mApps.get(0).id);
+            counter ++;
+        }
+
+        int serverCount = mServerMap.mApps.size();
+        counter = 0;
+        while ((counter < serverCount) && (mServerMap.mApps.size() > 0)) {
+            if (DBG) Log.d(TAG, "unreg server:" + mServerMap.mApps.get(0).id);
+            unregisterServer(mServerMap.mApps.get(0).id);
+            counter ++;
         }
     }
 
@@ -1627,12 +1647,11 @@ public class GattService extends ProfileService {
     void connectionParameterUpdate(int clientIf, String address, int connectionPriority) {
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
 
-        // Default spec recommended interval is 30->50 ms
-        int minInterval = 24; // 24 * 1.25ms = 30ms
-        int maxInterval = 40; // 40 * 1.25ms = 50ms
+        int minInterval;
+        int maxInterval;
 
         // Slave latency
-        int latency = 0;
+        int latency;
 
         // Link supervision timeout is measured in N * 10ms
         int timeout = 2000; // 20s
@@ -1642,12 +1661,22 @@ public class GattService extends ProfileService {
             case BluetoothGatt.CONNECTION_PRIORITY_HIGH:
                 minInterval = getResources().getInteger(R.integer.gatt_high_priority_min_interval);
                 maxInterval = getResources().getInteger(R.integer.gatt_high_priority_max_interval);
+                latency = getResources().getInteger(R.integer.gatt_high_priority_latency);
                 break;
 
             case BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER:
                 minInterval = getResources().getInteger(R.integer.gatt_low_power_min_interval);
                 maxInterval = getResources().getInteger(R.integer.gatt_low_power_max_interval);
-                latency = 2;
+                latency = getResources().getInteger(R.integer.gatt_low_power_latency);
+                break;
+
+            default:
+                // Using the values for CONNECTION_PRIORITY_BALANCED.
+                minInterval =
+                        getResources().getInteger(R.integer.gatt_balanced_priority_min_interval);
+                maxInterval =
+                        getResources().getInteger(R.integer.gatt_balanced_priority_max_interval);
+                latency = getResources().getInteger(R.integer.gatt_balanced_priority_latency);
                 break;
         }
 
