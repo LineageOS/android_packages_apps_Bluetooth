@@ -40,6 +40,7 @@ public class OolConnManager {
     static int channel = 0;
     static boolean sdpDone = false;
     static String mAddress;
+    public static boolean interruptSdp = false;
 
     public static BluetoothSocket CreateL2capConnection(BluetoothDevice remBtDev,UUID uuid ) {
 
@@ -66,7 +67,7 @@ public class OolConnManager {
 
         int waitCount = 0;
         int channelNo = -1;
-        while(!sdpDone && waitCount < 100) {
+        while(!sdpDone && waitCount < 100 && (!interruptSdp)) {
 
            try {
                Thread.sleep(100);
@@ -77,6 +78,7 @@ public class OolConnManager {
         }
         waitCount = 0;
         sdpDone = false;
+        interruptSdp = false;
 
         Log.d(TAG,"returning l2c channel as "+channel);
         channelNo = channel;
@@ -86,8 +88,9 @@ public class OolConnManager {
 
     public static void saveOppSdpRecord(SdpOppOpsRecord sdpRec, BluetoothDevice btDevice) {
 
-        Log.v(TAG,"saveOppSdpRecord"+ btDevice.getAddress());
-        if ((mAddress != null) && mAddress.equalsIgnoreCase(btDevice.getAddress())) {
+        Log.i(TAG, "saveOppSdpRecord" + btDevice.getAddress() + " sdpRec:" + sdpRec);
+        if (sdpRec != null && (mAddress != null) && mAddress.
+                equalsIgnoreCase(btDevice.getAddress())) {
            channel = sdpRec.getL2capPsm();
            sdpDone = true;
            Log.d(TAG,"saveOppSdpRecord channel "+ channel);
