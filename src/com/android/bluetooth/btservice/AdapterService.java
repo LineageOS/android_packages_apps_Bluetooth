@@ -21,6 +21,7 @@
 package com.android.bluetooth.btservice;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -125,6 +126,7 @@ public class AdapterService extends Service {
     public static final String BLUETOOTH_ADMIN_PERM =
         android.Manifest.permission.BLUETOOTH_ADMIN;
 
+    public static int oppNotificationId = 0;
     static final ParcelUuid[] A2DP_SOURCE_SINK_UUIDS = {
         BluetoothUuid.AudioSource,
         BluetoothUuid.AudioSink
@@ -650,6 +652,15 @@ public class AdapterService extends Service {
                     + serviceName + " with result: " + res);
             }
         return;
+    }
+
+    void cleanOppNotifciations() {
+        Log.d(TAG, " cleanOppNotifciations ID:" + oppNotificationId);
+        if (oppNotificationId != 0) {
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            nm.cancel(oppNotificationId);
+            oppNotificationId = 0;
+        }
     }
 
     boolean stopGattProfileService() {

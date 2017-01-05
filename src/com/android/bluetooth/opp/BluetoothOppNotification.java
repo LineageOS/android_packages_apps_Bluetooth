@@ -33,6 +33,7 @@
 package com.android.bluetooth.opp;
 
 import com.android.bluetooth.R;
+import com.android.bluetooth.btservice.AdapterService;
 
 import android.content.Context;
 import android.app.Notification;
@@ -378,6 +379,7 @@ class BluetoothOppNotification {
 
             if (mActiveNotificationId != item.id) {
                 mActiveNotificationId = item.id;
+                AdapterService.oppNotificationId = item.id;
                 mUpdateCount = true;
             }
         }
@@ -591,6 +593,7 @@ class BluetoothOppNotification {
               .build();
           mNotificationMgr.notify(info.mID, n);
           Log.i(TAG, " Incoming Notification ID :" + info.mID);
+          AdapterService.oppNotificationId = info.mID;
         }
         cursor.close();
         cursor = null;
@@ -626,6 +629,7 @@ class BluetoothOppNotification {
         cursor.close();
         if (V) Log.v(TAG, "Freeing cursor: " + cursor);
         cursor = null;
+        AdapterService.oppNotificationId = 0;
     }
 
 }

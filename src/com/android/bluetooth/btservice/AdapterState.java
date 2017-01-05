@@ -489,6 +489,7 @@ final class AdapterState extends StateMachine {
                     mVendor.ssrCleanup(false);
                     mPendingCommandState.setTurningOff(false);
                     notifyAdapterStateChange(BluetoothAdapter.STATE_BLE_ON);
+                    adapterService.cleanOppNotifciations();
                     adapterService.disableProfileServices();
                     transitionTo(mOffState);
                     errorLog("BREDR_STOP_TIMEOUT:Killing the process to force a restart as part cleanup");
