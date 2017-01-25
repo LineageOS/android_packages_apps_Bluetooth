@@ -68,6 +68,7 @@
   <!-- content for timeout-->
   <string name="incoming_file_confirm_timeout_content">D\'Zäit ass beim Empfänke vun engem Fichier vum \u0022<xliff:g id="sender">%1$s</xliff:g>\u0022 ofgelaf</string>
   <!-- Bluetooth File Transfer Acceptance Notification item -->
+  <string name="incoming_file_confirm_Notification_title">Erakommende Fichier</string>
   <!-- Inbound File Transfer Progress Notification item -->
   <!-- label for the notification item of receiving file -->
   <string name="notification_receiving">Bluetooth-Fräigab: <xliff:g id="file">%1$s</xliff:g> gëtt empfaangen</string>

@@ -16,5 +16,6 @@
      limitations under the License.
 -->
 <resources>
+  <string name="incoming_file_toast_msg">Εισερχόμενο αρχείο από άλλη συσκευή. Επιβεβαιώστε ότι θέλετε να λάβετε αυτό το αρχείο.</string>
   <string name="upload_fail_waiting">Το αρχείο δεν στάλθηκε, προσπάθεια ξανά\u2026</string>
 </resources>

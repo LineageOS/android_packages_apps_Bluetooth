@@ -16,6 +16,6 @@
      limitations under the License.
 -->
 <resources>
-  <string name="incoming_file_toast_msg">另一台设备尝试传入文件。请确认您是否要接受此文件。</string>
+  <string name="incoming_file_toast_msg">另一台设备尝试传入文件。请您确认是否接收此文件。</string>
   <string name="upload_fail_waiting">无法发送文件，正在重试\u2026</string>
 </resources>
