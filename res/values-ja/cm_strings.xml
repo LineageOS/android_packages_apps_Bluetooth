@@ -30,5 +30,5 @@
         permission controls access to the Bluetooth Avrcp Data Manager.
     -->
   <string name="permdesc_bluetoothAvrcpDataManager">Bluetooth AVRCPメタデータのアクセスとUIへ表示するための使用をアプリに許可します。</string>
-  <string name="upload_fail_waiting">ファイルを送信できませんでした、再試行しています\u2026</string>
+  <string name="upload_fail_waiting">ファイルを送信できませんでした、再試行しています...</string>
 </resources>
