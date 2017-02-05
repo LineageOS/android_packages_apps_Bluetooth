@@ -16,5 +16,6 @@
      limitations under the License.
 -->
 <resources>
+  <string name="incoming_file_toast_msg">Tập tin từ một thiết bị khác. Xác nhận bạn muốn nhận tập tin này.</string>
   <string name="upload_fail_waiting">Không thể gửi tập tin, đang thử lại\u2026</string>
 </resources>
