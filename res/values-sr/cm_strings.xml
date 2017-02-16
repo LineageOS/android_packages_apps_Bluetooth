@@ -16,5 +16,6 @@
      limitations under the License.
 -->
 <resources>
+  <string name="incoming_file_toast_msg">Долазни фајл са другог уређаја. Потврди да желиш да примиш тај фајл.</string>
   <string name="upload_fail_waiting">Није могуће послати датотеку, понављам\u2026</string>
 </resources>

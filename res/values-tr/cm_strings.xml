@@ -16,5 +16,6 @@
      limitations under the License.
 -->
 <resources>
+  <string name="incoming_file_toast_msg">Başka cihazdan gelen dosya isteği. Dosyayı almak istiyor musunuz?</string>
   <string name="upload_fail_waiting">Dosya gönderilemedi, yeniden deneniyor\u2026</string>
 </resources>

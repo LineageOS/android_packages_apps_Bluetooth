@@ -16,5 +16,6 @@
      limitations under the License.
 -->
 <resources>
+  <string name="incoming_file_toast_msg">Un fişier de la alt dispozitiv se află în curs de primire. Confirmaţi dacă doriţi primirea acestuia.</string>
   <string name="upload_fail_waiting">Imposibil de transmis fișierul, se reîncearcă\u2026</string>
 </resources>

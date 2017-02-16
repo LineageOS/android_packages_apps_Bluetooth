@@ -16,5 +16,6 @@
      limitations under the License.
 -->
 <resources>
+  <string name="incoming_file_toast_msg">מכשיר אחר שולח אליך קובץ. נא אשר את קבלת הקובץ.</string>
   <string name="upload_fail_waiting">שליחת הקובץ נכשלה, מנסה שנית\u2026</string>
 </resources>
