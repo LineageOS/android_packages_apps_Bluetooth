@@ -95,6 +95,8 @@ public class BluetoothOppObexServerSession extends ServerRequestHandler implemen
 
     private BluetoothOppReceiveFileInfo mFileInfo;
 
+    private WakeLock mWakeLock;
+
     private WakeLock mPartialWakeLock;
 
     boolean mTimeoutMsgSent = false;
@@ -111,6 +113,8 @@ public class BluetoothOppObexServerSession extends ServerRequestHandler implemen
         mContext = context;
         mTransport = transport;
         PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP
+                | PowerManager.ON_AFTER_RELEASE, TAG);
         mPartialWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
     }
 
@@ -396,6 +400,10 @@ public class BluetoothOppObexServerSession extends ServerRequestHandler implemen
         mLocalShareInfoId = Integer.parseInt(contentUri.getPathSegments().get(1));
 
         if (needConfirm) {
+            if (!mWakeLock.isHeld()) {
+                if (D) Log.d(TAG, "acquire full WakeLock");
+                mWakeLock.acquire();
+            }
             Intent in = new Intent(BluetoothShare.INCOMING_FILE_CONFIRMATION_REQUEST_ACTION);
             in.setClassName(Constants.THIS_PACKAGE_NAME, BluetoothOppReceiver.class.getName());
             mContext.sendBroadcast(in);
@@ -407,8 +415,14 @@ public class BluetoothOppObexServerSession extends ServerRequestHandler implemen
         if (V) Log.v(TAG, "mLocalShareInfoId = " + mLocalShareInfoId);
 
         synchronized (this) {
-            mPartialWakeLock.acquire();
             mServerBlocking = true;
+            if (mWakeLock.isHeld()) {
+                if (!mPartialWakeLock.isHeld()) {
+                    if (D) Log.v(TAG, "acquire partial WakeLock");
+                    mPartialWakeLock.acquire();
+                }
+                mWakeLock.release();
+            }
             try {
 
                 while (mServerBlocking) {
@@ -717,14 +731,19 @@ public class BluetoothOppObexServerSession extends ServerRequestHandler implemen
     }
 
     private synchronized void releaseWakeLocks() {
+        if (mWakeLock.isHeld()) {
+            if (D) Log.d(TAG, "releasing full wakelock");
+            mWakeLock.release();
+        }
         if (mPartialWakeLock.isHeld()) {
+            if (D) Log.d(TAG, "releasing partial wakelock");
             mPartialWakeLock.release();
         }
     }
 
     @Override
     public void onClose() {
-        if (V) Log.v(TAG, "release WakeLock");
+        if (D) Log.v(TAG, "onClose");
         releaseWakeLocks();
 
         /* onClose could happen even before start() where mCallback is set */
