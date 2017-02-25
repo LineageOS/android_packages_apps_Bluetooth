@@ -16,5 +16,6 @@
      limitations under the License.
 -->
 <resources>
-  <string name="upload_fail_waiting">파일 전송 실패, 재시도 중\u2026</string>
+  <string name="incoming_file_toast_msg">다른 기기에서 파일을 전송 중입니다. 이 파일을 수신할 것인지 확인하세요.</string>
+  <string name="upload_fail_waiting">파일 전송 실패, 다시 시도하는 중\u2026</string>
 </resources>
