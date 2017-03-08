@@ -15,4 +15,6 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources></resources>
+<resources>
+  <string name="incoming_file_toast_msg">Ficheru entrante d\'otru preséu. Confirma que quies recibilu.</string>
+</resources>
