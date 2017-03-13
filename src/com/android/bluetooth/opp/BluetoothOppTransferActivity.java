@@ -401,7 +401,7 @@ public class BluetoothOppTransferActivity extends AlertActivity implements
                         public void run() {
                             BluetoothOppSendFileInfo sendFileInfo =
                                 BluetoothOppSendFileInfo.generateFileInfo(BluetoothOppTransferActivity.this,
-                                uri, mTransInfo.mFileType);
+                                uri, mTransInfo.mFileType, false);
                             uri = BluetoothOppUtility.generateUri(uri, sendFileInfo);
                             BluetoothOppUtility.putSendFileInfo(uri, sendFileInfo);
                             mTransInfo.mFileUri = uri.toString();
