@@ -251,14 +251,15 @@ public class BluetoothOppManager {
         if (V) Log.v(TAG, "Application data stored to SharedPreference! ");
     }
 
-    public void saveSendingFileInfo(String mimeType, String uriString, boolean isHandover) {
+    public void saveSendingFileInfo(String mimeType, String uriString, boolean isHandover,
+            boolean fromExternal) {
         synchronized (BluetoothOppManager.this) {
             mMultipleFlag = false;
             mMimeTypeOfSendingFile = mimeType;
             mIsHandoverInitiated = isHandover;
             Uri uri = Uri.parse(uriString);
             BluetoothOppSendFileInfo sendFileInfo =
-                BluetoothOppSendFileInfo.generateFileInfo(mContext, uri, mimeType);
+                BluetoothOppSendFileInfo.generateFileInfo(mContext, uri, mimeType, fromExternal);
             uri = BluetoothOppUtility.generateUri(uri, sendFileInfo);
             BluetoothOppUtility.putSendFileInfo(uri, sendFileInfo);
             mUriOfSendingFile = uri.toString();
@@ -267,7 +268,8 @@ public class BluetoothOppManager {
         }
     }
 
-    public void saveSendingFileInfo(String mimeType, ArrayList<Uri> uris, boolean isHandover) {
+    public void saveSendingFileInfo(String mimeType, ArrayList<Uri> uris, boolean isHandover,
+            boolean fromExternal) {
         synchronized (BluetoothOppManager.this) {
             mMultipleFlag = true;
             mMimeTypeOfSendingFiles = mimeType;
@@ -275,7 +277,7 @@ public class BluetoothOppManager {
             mIsHandoverInitiated = isHandover;
             for (Uri uri : uris) {
                 BluetoothOppSendFileInfo sendFileInfo =
-                    BluetoothOppSendFileInfo.generateFileInfo(mContext, uri, mimeType);
+                    BluetoothOppSendFileInfo.generateFileInfo(mContext, uri, mimeType, fromExternal);
                 uri = BluetoothOppUtility.generateUri(uri, sendFileInfo);
                 mUrisOfSendingFiles.add(uri);
                 BluetoothOppUtility.putSendFileInfo(uri, sendFileInfo);
