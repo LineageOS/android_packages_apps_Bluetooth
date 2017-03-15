@@ -39,13 +39,18 @@
   <!--Line 1 -->
   <!--Line 2 -->
   <!-- Label for a cancel button. -->
+  <string name="bt_enable_cancel">Encaboxar</string>
   <!-- Label for a confirm button.-->
   <!-- Bluetooth File Transfer Acceptance Dialog -->
   <!--Title -->
+  <string name="incoming_file_confirm_title">Tresferencia de ficheros</string>
   <!--content -->
+  <string name="incoming_file_confirm_content">¿Aceutar ficheru entrante? </string>
   <!-- Label for a cancel button. -->
   <!-- Label for a confirm button.-->
+  <string name="incoming_file_confirm_ok">Aceutar</string>
   <!-- Label for timeout OK button.-->
+  <string name="incoming_file_confirm_timeout_ok">Aceutar</string>
   <!-- content for timeout-->
   <!-- Bluetooth File Transfer Acceptance Notification item -->
   <!-- Inbound File Transfer Progress Notification item -->
@@ -64,28 +69,37 @@
   <!--Line 3 -->
   <!--Line 4 -->
   <!-- Label for a cancel button. -->
+  <string name="download_cancel">Parar</string>
   <!-- Label for a hide button.-->
+  <string name="download_ok">Anubrir</string>
   <!--Line 1 -->
+  <string name="incoming_line1">De</string>
   <!--Line 2 -->
+  <string name="incoming_line2">Nome de ficheru</string>
   <!--Line 3 -->
+  <string name="incoming_line3">Tamañu</string>
   <!-- Bluetooth failed Download  Dialog -->
   <!--Line 1  -->
   <!--Line 2  -->
   <!--Line 3  -->
   <!-- Label for ok button.-->
+  <string name="download_fail_ok">ACEUTAR</string>
   <!-- Bluetooth Successful Download  Dialog -->
   <!--Line 4 in "Bluetooth Download Progress Dialog" -->
   <!-- Label for a OK button.-->
+  <string name="download_succ_ok">Abrir</string>
   <!-- Bluetooth Upload Progress Dialog -->
   <!-- Bluetooth Successful Upload Progress Dialog -->
   <!--Line 4 -->
   <!-- Label for a confirm button.-->
+  <string name="upload_succ_ok">ACEUTAR</string>
   <!-- Bluetooth Failed Upload File Transfer Dialog -->
   <!-- Label for a try again button.-->
   <!-- Label for a cancel button.-->
   <!-- Bluetooth error dialog -->
   <!-- Bluetooth  Enabling progress dialog -->
   <!-- Bluetooth Toast Message -->
+  <string name="bt_toast_2">Nun pue recibise\'l ficheru.</string>
   <!-- Bluetooth System Messages [CHAR LIMIT=NONE] -->
   <!-- Bluetooth System Messages -->
   <!-- Bluetooth Transfer Failure Reason -->
@@ -96,4 +110,5 @@
   <!-- Used to run Bluetooth.apk in another process if needed -->
   <!-- Do not translate. android:sharedUserId string of this application. -->
   <!-- Do not translate. android:process of this application. -->
+  <string name="bluetooth_map_settings_cancel">Encaboxar</string>
 </resources>
