@@ -17,4 +17,5 @@
 -->
 <resources>
   <string name="incoming_file_toast_msg">Вхідний файл з іншого пристрою. Підтвердіть, що хочете отримати цей файл.</string>
+  <string name="upload_fail_waiting">Не вдається надіслати файл, повторна спроба\u2026</string>
 </resources>

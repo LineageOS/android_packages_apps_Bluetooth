@@ -31,8 +31,10 @@
     -->
   <!-- string showed on "Share picutre via" dialog -->
   <!-- string for "unknown device" -->
+  <string name="unknown_device">Preséu desconocíu</string>
   <!-- string for "unknown" phone number" -->
   <!-- string for "the title of airplane mode error" -->
+  <string name="airplane_error_title">Mou avión</string>
   <!-- string for "error message in airplane mode" -->
   <!-- Activate Bluetooth Confirmation Dialog -->
   <!--Title -->
@@ -53,6 +55,7 @@
   <string name="incoming_file_confirm_timeout_ok">Aceutar</string>
   <!-- content for timeout-->
   <!-- Bluetooth File Transfer Acceptance Notification item -->
+  <string name="incoming_file_confirm_Notification_title">Ficheru entrante</string>
   <!-- Inbound File Transfer Progress Notification item -->
   <!-- label for the notification item of receiving file -->
   <!-- label for the notification item of received file -->
