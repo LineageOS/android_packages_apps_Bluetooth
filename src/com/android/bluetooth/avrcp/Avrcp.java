@@ -123,7 +123,6 @@ public final class Avrcp {
     private static boolean updatePlayTime;
     private static boolean updateValues;
     private int mAddressedPlayerId;
-    private int mBrowsedPlayerId;
 
     /* BTRC features */
     public static final int BTRC_FEAT_METADATA = 0x01;
@@ -154,10 +153,6 @@ public final class Avrcp {
     private static final int MESSAGE_CHANGE_PLAY_POS = 12;
     private static final int MESSAGE_SET_A2DP_AUDIO_STATE = 13;
     private static final int MESSAGE_SET_ADDR_PLAYER_REQ_TIMEOUT = 14;
-    private static final int MESSAGE_DEVICE_RC_CLEANUP = 15;
-
-    private static final int STACK_CLEANUP = 0;
-    private static final int APP_CLEANUP = 1;
 
     private static final int AVRCP_BR_RSP_TIMEOUT = 2000;
     private static final int MESSAGE_SEND_PASS_THROUGH_CMD = 2001;
@@ -300,6 +295,7 @@ public final class Avrcp {
         private boolean isMusicAppResponsePending;
         private boolean isBrowsingSupported;
         private boolean isAbsoluteVolumeSupportingDevice;
+        private boolean isActiveDevice;
 
         private int mRemoteVolume;
         private int mLastRemoteVolume;
@@ -340,6 +336,7 @@ public final class Avrcp {
             isMusicAppResponsePending = false;
             isBrowsingSupported = false;
             isAbsoluteVolumeSupportingDevice = false;
+            isActiveDevice = false;
             mRemoteVolume = -1;
             mInitialRemoteVolume = -1;
             mLastRemoteVolume = -1;
@@ -438,7 +435,6 @@ public final class Avrcp {
         maxAvrcpConnections = maxConnections;
         deviceFeatures = new DeviceDependentFeature[maxAvrcpConnections];
         mAddressedPlayerId = INVALID_ADDRESSED_PLAYER_ID;
-        mBrowsedPlayerId = INVALID_ADDRESSED_PLAYER_ID;
         for(int i = 0; i < maxAvrcpConnections; i++) {
             deviceFeatures[i] = new DeviceDependentFeature();
         }
@@ -716,7 +712,7 @@ public final class Avrcp {
             featureMasks2[FEATURE_MASK_REWIND_OFFSET] | FEATURE_MASK_REWIND_MASK;
         featureMasks2[FEATURE_MASK_FAST_FWD_OFFSET] =
             featureMasks2[FEATURE_MASK_FAST_FWD_OFFSET] | FEATURE_MASK_FAST_FWD_MASK;
-        mediaPlayerInfo1 = new MediaPlayerInfo ((short)0x0000,
+        mediaPlayerInfo1 = new MediaPlayerInfo ((short)0x0001,
                     MAJOR_TYPE_AUDIO,
                     SUB_TYPE_NONE,
                     (byte)PlaybackState.STATE_PAUSED,
@@ -726,7 +722,7 @@ public final class Avrcp {
                     "com.android.music",
                     true,
                     featureMasks);
-        mediaPlayerInfo2 = new MediaPlayerInfo ((short)0x0001,
+        mediaPlayerInfo2 = new MediaPlayerInfo ((short)0x0000,
                     MAJOR_TYPE_AUDIO,
                     SUB_TYPE_NONE,
                     (byte)PlaybackState.STATE_PAUSED,
@@ -753,10 +749,16 @@ public final class Avrcp {
     public void doQuit() {
         if (DEBUG)
             Log.v(TAG, "doQuit");
-        Message msg = mHandler.obtainMessage(MESSAGE_DEVICE_RC_CLEANUP, APP_CLEANUP,
-               0, null);
-        mHandler.sendMessage(msg);
-
+        mHandler.removeCallbacksAndMessages(null);
+        Looper looper = mHandler.getLooper();
+        if (looper != null) {
+            looper.quit();
+        }
+        mMediaSessionManager.removeOnActiveSessionsChangedListener(mSessionChangeListener);
+        clearDeviceDependentFeature();
+        for (int i = 0; i < maxAvrcpConnections; i++) {
+            cleanupDeviceFeaturesIndex(i);
+        }
         mAvrcpBipRsp.stop();
         try {
             mContext.unregisterReceiver(mIntentReceiver);
@@ -769,13 +771,6 @@ public final class Avrcp {
             if (DEBUG)
                 Log.v(TAG, "Addressed player message cleanup as part of doQuit");
         }
-
-        mHandler.removeCallbacksAndMessages(null);
-        Looper looper = mHandler.getLooper();
-        if (looper != null) {
-            looper.quit();
-        }
-        mMediaSessionManager.removeOnActiveSessionsChangedListener(mSessionChangeListener);
     }
 
     public void clearDeviceDependentFeature() {
@@ -817,6 +812,42 @@ public final class Avrcp {
         @Override
         public void onSessionDestroyed() {
             Log.v(TAG, "MediaController session destroyed");
+        }
+
+        @Override
+        public void onUpdateFolderInfoBrowsedPlayer(String stringUri) {
+            Log.v(TAG, "onClientFolderInfoBrowsedPlayer: stringUri: " + stringUri);
+            if (stringUri != null) {
+                String[] ExternalPath = stringUri.split("/");
+                if (ExternalPath.length < 4) {
+                    Log.d(TAG, "Wrong entries.");
+                    mHandler.obtainMessage(MSG_UPDATE_BROWSED_PLAYER_FOLDER, 0, INTERNAL_ERROR,
+                                                                  null).sendToTarget();
+                    return;
+                }
+                Uri uri = Uri.parse(stringUri);
+                Log.v(TAG, "URI received: " + uri);
+                String[] SplitPath = new String[ExternalPath.length - 3];
+                for (int count = 2; count < (ExternalPath.length - 1); count++) {
+                    SplitPath[count - 2] = ExternalPath[count];
+                    Log.d(TAG, "SplitPath[" + (count - 2) + "] = " + SplitPath[count - 2]);
+                }
+                Log.v(TAG, "folderDepth: " + SplitPath.length);
+                for (int count = 0; count < SplitPath.length; count++) {
+                    Log.v(TAG, "folderName: " + SplitPath[count]);
+                }
+                mMediaUriStatic = uri;
+                if (mHandler != null) {
+                    // Don't send the complete path to CK as few gets confused by that
+                    // Send only the name of the root folder
+                    mHandler.obtainMessage(MSG_UPDATE_BROWSED_PLAYER_FOLDER, NUM_ROOT_ELEMENTS,
+                                                OPERATION_SUCCESSFUL, SplitPath).sendToTarget();
+                }
+            } else {
+                mHandler.obtainMessage(MSG_UPDATE_BROWSED_PLAYER_FOLDER, 0, INTERNAL_ERROR,
+                                                                  null).sendToTarget();
+            }
+            Log.d(TAG, "Exit onUpdateFolderInfoBrowsedPlayer()");
         }
 
         @Override
@@ -987,6 +1018,11 @@ public final class Avrcp {
                 updateAddressedMediaPlayer(msg.arg1);
                 break;
 
+            case MSG_UPDATE_BROWSED_PLAYER_FOLDER:
+                Log.v(TAG, "MSG_UPDATE_BROWSED_PLAYER_FOLDER");
+                updateBrowsedPlayerFolder(msg.arg1, msg.arg2, (String [])msg.obj);
+                break;
+
             case MSG_UPDATE_NOW_PLAYING_CONTENT_CHANGED:
                 Log.v(TAG, "MSG_UPDATE_NOW_PLAYING_CONTENT_CHANGED");
                 updateNowPlayingContentChanged();
@@ -1039,19 +1075,6 @@ public final class Avrcp {
                 deviceFeatures[deviceIndex].mInitialRemoteVolume = -1;
                 if (deviceFeatures[deviceIndex].mVolumeMapping != null)
                     deviceFeatures[deviceIndex].mVolumeMapping.clear();
-
-                if ((deviceFeatures[deviceIndex].mFeatures &
-                        BTRC_FEAT_BROWSE) != 0)
-                {
-                    Log.v(TAG,"BTRC_FEAT_BROWSE support is present on remote side");
-                    deviceFeatures[deviceIndex].mCurrentPath = PATH_ROOT;
-                    deviceFeatures[deviceIndex].mCurrentPathUid = null;
-                    deviceFeatures[deviceIndex].mMediaUri = Uri.parse("content://media/external/audio/media");
-                    Log.v(TAG," update current path to root folder before browse");
-                    deviceFeatures[deviceIndex].isBrowsingSupported = true;
-                    mBrowserDevice = device;
-                    Log.v(TAG,"Browsing supported by remote : mBrowserDevice = " + mBrowserDevice);
-                }
 
                 if ((deviceFeatures[deviceIndex].mFeatures &
                         BTRC_FEAT_AVRC_UI_UPDATE) != 0)
@@ -1204,6 +1227,12 @@ public final class Avrcp {
                                                  msg.arg2 == AVRC_RSP_CHANGED ||
                                                  msg.arg2 == AVRC_RSP_INTERIM)) {
                     /* If the volume has successfully changed */
+                    if (!deviceFeatures[deviceIndex].isActiveDevice &&
+                           (msg.arg2 == AVRC_RSP_CHANGED || msg.arg2 == AVRC_RSP_INTERIM)) {
+                        Log.d(TAG, "Do not change volume from an inactive device");
+                        break;
+                    }
+
                     deviceFeatures[deviceIndex].mLocalVolume = volIndex;
                     if (deviceFeatures[deviceIndex].mLastLocalVolume != -1
                         && msg.arg2 == AVRC_RSP_ACCEPT) {
@@ -1260,85 +1289,83 @@ public final class Avrcp {
                     if (DEBUG) Log.v(TAG, "ignore MESSAGE_ADJUST_VOLUME");
                     break;
                 }
-                List<BluetoothDevice> playingDevice = mA2dpService.getA2dpPlayingDevice();
+
+                if (mA2dpService.isMulticastFeatureEnabled() &&
+                        areMultipleDevicesConnected()) {
+                    if (DEBUG) Log.v(TAG, "Volume change not entertained as multicast is enabled & multiple devices are connected");
+                    break;
+                }
                 if (DEBUG)
                     Log.d(TAG, "MESSAGE_ADJUST_VOLUME: direction=" + msg.arg1);
-                for (int i = 0; i < playingDevice.size(); i++) {
-                    Log.v(TAG, "event for device address " +
-                            playingDevice.get(i).getAddress());
-                    deviceIndex = getIndexForDevice(playingDevice.get(i));
-                    if (deviceIndex == INVALID_DEVICE_INDEX) {
-                        Log.e(TAG,"Unkown playing device");
-                        sendAdjustVolume(msg.arg1);
-                        continue;
-                    }
-                    if ((deviceFeatures[deviceIndex].mVolCmdAdjustInProgress) ||
-                        (deviceFeatures[deviceIndex].mVolCmdSetInProgress)){
-                        if (DEBUG)
-                            Log.w(TAG, "already a volume command in progress" +
-                                    "for this device.");
-                        continue;
-                    }
-                    if (deviceFeatures[deviceIndex].mInitialRemoteVolume == -1) {
-                        if (DEBUG) Log.d(TAG, "remote never tell us initial volume, black list it.");
-                        blackListCurrentDevice(deviceIndex);
-                        break;
-                    }
-                    // Wait on verification on volume from device, before changing the volume.
-                    if (deviceFeatures[deviceIndex].mRemoteVolume != -1 &&
-                            (msg.arg1 == -1 || msg.arg1 == 1)) {
-                        int setVol = -1;
-                        int targetVolIndex = -1;
-                        if (deviceFeatures[deviceIndex].mLocalVolume == 0 && msg.arg1 == -1) {
-                            if (DEBUG) Log.w(TAG, "No need to Vol down from 0.");
-                            break;
-                        }
-                        if (deviceFeatures[deviceIndex].mLocalVolume == 
-                            mAudioStreamMax && msg.arg1 == 1) {
-                            if (DEBUG) Log.w(TAG, "No need to Vol up from max.");
-                            break;
-                        }
+                for (int i = 0; i < maxAvrcpConnections; i++) {
+                    if (deviceFeatures[i].mCurrentDevice != null &&
+                            deviceFeatures[i].isActiveDevice) {
+                          deviceIndex = i;
+                          if ((deviceFeatures[deviceIndex].mVolCmdAdjustInProgress) ||
+                                (deviceFeatures[deviceIndex].mVolCmdSetInProgress)){
+                          if (DEBUG)
+                               Log.w(TAG, "already a volume command in progress" +
+                                       "for this device.");
+                              continue;
+                          }
+                          if (deviceFeatures[deviceIndex].mInitialRemoteVolume == -1) {
+                              if (DEBUG) Log.d(TAG, "remote never tell us initial volume, black list it.");
+                              blackListCurrentDevice(deviceIndex);
+                              break;
+                          }
+                              // Wait on verification on volume from device, before changing the volume.
+                          if (deviceFeatures[deviceIndex].mRemoteVolume != -1 &&
+                                   (msg.arg1 == -1 || msg.arg1 == 1)) {
+                              int setVol = -1;
+                              int targetVolIndex = -1;
+                              if (deviceFeatures[deviceIndex].mLocalVolume == 0 && msg.arg1 == -1) {
+                                 if (DEBUG) Log.w(TAG, "No need to Vol down from 0.");
+                              break;
+                              }
+                              if (deviceFeatures[deviceIndex].mLocalVolume ==
+                                      mAudioStreamMax && msg.arg1 == 1) {
+                                  if (DEBUG) Log.w(TAG, "No need to Vol up from max.");
+                                  break;
+                              }
 
-                        targetVolIndex = deviceFeatures[deviceIndex].mLocalVolume + msg.arg1;
-                        if (DEBUG) Log.d(TAG, "Adjusting volume to  " + targetVolIndex);
+                              targetVolIndex = deviceFeatures[deviceIndex].mLocalVolume + msg.arg1;
+                              if (DEBUG) Log.d(TAG, "Adjusting volume to  " + targetVolIndex);
 
-                        Integer j;
-                        synchronized (deviceFeatures[deviceIndex].mVolumeMapping) {
-                            j = deviceFeatures[deviceIndex].mVolumeMapping.get(targetVolIndex);
-                        }
-
-                        if (j != null) {
-                            /* if we already know this volume mapping, use it */
-                            setVol = j.byteValue();
-                            if (setVol == deviceFeatures[deviceIndex].mRemoteVolume) {
-                                if (DEBUG) Log.d(TAG, "got same volume from mapping for " +
-                                    targetVolIndex + ", ignore.");
-                                setVol = -1;
-                            }
-                            if (DEBUG) Log.d(TAG, "set volume from mapping " + targetVolIndex + "-" + setVol);
-                        }
-
-                        if (setVol == -1) {
-                            /* otherwise use phone steps */
-                            setVol = Math.min(AVRCP_MAX_VOL,
-                                     convertToAvrcpVolume(Math.max(0, targetVolIndex)));
-                            if (DEBUG) Log.d(TAG, "set volume from local volume "+ targetVolIndex+"-"+ setVol);
-                        }
-
-                        boolean isSetVol = setVolumeNative(setVol ,
-                                getByteAddress(deviceFeatures[deviceIndex].mCurrentDevice));
-                        if (isSetVol) {
-                            sendMessageDelayed(obtainMessage(MESSAGE_ABS_VOL_TIMEOUT,
-                            0, 0, deviceFeatures[deviceIndex].mCurrentDevice), CMD_TIMEOUT_DELAY);
-                            deviceFeatures[deviceIndex].mVolCmdAdjustInProgress = true;
-                            deviceFeatures[deviceIndex].mLastDirection = msg.arg1;
-                            deviceFeatures[deviceIndex].mLastRemoteVolume = setVol;
-                            deviceFeatures[deviceIndex].mLastLocalVolume = targetVolIndex;
+                              Integer j;
+                              synchronized (deviceFeatures[deviceIndex].mVolumeMapping) {
+                                  j = deviceFeatures[deviceIndex].mVolumeMapping.get(targetVolIndex);
+                           }
+                           if (j != null) {
+                                /* if we already know this volume mapping, use it */
+                               setVol = j.byteValue();
+                               if (setVol == deviceFeatures[deviceIndex].mRemoteVolume) {
+                                    if (DEBUG) Log.d(TAG, "got same volume from mapping for " +
+                                         targetVolIndex + ", ignore.");
+                                    setVol = -1;
+                               }
+                               if (DEBUG) Log.d(TAG, "set volume from mapping " + targetVolIndex + "-" + setVol);
+                           }
+                           if (setVol == -1) {
+                               /* otherwise use phone steps */
+                               setVol = Math.min(AVRCP_MAX_VOL,
+                                        convertToAvrcpVolume(Math.max(0, targetVolIndex)));
+                               if (DEBUG) Log.d(TAG, "set volume from local volume "+ targetVolIndex+"-"+ setVol);
+                           }
+                           boolean isSetVol = setVolumeNative(setVol ,
+                                   getByteAddress(deviceFeatures[deviceIndex].mCurrentDevice));
+                           if (isSetVol) {
+                                sendMessageDelayed(obtainMessage(MESSAGE_ABS_VOL_TIMEOUT,
+                                    0, 0, deviceFeatures[deviceIndex].mCurrentDevice), CMD_TIMEOUT_DELAY);
+                                deviceFeatures[deviceIndex].mVolCmdAdjustInProgress = true;
+                                deviceFeatures[deviceIndex].mLastDirection = msg.arg1;
+                                deviceFeatures[deviceIndex].mLastRemoteVolume = setVol;
+                                deviceFeatures[deviceIndex].mLastLocalVolume = targetVolIndex;
+                           } else {
+                                if (DEBUG) Log.d(TAG, "adjustVolumeNative failed");
+                           }
                         } else {
-                            if (DEBUG) Log.d(TAG, "adjustVolumeNative failed");
+                             Log.e(TAG, "Unknown direction in MESSAGE_ADJUST_VOLUME");
                         }
-                    } else {
-                        Log.e(TAG, "Unknown direction in MESSAGE_ADJUST_VOLUME");
                     }
                 }
                 break;
@@ -1349,46 +1376,46 @@ public final class Avrcp {
                     if (DEBUG) Log.v(TAG, "ignore MESSAGE_SET_ABSOLUTE_VOLUME");
                     break;
                 }
+                if (mA2dpService.isMulticastFeatureEnabled() &&
+                        areMultipleDevicesConnected()) {
+                    if (DEBUG) Log.v(TAG, "Volume change not entertained as multicast is enabled & multiple devices are connected");
+                    break;
+                }
                 if (DEBUG)
                     Log.v(TAG, "MESSAGE_SET_ABSOLUTE_VOLUME");
-                List<BluetoothDevice> playingDevice = mA2dpService.getA2dpPlayingDevice();
-                if (playingDevice.size() == 0) {
-                    Log.e(TAG,"Volume cmd without a2dp playing");
-                }
+
                 int avrcpVolume = convertToAvrcpVolume(msg.arg1);
                 avrcpVolume = Math.min(AVRCP_MAX_VOL, Math.max(0, avrcpVolume));
-                for (int i = 0; i < playingDevice.size(); i++) {
-                    deviceIndex = getIndexForDevice(playingDevice.get(i));
-                    if (deviceIndex == INVALID_DEVICE_INDEX) {
-                        Log.e(TAG,"Unkown playing device for SetAbsVol");
-                        sendSetAbsoluteVolume(msg.arg1);
-                        continue;
-                    }
-                    Log.v(TAG, "event for device address " +
-                            playingDevice.get(i).getAddress());
-                    if ((deviceFeatures[deviceIndex].mVolCmdSetInProgress) ||
-                        (deviceFeatures[deviceIndex].mVolCmdAdjustInProgress)){
-                        if (DEBUG)
-                            Log.w(TAG, "There is already a volume command in progress.");
-                        continue;
-                    }
-                    if (deviceFeatures[deviceIndex].mInitialRemoteVolume == -1) {
-                        if (DEBUG) Log.d(TAG, "remote never tell us initial volume, black list it.");
-                        blackListCurrentDevice(deviceIndex);
-                        break;
-                    }
-                    Log.v(TAG, "event for device address " + (String)msg.obj);
-                    boolean isSetVol = setVolumeNative(avrcpVolume ,
-                            getByteAddress(deviceFeatures[deviceIndex].mCurrentDevice));
-                    if (isSetVol) {
-                        sendMessageDelayed(obtainMessage(MESSAGE_ABS_VOL_TIMEOUT,
-                                0, 0, deviceFeatures[deviceIndex].mCurrentDevice),
-                                CMD_TIMEOUT_DELAY);
-                        deviceFeatures[deviceIndex].mVolCmdSetInProgress = true;
-                        deviceFeatures[deviceIndex].mLastRemoteVolume = avrcpVolume;
-                        deviceFeatures[deviceIndex].mLastLocalVolume = msg.arg1;
-                    } else {
-                        if (DEBUG) Log.d(TAG, "setVolumeNative failed");
+                for (int i = 0; i < maxAvrcpConnections; i++) {
+                    if (deviceFeatures[i].mCurrentDevice != null &&
+                            deviceFeatures[i].isActiveDevice) {
+
+                          deviceIndex = i;
+
+                          if ((deviceFeatures[deviceIndex].mVolCmdSetInProgress) ||
+                                (deviceFeatures[deviceIndex].mVolCmdAdjustInProgress)){
+                              if (DEBUG)
+                                  Log.w(TAG, "There is already a volume command in progress.");
+                              continue;
+                          }
+                          if (deviceFeatures[deviceIndex].mInitialRemoteVolume == -1) {
+                              if (DEBUG) Log.d(TAG, "remote never tell us initial volume, black list it.");
+                              blackListCurrentDevice(deviceIndex);
+                              break;
+                          }
+                          Log.v(TAG, "event for device address " + (String)msg.obj);
+                          boolean isSetVol = setVolumeNative(avrcpVolume ,
+                                getByteAddress(deviceFeatures[deviceIndex].mCurrentDevice));
+                          if (isSetVol) {
+                              sendMessageDelayed(obtainMessage(MESSAGE_ABS_VOL_TIMEOUT,
+                                   0, 0, deviceFeatures[deviceIndex].mCurrentDevice),
+                                   CMD_TIMEOUT_DELAY);
+                              deviceFeatures[deviceIndex].mVolCmdSetInProgress = true;
+                              deviceFeatures[deviceIndex].mLastRemoteVolume = avrcpVolume;
+                              deviceFeatures[deviceIndex].mLastLocalVolume = msg.arg1;
+                         } else {
+                            if (DEBUG) Log.d(TAG, "setVolumeNative failed");
+                         }
                     }
                 }
                 break;
@@ -1512,31 +1539,6 @@ public final class Avrcp {
                 updateA2dpAudioState(msg.arg1, (BluetoothDevice)msg.obj);
                 break;
 
-            case MESSAGE_DEVICE_RC_CLEANUP:
-                if (DEBUG)
-                    Log.v(TAG,"MESSAGE_DEVICE_RC_CLEANUP: " + msg.arg1);
-                if (msg.arg1 == STACK_CLEANUP) {
-                    deviceIndex = getIndexForDevice((BluetoothDevice) msg.obj);
-                    if (deviceIndex == INVALID_DEVICE_INDEX) {
-                        Log.e(TAG,"invalid device index for cleanup");
-                        break;
-                    }
-                    cleanupDeviceFeaturesIndex(deviceIndex);
-                } else if (msg.arg1 == APP_CLEANUP) {
-                    if (msg.obj == null) {
-                        clearDeviceDependentFeature();
-                        for (int i = 0; i < maxAvrcpConnections; i++) {
-                            cleanupDeviceFeaturesIndex(i);
-                        }
-                    } else {
-                        Log.v(TAG, "Invalid message params");
-                        break;
-                    }
-                } else {
-                    Log.v(TAG, "Invalid Arguments to MESSAGE_DEVICE_RC_CLEANUP");
-                }
-                break;
-
             case MSG_UPDATE_RCC_CHANGE:
                 Log.v(TAG, "MSG_UPDATE_RCC_CHANGE");
                 String callingPackageName = (String)msg.obj;
@@ -1565,8 +1567,8 @@ public final class Avrcp {
                 for (int i = 0; i < msg.arg1; ++i) {
                     attrIds[i] = itemAttr.mAttrList.get(i).intValue();
                 }
-                processGetItemAttrInternal((byte)msg.arg2, itemAttr.mUid, (byte)msg.arg1,
-                          attrIds, itemAttr.mSize, itemAttr.mAddress);
+                processGetItemAttr((byte)msg.arg2, itemAttr.mUid, (byte)msg.arg1,
+                        attrIds, itemAttr.mSize, itemAttr.mAddress);
                 break;
             case MESSAGE_GET_FOLDER_ITEMS:
                 FolderListEntries folderListEntries = (FolderListEntries)msg.obj;
@@ -1635,7 +1637,6 @@ public final class Avrcp {
 
     private void updateA2dpAudioState(int state, BluetoothDevice device) {
         boolean isPlaying = (state == BluetoothA2dp.STATE_PLAYING);
-
         Log.v(TAG,"updateA2dpAudioState");
         if ((isPlaying) && !mAudioManager.isMusicActive()) {
             /* Play state to be updated only for music streaming, not touchtone */
@@ -1647,14 +1648,21 @@ public final class Avrcp {
                     (device.equals(deviceFeatures[i].mCurrentDevice))) {
                 PlaybackState.Builder builder = new PlaybackState.Builder();
                 if (isPlaying) {
+                    deviceFeatures[i].isActiveDevice = true;
                     builder.setState(PlaybackState.STATE_PLAYING,
                                      PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1.0f);
+                    Log.v(TAG,"updateA2dpAudioState: Active device is set true at index = " + i);
                 } else {
                     builder.setState(PlaybackState.STATE_PAUSED,
                                      PlaybackState.PLAYBACK_POSITION_UNKNOWN, 0.0f);
                 }
                 updatePlaybackState(builder.build(), device);
-                break;
+            }
+
+            if (!device.equals(deviceFeatures[i].mCurrentDevice) &&
+                    deviceFeatures[i].isActiveDevice && isPlaying) {
+                deviceFeatures[i].isActiveDevice = false;
+                Log.v(TAG,"updateA2dpAudioState: Active device is set false at index = " + i);
             }
         }
     }
@@ -1721,7 +1729,7 @@ public final class Avrcp {
         deviceFeatures[deviceIndex].mCurrentPlayState = state;
 
         if ((deviceFeatures[deviceIndex].mPlayStatusChangedNT == NOTIFICATION_TYPE_INTERIM) &&
-               (oldPlayStatus != newPlayStatus) && deviceFeatures[deviceIndex].mCurrentDevice != null) {
+               (oldPlayStatus != newPlayStatus)) {
             deviceFeatures[deviceIndex].mPlayStatusChangedNT = NOTIFICATION_TYPE_CHANGED;
             registerNotificationRspPlayStatusNative(
                     deviceFeatures[deviceIndex].mPlayStatusChangedNT,
@@ -1898,22 +1906,7 @@ public final class Avrcp {
                             long TrackNumberRsp = -1L;
                             try {
                                 TrackNumberRsp = Long.parseLong(mMediaAttributes.getString
-                                                 (MediaAttributes.ATTR_MEDIA_NUMBER));
-                                //if (deviceFeatures[i].isBrowsingSupported) {//Track num
-                                if (((deviceFeatures[i].mFeatures & BTRC_FEAT_BROWSE) != 0) &&
-                                    (deviceFeatures[i].mCurrentPath != PATH_INVALID)) {//Track num
-                                    Log.e(TAG,"TRACK_CHANGE_NOTIFICATION device suppports browsing");
-                                    if (mMediaPlayers.size() > 0) {
-                                        final Iterator<MediaPlayerInfo> rccIterator = mMediaPlayers.iterator();
-                                        while (rccIterator.hasNext()) {
-                                             final MediaPlayerInfo di = rccIterator.next();
-                                             if (di.IsPlayerBrowsable() && (di.GetPlayerFocus() == true)) {
-                                                 TrackNumberRsp = Long.parseLong(mMediaAttributes.getString
-                                                              (MediaAttributes.ATTR_TRACK_NUM));
-                                             }
-                                        }
-                                    }
-                                }
+                                    (MediaAttributes.ATTR_MEDIA_NUMBER));
                             } catch (Exception e) {
                                 Log.e(TAG, "sendTrackChangedRsp Exception e" + e);
                                 TrackNumberRsp = -1L;
@@ -1982,6 +1975,27 @@ public final class Avrcp {
         updateResetNotification(PLAYER_STATUS_CHANGED_NOTIFICATION);
     }
 
+    void updateBrowsedPlayerFolder(int numOfItems, int status, String[] folderNames) {
+        Log.v(TAG, "updateBrowsedPlayerFolder: numOfItems =  " + numOfItems
+              + " status = " + status);
+        if (mBrowserDevice == null) {
+            Log.e(TAG,"mBrowserDevice is null for music player called api");
+        }
+        BluetoothDevice device = mBrowserDevice;
+        int deviceIndex = getIndexForDevice(device);
+        if (deviceIndex == INVALID_DEVICE_INDEX) {
+            Log.e(TAG,"invalid index for device");
+            return;
+        }
+        deviceFeatures[deviceIndex].mCurrentPath = PATH_ROOT;
+        deviceFeatures[deviceIndex].mCurrentPathUid = null;
+        deviceFeatures[deviceIndex].mMediaUri = mMediaUriStatic;
+        mMediaUriStatic = null;
+
+        setBrowsedPlayerRspNative((byte)status, 0x0, numOfItems, 0x0, CHAR_SET_UTF8,
+                                   folderNames, getByteAddress(device));
+    }
+
     void updateNowPlayingContentChanged() {
         Log.v(TAG, "updateNowPlayingContentChanged");
         for (int i = 0; i < maxAvrcpConnections; i++) {
@@ -2046,11 +2060,6 @@ public final class Avrcp {
         }
 
         Log.v(TAG, "updateNowPlayingEntriesReceived");
-        if (mCachedRequest.mIsGetItemAttr) {
-             Log.v(TAG,"calling processGetItemAttrdummy");
-             processGetItemAttrdummy(playList);
-             return;
-        }
 
         if (!mCachedRequest.mIsGetFolderItems) {
             Log.v(TAG, "getTotalNumberOfItemsRspNative for NowPlaying List");
@@ -2147,22 +2156,13 @@ public final class Avrcp {
         ArrayList<Integer> mAttrList;
         int mSize;
         boolean mIsGetFolderItems;
-        boolean mIsGetItemAttr;
-        long mUid;
-        byte mScope;
-        String mDeviceAddress;
         public CachedRequest(long start, long end, byte attrCnt, int[] attrs,
-                int size, boolean isGetFolderItems, long uid, byte scope,
-                String deviceAddress, boolean isGetItemAttr) {
+                int size, boolean isGetFolderItems) {
             mStart = start;
             mEnd = end;
             mAttrCnt = attrCnt;
             mSize = size;
             mIsGetFolderItems = isGetFolderItems;
-            mUid = uid;
-            mScope = scope;
-            mDeviceAddress = deviceAddress;
-            mIsGetItemAttr = isGetItemAttr;
             mAttrList = new ArrayList<Integer>();
             for (int i = 0; i < attrCnt; ++i) {
                 mAttrList.add(new Integer(attrs[i]));
@@ -2206,7 +2206,6 @@ public final class Avrcp {
         private String coverArt;
         private String tracknum;
 
-        private static final int ATTR_TRACK_NUM = 0;
         private static final int ATTR_TITLE = 1;
         private static final int ATTR_ARTIST_NAME = 2;
         private static final int ATTR_ALBUM_NAME = 3;
@@ -2224,12 +2223,12 @@ public final class Avrcp {
 
             artistName = stringOrBlank(data.getString(MediaMetadata.METADATA_KEY_ARTIST));
             albumName = stringOrBlank(data.getString(MediaMetadata.METADATA_KEY_ALBUM));
-            /* playlist array starts with 0*/
-            mediaNumber = longStringOrBlank((data.getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER) + 1L));
+            mediaNumber = longStringOrBlank(data.getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER));
             mediaTotalNumber = longStringOrBlank(data.getLong(MediaMetadata.METADATA_KEY_NUM_TRACKS));
             genre = stringOrBlank(data.getString(MediaMetadata.METADATA_KEY_GENRE));
             playingTimeMs = longStringOrBlank(data.getLong(MediaMetadata.METADATA_KEY_DURATION));
             tracknum = longStringOrBlank(data.getLong(MediaMetadata.METADATA_KEY_DISC_NUMBER));
+
             // Try harder for the title.
             title = data.getString(MediaMetadata.METADATA_KEY_TITLE);
 
@@ -2271,8 +2270,6 @@ public final class Avrcp {
                 return new String();
 
             switch (attrId) {
-                case ATTR_TRACK_NUM:
-                    return tracknum;
                 case ATTR_TITLE:
                     return title;
                 case ATTR_ARTIST_NAME:
@@ -2382,9 +2379,6 @@ public final class Avrcp {
 
     private void processSetBrowsedPlayer(int playerId, String deviceAddress) {
         String packageName = null;
-        int folder_depth = 0;
-        long num_attributes = 0;
-        ArrayList <String> folderPath = new ArrayList<String>();
         byte retError = INVALID_PLAYER_ID;
         BluetoothDevice device = mAdapter.getRemoteDevice(deviceAddress);
         int deviceIndex = getIndexForDevice(device);
@@ -2392,7 +2386,10 @@ public final class Avrcp {
             Log.v(TAG,"device entry not present, bailing out");
             return;
         }
-
+        /* Following gets updated if SetBrowsed Player succeeds */
+        deviceFeatures[deviceIndex].mCurrentPath = PATH_INVALID;
+        deviceFeatures[deviceIndex].mMediaUri = Uri.EMPTY;
+        deviceFeatures[deviceIndex].mCurrentPathUid = null;
         if (DEBUG)
             Log.v(TAG, "processSetBrowsedPlayer: PlayerID: " + playerId);
         if (mMediaPlayers.size() > 0) {
@@ -2425,200 +2422,15 @@ public final class Avrcp {
                 }
             }
         }
-        if (packageName == null) {
+        if (packageName != null) {
+            mMediaController.getTransportControls().setRemoteControlClientBrowsedPlayer();
+            mBrowserDevice = device;
+        } else {
             if (DEBUG)
                 Log.v(TAG, "player not available for browse");
             setBrowsedPlayerRspNative(retError ,
                     0x0, 0x0, 0x0, 0x0,
                     null, getByteAddress(device));
-        } else {
-            String CurrentPath = deviceFeatures[deviceIndex].mCurrentPath;
-            String CurrentPathUid = deviceFeatures[deviceIndex].mCurrentPathUid;
-            Uri CurrentUri = deviceFeatures[deviceIndex].mMediaUri;
-            long folderUid = (CurrentPathUid != null) ? Long.valueOf(CurrentPathUid):(long)0;
-            retError = OPERATION_SUCCESSFUL;
-            folderPath.add(PATH_ROOT);
-
-            if (deviceFeatures[deviceIndex].mCurrentPath.equals(PATH_ROOT)) {
-                num_attributes = NUM_ROOT_ELEMENTS;
-                folder_depth = 0;
-
-            } else if (CurrentPath.equals(PATH_TITLES)) {
-                folderPath.add(CurrentPath);
-                num_attributes = getNumItems(PATH_TITLES,
-                   MediaStore.Audio.Media.TITLE, deviceIndex);
-
-            } else if (CurrentPath.equals(PATH_ALBUMS)) {
-                folderPath.add(CurrentPath);
-                if (CurrentPathUid == null) {
-                    num_attributes = getNumItems(PATH_ALBUMS,
-                        MediaStore.Audio.Media.ALBUM_ID, deviceIndex);
-                } else {
-                    Cursor cursor = null;
-                     try {
-                          cursor = mContext.getContentResolver().query(CurrentUri,
-                                  mCursorCols, MediaStore.Audio.Media.IS_MUSIC + "=1 AND " +
-                                  MediaStore.Audio.Media.ALBUM_ID + "=" + folderUid, null,
-                                  MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
-                          if (cursor != null) {
-                              num_attributes = cursor.getCount();
-                              String FolderName;
-                              cursor.moveToFirst();
-                              FolderName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
-                              Log.i(TAG,"ALBUM =" + FolderName);
-                              folderPath.add(FolderName);
-                          } else {
-                              Log.i(TAG, "Error: could not fetch the elements");
-                              retError = INTERNAL_ERROR;
-                              setBrowsedPlayerRspNative(retError,
-                                    0x0, 0x0, 0x0, 0x0,
-                                    null, getByteAddress(device));
-                         }
-                     }
-                     catch(Exception e) {
-                         Log.e(TAG, "Exception e" + e);
-                         retError =  INTERNAL_ERROR;
-                         setBrowsedPlayerRspNative(retError,
-                              0x0, 0x0, 0x0, 0x0,
-                              null, getByteAddress(device));
-                     } finally {
-                         if (cursor != null) {
-                             cursor.close();
-                         }
-                     }
-               }
-
-            } else if (CurrentPath.equals(PATH_ARTISTS)) {
-                folderPath.add(CurrentPath);
-                if (CurrentPathUid == null) {
-                    num_attributes = getNumItems(PATH_ARTISTS,
-                        MediaStore.Audio.Media.ARTIST_ID, deviceIndex);
-                } else {
-                    Cursor cursor = null;
-                     try {
-                          cursor = mContext.getContentResolver().query(CurrentUri,
-                                  mCursorCols, MediaStore.Audio.Media.IS_MUSIC + "=1 AND " +
-                                  MediaStore.Audio.Media.ARTIST_ID + "=" + folderUid, null,
-                                  MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
-                          if (cursor != null) {
-                              num_attributes = cursor.getCount();
-                              String FolderName;
-                              cursor.moveToFirst();
-                              FolderName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST));
-                              Log.i(TAG,"ARTIST =" + FolderName);
-                              folderPath.add(FolderName);
-                          } else {
-                              Log.i(TAG, "Error: could not fetch the elements");
-                              retError = INTERNAL_ERROR;
-                              setBrowsedPlayerRspNative(retError,
-                                    0x0, 0x0, 0x0, 0x0,
-                                    null, getByteAddress(device));
-                         }
-                     } catch(Exception e) {
-                        Log.e(TAG, "Exception e" + e);
-                        retError = INTERNAL_ERROR;
-                        setBrowsedPlayerRspNative(retError,
-                              0x0, 0x0, 0x0, 0x0,
-                              null, getByteAddress(device));
-                     } finally {
-                         if (cursor != null) {
-                             cursor.close();
-                         }
-                     }
-                }
-
-            } else if (CurrentPath.equals(PATH_PLAYLISTS)) {
-                folderPath.add(CurrentPath);
-                if (CurrentPathUid == null) {
-                    num_attributes = getNumPlaylistItems();
-                } else {
-                    Cursor cursor = null;
-                    String[] playlistMemberCols = new String[] {
-                        MediaStore.Audio.Playlists.Members._ID,
-                        MediaStore.Audio.Media.TITLE,
-                        MediaStore.Audio.Media.DATA,
-                        MediaStore.Audio.Media.ALBUM,
-                        MediaStore.Audio.Media.ARTIST,
-                        MediaStore.Audio.Media.DURATION,
-                        MediaStore.Audio.Playlists.Members.PLAY_ORDER,
-                        MediaStore.Audio.Playlists.Members.AUDIO_ID,
-                        MediaStore.Audio.Media.IS_MUSIC
-                    };
-                    try {
-                        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external",
-                                           folderUid);
-                        StringBuilder where = new StringBuilder();
-                        where.append(MediaStore.Audio.Media.TITLE + " != ''");
-                        cursor = mContext.getContentResolver().query(uri, playlistMemberCols,
-                                        where.toString(), null,
-                                        MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
-                        if (cursor != null) {
-                            num_attributes =  cursor.getCount();
-                        }
-                    } catch (Exception e) {
-                            Log.e(TAG, "Exception " + e);
-                            retError = INTERNAL_ERROR;
-                            setBrowsedPlayerRspNative(retError,
-                                  0x0, 0x0, 0x0, 0x0,
-                                  null, getByteAddress(device));
-                    } finally {
-                        if (cursor != null) {
-                            cursor.close();
-                        }
-                    }
-                    Cursor tempcursor = null;
-                    String[] cols = new String[] {
-                            MediaStore.Audio.Playlists._ID,
-                            MediaStore.Audio.Playlists.NAME
-                    };
-                    try {
-                        tempcursor = mContext.getContentResolver().query(
-                               MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-                               cols, MediaStore.Audio.Playlists._ID + "=" + folderUid,
-                               null, MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
-                        if (tempcursor != null) {
-                            tempcursor.moveToFirst();
-                            String FolderName;
-                            FolderName = tempcursor.getString(tempcursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
-                            Log.i(TAG,"PLAYLIST = " + FolderName);
-                            folderPath.add(FolderName);
-                        }
-                    } catch (Exception e) {
-                            Log.e(TAG, "Exception " + e);
-                            retError = INTERNAL_ERROR;
-                            setBrowsedPlayerRspNative(retError,
-                                  0x0, 0x0, 0x0, 0x0,
-                                  null, getByteAddress(device));
-                    } finally {
-                        if (tempcursor != null) {
-                            tempcursor.close();
-                        }
-                    }
-                }
-
-            } else {
-                folderPath.clear();
-                retError =  INTERNAL_ERROR;
-                num_attributes = 0;
-            }
-            folder_depth = folderPath.size() - 1;
-            String [] folderNames = new String[folderPath.size()];
-            folderNames = folderPath.toArray(folderNames);
-            Log.i(TAG,"SetBrowsedplayer for playerid = " + playerId + " and status code" + retError);
-            for (int i = 0; i < folderPath.size(); i++) {
-                Log.i(TAG,"folderNames[" + i + "] = " + folderNames[i]);
-            }
-            setBrowsedPlayerRspNative(retError ,
-                    0x0, (int)num_attributes, folder_depth, (int)CHAR_SET_UTF8,
-                    folderNames, getByteAddress(device));
-        }
-
-        if (retError == OPERATION_SUCCESSFUL) {
-            mBrowsedPlayerId = playerId;
-            Log.i(TAG,"Set Browsed player id = " + mBrowsedPlayerId);
-        } else {
-            mBrowsedPlayerId = INVALID_ADDRESSED_PLAYER_ID;
-            Log.i(TAG,"Set Browsed player failed with error = " + retError);
         }
     }
 
@@ -3315,8 +3127,7 @@ public final class Avrcp {
         }
         if (mMediaController != null) {
             mMediaController.getTransportControls().getRemoteControlClientNowPlayingEntries();
-            mCachedRequest = new CachedRequest((long)0, (long)0, (byte)0, null, (int)0, false,
-                                               (long)0, (byte)0, null, false);
+            mCachedRequest = new CachedRequest((long)0, (long)0, (byte)0, null, (int)0, false);
         } else {
             Log.e(TAG, "processGetNowPlayingTotalItems fails: mMediaController is null");
             getTotalNumberOfItemsRspNative((byte)INTERNAL_ERROR, virtualFileTotalItems,
@@ -3553,42 +3364,9 @@ public final class Avrcp {
                     MediaStore.Audio.Media.IS_PODCAST,
                     MediaStore.Audio.Media.BOOKMARK
     };
-    private void processGetItemAttrInternal(byte scope, long uid, byte numAttr, int[] attrs,
-                int size, String deviceAddress) {
-        boolean cachereq = false;
-        Log.v(TAG,"processGetItemAttrInternal uid = " + uid);
 
-        for (int i = 0; i < numAttr; i++) {
-            if (attrs[i] == MEDIA_ATTR_TRACK_NUM ||
-                attrs[i] == MEDIA_ATTR_NUM_TRACKS)
-                cachereq = true;
-        }
-        if (mMediaController != null && scope == SCOPE_NOW_PLAYING && cachereq) {
-            Log.v(TAG,"scope now playing, caching req");
-            mMediaController.getTransportControls().getRemoteControlClientNowPlayingEntries();
-            mCachedRequest = new CachedRequest((long)0, (long)0, numAttr, attrs, size, false,
-                                               uid, scope, deviceAddress, true);
-        }
-        else
-            processGetItemAttr(scope, uid, numAttr, attrs, size, deviceAddress, null);
-    }
-    private void processGetItemAttrdummy(long [] playlist) {
-        byte scope = mCachedRequest.mScope;
-        long uid = mCachedRequest.mUid;
-        byte numAttr = mCachedRequest.mAttrCnt;
-        int[] attrs = new int[numAttr];
-        int size = mCachedRequest.mSize;
-        String deviceAddress = mCachedRequest.mDeviceAddress;
-        for (int i = 0; i < numAttr; ++i)
-             attrs[i] = mCachedRequest.mAttrList.get(i).intValue();
-
-        Log.v(TAG,"processGetItemAttrdummy");
-        processGetItemAttr(scope, uid, numAttr, attrs, size, deviceAddress, playlist);
-        mCachedRequest.mIsGetItemAttr = false;
-        //mCachedGetItemAttrReq = null;
-    }
     private void processGetItemAttr(byte scope, long uid, byte numAttr, int[] attrs,
-                int size, String deviceAddress, long[] playlist) {
+                int size, String deviceAddress) {
         if (DEBUG)
             Log.v(TAG, "processGetItemAttr: scope: " + scope + " uid:" + uid +
                     " numAttr:" + numAttr + " size: " + size);
@@ -3630,31 +3408,6 @@ public final class Avrcp {
                                     cursor, attrs[i], deviceIndex);
                             Log.i(TAG, "textArray[" + i + "] = " + textArray[i]);
                             validAttrib ++;
-                        }
-                    }
-                    if (scope == SCOPE_NOW_PLAYING && playlist != null) {
-                        long arraylength = playlist.length;
-                        Log.i(TAG,"arraylength = " + arraylength);
-                        for (int i = 0; i < numAttr; ++i) {
-                             if (attrs[i] == MEDIA_ATTR_NUM_TRACKS)
-                                 textArray[i] = String.valueOf(arraylength);
-                             if (attrs[i] == MEDIA_ATTR_TRACK_NUM) {
-                                 for (int j = 0; j < playlist.length; ++j) {
-                                      cursor = mContext.getContentResolver().query(
-                                               deviceFeatures[deviceIndex].mMediaUri, mCursorCols,
-                                               MediaStore.Audio.Media.IS_MUSIC + "=1 AND _id=" +
-                                               playlist[j], null, null);
-                                      if (cursor != null) {
-                                          cursor.moveToFirst();
-                                          long muid = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
-                                          Log.i(TAG,"uid = " + uid + "muid = " + muid);
-                                          if (muid == uid) {
-                                             textArray[i] = String.valueOf(j+1); //j starts from 0
-                                             break;
-                                         }
-                                     }
-                                 }
-                             }
                         }
                     }
                     getItemAttrRspNative(numAttr ,attrs ,
@@ -3875,15 +3628,6 @@ public final class Avrcp {
             for (int count = 0; count < (MAX_BROWSE_ITEM_TO_SEND * 8); count++) {
                 attValues[count] = "";
                 attIds[count] = 0;
-            }
-
-            if (!deviceFeatures[deviceIndex].isBrowsingSupported || mBrowsedPlayerId != 0) {
-                getFolderItemsRspNative((byte)INTERNAL_ERROR ,
-                        numItems, itemType, uid, type,
-                        playable, displayName, numAtt, attValues, attIds, size,
-                        getByteAddress(deviceFeatures[deviceIndex].mCurrentDevice));
-                Log.v(TAG, "Browsed player is yet not set");
-                return;
             }
 
             if (DEBUG)
@@ -4654,8 +4398,7 @@ public final class Avrcp {
                 }
             }
             mMediaController.getTransportControls().getRemoteControlClientNowPlayingEntries();
-            mCachedRequest = new CachedRequest(start, end, numAttr, attrs, size, true, (long)0,
-                                               (byte)0, null, false);
+            mCachedRequest = new CachedRequest(start, end, numAttr, attrs, size, true);
         }
     }
 
@@ -4887,34 +4630,12 @@ public final class Avrcp {
 
         try {
             TrackNumberRsp = Long.parseLong(mMediaAttributes.getString
-                                (MediaAttributes.ATTR_MEDIA_NUMBER));
-            if ((((deviceFeatures[deviceIndex].mFeatures & BTRC_FEAT_BROWSE) != 0) &&
-                (deviceFeatures[deviceIndex].mCurrentPath != PATH_INVALID)) ||
-                ((deviceFeatures[deviceIndex].mTrackChangedNT == NOTIFICATION_TYPE_INTERIM) &&
-                (((deviceFeatures[deviceIndex].mFeatures & BTRC_FEAT_BROWSE) != 0) &&
-                   deviceFeatures[deviceIndex].mCurrentPath == PATH_INVALID))) {
-                /* First time when media playback is resumed after AVRCP connection,
-                 * track changed rsp is not sent, So send track num for interim resp
-                 * if browse channel is not connected yet to avoid metadata not getting
-                 * updated properly.
-                */
-                Log.e(TAG,"sendTrackChangedRsp: device supports browsing");
-                if (mMediaPlayers.size() > 0) {
-                    final Iterator<MediaPlayerInfo> rccIterator = mMediaPlayers.iterator();
-                    while (rccIterator.hasNext()) {
-                         final MediaPlayerInfo di = rccIterator.next();
-                         if (di.IsPlayerBrowsable() && (di.GetPlayerFocus() == true)) {
-                             TrackNumberRsp = Long.parseLong(mMediaAttributes.getString
-                                                    (MediaAttributes.ATTR_TRACK_NUM));
-                             Log.e(TAG,"sendTrackChangedRsp: in focus tracnum = " + TrackNumberRsp);
-                         }
-                    }
-                }
-            }
+                                    (MediaAttributes.ATTR_MEDIA_NUMBER));
         } catch (Exception e) {
             Log.e(TAG, "sendTrackChangedRsp Exception e" + e);
             TrackNumberRsp = -1;
         }
+
         /* track is stored in big endian format */
         for (int i = 0; i < TRACK_ID_SIZE; ++i) {
             track[i] = (byte) (TrackNumberRsp >> (56 - 8 * i));
@@ -5032,17 +4753,16 @@ public final class Avrcp {
         int playStatus = PLAYSTATUS_ERROR;
         switch (state.getState()) {
             case PlaybackState.STATE_PLAYING:
+            case PlaybackState.STATE_BUFFERING:
                 playStatus = PLAYSTATUS_PLAYING;
                 break;
 
             case PlaybackState.STATE_STOPPED:
-            case PlaybackState.STATE_CONNECTING:
             case PlaybackState.STATE_NONE:
                 playStatus = PLAYSTATUS_STOPPED;
                 break;
 
             case PlaybackState.STATE_PAUSED:
-            case PlaybackState.STATE_BUFFERING:
                 playStatus = PLAYSTATUS_PAUSED;
                 break;
 
@@ -5082,14 +4802,6 @@ public final class Avrcp {
             return;
         }
         long playPositionMs = getPlayPosition(deviceFeatures[i].mCurrentDevice);
-        int currPlayStatus = convertPlayStateToPlayStatus(deviceFeatures[i].mCurrentPlayState);
-
-        // Some remote devices are going to bad state when sending play position
-        // as ffff for non-playing state
-        if (playPositionMs == -1L && currPlayStatus != PLAYSTATUS_PLAYING) {
-           if (DEBUG) Log.d(TAG, " Don't send invalid play position notification for non-playing state");
-           return;
-        }
 
         // mNextPosMs is set to -1 when the previous position was invalid
         // so this will be true if the new position is valid & old was invalid.
@@ -5134,8 +4846,13 @@ public final class Avrcp {
      * returns true only when both playing devices support absolute volume
      */
     public boolean isAbsoluteVolumeSupported() {
+        if (mA2dpService.isMulticastFeatureEnabled() &&
+                areMultipleDevicesConnected()) {
+            if (DEBUG) Log.v(TAG, "isAbsoluteVolumeSupported : Absolute volume false multicast is enabled & multiple devices are connected");
+            return false;
+        }
         List<Byte> absVolumeSupported = new ArrayList<Byte>();
-        for (int i = 0; i < maxAvrcpConnections; i++ ) {
+        for (int i = 0; i < maxAvrcpConnections; i++) {
             if (deviceFeatures[i].mCurrentDevice != null) {
                 // add 1 in byte list if absolute volume is supported
                 // add 0 in byte list if absolute volume not supported
@@ -5537,6 +5254,7 @@ public final class Avrcp {
         for (int i = 0; i < maxAvrcpConnections; i++ ) {
             if (deviceFeatures[i].mCurrentDevice == null) {
                 deviceFeatures[i].mCurrentDevice = device;
+                deviceFeatures[i].isActiveDevice = true;
                 /*Playstate is explicitly updated here to take care of cases
                         where play state update is missed because of that happening
                         even before Avrcp connects*/
@@ -5559,7 +5277,17 @@ public final class Avrcp {
                 Log.i(TAG,"play status updated on Avrcp connection as: " +
                                                     deviceFeatures[i].mCurrentPlayState);
                 Log.i(TAG,"device added at " + i);
+                Log.i(TAG,"Active device set to true at index =  " + i);
                 break;
+            }
+        }
+
+        for (int i = 0; i < maxAvrcpConnections; i++ ) {
+            if (deviceFeatures[i].mCurrentDevice != null &&
+                    !(deviceFeatures[i].mCurrentDevice.equals(device)) &&
+                    deviceFeatures[i].isActiveDevice) {
+                deviceFeatures[i].isActiveDevice = false;
+                Log.i(TAG,"Active device set to false at index =  " + i);
             }
         }
     }
@@ -5614,6 +5342,7 @@ public final class Avrcp {
         deviceFeatures[index].mMediaUri = Uri.EMPTY;
         deviceFeatures[index].isMusicAppResponsePending = false;
         deviceFeatures[index].isBrowsingSupported = false;
+        deviceFeatures[index].isActiveDevice = false;
         deviceFeatures[index].isAbsoluteVolumeSupportingDevice = false;
     }
     /**
@@ -5624,11 +5353,11 @@ public final class Avrcp {
             if (deviceFeatures[i].mCurrentDevice !=null &&
                     deviceFeatures[i].mCurrentDevice.equals(device)) {
                 // initiate cleanup for all variables;
-                Message msg = mHandler.obtainMessage(MESSAGE_DEVICE_RC_CLEANUP, STACK_CLEANUP,
-                       0, device);
-                mHandler.sendMessage(msg);
+
                 Log.i(TAG,"Device removed is " + device);
                 Log.i(TAG,"removed at " + i);
+                deviceFeatures[i].mCurrentDevice = null;
+                cleanupDeviceFeaturesIndex(i);
                 /* device is disconnect and some response form music app was
                  * pending for this device clear it.*/
                 if (mBrowserDevice != null &&
@@ -5636,7 +5365,16 @@ public final class Avrcp {
                     Log.i(TAG,"clearing mBrowserDevice on disconnect");
                     mBrowserDevice = null;
                 }
-                break;
+            }
+            /* Multicast scenario both abs vol supported
+               Active device got disconnected so make other
+               device which is left supporting absolute
+               volume as active device
+            */
+            if (deviceFeatures[i].mCurrentDevice != null &&
+                    !(deviceFeatures[i].mCurrentDevice.equals(device))) {
+                deviceFeatures[i].isActiveDevice = true;
+                Log.i(TAG,"setAvrcpDisconnectedDevice : Active device changed to index = " + i);
             }
         }
         mAudioManager.avrcpSupportsAbsoluteVolume(device.getAddress(),
