@@ -113,5 +113,6 @@
   <!-- Used to run Bluetooth.apk in another process if needed -->
   <!-- Do not translate. android:sharedUserId string of this application. -->
   <!-- Do not translate. android:process of this application. -->
+  <string name="bluetooth_map_settings_save">Guardar</string>
   <string name="bluetooth_map_settings_cancel">Encaboxar</string>
 </resources>
