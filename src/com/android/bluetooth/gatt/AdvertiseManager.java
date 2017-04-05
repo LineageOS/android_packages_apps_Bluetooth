@@ -157,7 +157,7 @@ class AdvertiseManager {
         }
     }
 
-    private AdvertiseClient getAdvertiseClient(int clientIf) {
+    public AdvertiseClient getAdvertiseClient(int clientIf) {
         for (AdvertiseClient client : mAdvertiseClients) {
             if (client.clientIf == clientIf) {
                 return client;
@@ -316,6 +316,9 @@ class AdvertiseManager {
                 return false;
             }
             setAdvertisingData(client, client.advertiseData, false);
+            if (client.scanResponse != null) {
+                setAdvertisingData(client, client.scanResponse, true);
+            }
             return true;
         }
 

@@ -1435,6 +1435,12 @@ public class GattService extends ProfileService {
 
         if (DBG) Log.d(TAG, "unregisterClient() - clientIf=" + clientIf);
         mClientMap.remove(clientIf);
+
+        AdvertiseClient client = mAdvertiseManager.getAdvertiseClient(clientIf);
+        if (client != null && !client.appDied) {
+            stopMultiAdvertising(client);
+        }
+
         gattClientUnregisterAppNative(clientIf);
     }
 
