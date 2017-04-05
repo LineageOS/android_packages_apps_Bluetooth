@@ -207,14 +207,6 @@ public class BluetoothOppUtility {
             return;
         }
 
-        CustomIntent activityIntent = new CustomIntent(Intent.ACTION_VIEW);
-        if ("application/vnd.android.package-archive".equals(mimetype)) {
-            // PackageInstaller doesn't like content URIs, so open file
-            activityIntent.setDataAndType(Uri.fromFile(f), mimetype);
-            context.startActivity(activityIntent);
-            return;
-        }
-
         Uri path = FileProvider.getUriForFile(context,
                        "com.google.android.bluetooth.fileprovider", f);
         // If there is no scheme, then it must be a file
@@ -223,6 +215,7 @@ public class BluetoothOppUtility {
         }
 
         if (isRecognizedFileType(context, path, mimetype)) {
+            CustomIntent activityIntent = new CustomIntent(Intent.ACTION_VIEW);
             activityIntent.setDataAndTypeAndNormalize(path, mimetype);
 
             List<ResolveInfo> resInfoList = context.getPackageManager()
