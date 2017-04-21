@@ -112,8 +112,7 @@ public class BluetoothOppLauncherActivity extends Activity {
                     Thread t = new Thread(new Runnable() {
                         public void run() {
                             BluetoothOppManager.getInstance(BluetoothOppLauncherActivity.this)
-                                .saveSendingFileInfo(type,stream.toString(),
-                                    false /* isHandover */, true /* fromExternal */);
+                                .saveSendingFileInfo(type,stream.toString(), false);
                             //Done getting file info..Launch device picker and finish this activity
                             launchDevicePicker();
                             finish();
@@ -129,8 +128,7 @@ public class BluetoothOppLauncherActivity extends Activity {
                         Thread t = new Thread(new Runnable() {
                             public void run() {
                                 BluetoothOppManager.getInstance(BluetoothOppLauncherActivity.this)
-                                    .saveSendingFileInfo(type,fileUri.toString(),
-                                        false /* isHandover */, false /* fromExternal */);
+                                    .saveSendingFileInfo(type,fileUri.toString(), false);
                                 //Done getting file info..Launch device picker
                                 //and finish this activity
                                 launchDevicePicker();
@@ -158,8 +156,7 @@ public class BluetoothOppLauncherActivity extends Activity {
                     Thread t = new Thread(new Runnable() {
                         public void run() {
                             BluetoothOppManager.getInstance(BluetoothOppLauncherActivity.this)
-                                .saveSendingFileInfo(mimeType,uris,
-                                    false /* isHandover */, true /* fromExternal */);
+                                .saveSendingFileInfo(mimeType,uris, false);
                             //Done getting file info..Launch device picker
                             //and finish this activity
                             launchDevicePicker();
