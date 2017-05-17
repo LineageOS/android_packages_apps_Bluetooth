@@ -16,6 +16,11 @@
 package com.android.bluetooth.gatt;
 
 import android.bluetooth.le.ScanSettings;
+import android.os.Binder;
+import android.os.WorkSource;
+import android.os.ServiceManager;
+import android.os.RemoteException;
+import com.android.internal.app.IBatteryStats;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,6 +42,9 @@ import com.android.bluetooth.btservice.BluetoothProto;
 
     /* GattService is needed to add scan event protos to be dumped later */
     GattService gattService;
+
+    /* Battery stats is used to keep track of scans and result stats */
+    IBatteryStats batteryStats;
 
     class LastScan {
         long duration;
@@ -70,6 +78,7 @@ import com.android.bluetooth.btservice.BluetoothProto;
     static final int SCAN_TIMEOUT_MS = 30 * 60 * 1000;
 
     String appName;
+    WorkSource workSource; // Used for BatteryStats
     int scansStarted = 0;
     int scansStopped = 0;
     boolean isScanning = false;
@@ -82,15 +91,33 @@ import com.android.bluetooth.btservice.BluetoothProto;
     long stopTime = 0;
     int results = 0;
 
-    public AppScanStats(String name, ContextMap map, GattService service) {
+    public AppScanStats(String name, WorkSource source, ContextMap map, GattService service) {
         appName = name;
         contextMap = map;
         gattService = service;
+        batteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService("batterystats"));
+
+        if (source == null) {
+            // Bill the caller if the work source isn't passed through
+            source = new WorkSource(Binder.getCallingUid(), appName);
+        }
+        workSource = source;
     }
 
     synchronized void addResult() {
-        if (!lastScans.isEmpty())
-            lastScans.get(lastScans.size() - 1).results++;
+        if (!lastScans.isEmpty()) {
+            int batteryStatsResults = ++lastScans.get(lastScans.size() - 1).results;
+
+            // Only update battery stats after receiving 100 new results in order
+            // to lower the cost of the binder transaction
+            if (batteryStatsResults % 100 == 0) {
+                try {
+                    batteryStats.noteBleScanResults(workSource, 100);
+                } catch (RemoteException e) {
+                    /* ignore */
+                }
+            }
+        }
 
         results++;
     }
@@ -116,6 +143,12 @@ import com.android.bluetooth.btservice.BluetoothProto;
         scanEvent.setEventTimeMillis(System.currentTimeMillis());
         scanEvent.setInitiator(truncateAppName(appName));
         gattService.addScanEvent(scanEvent);
+
+        try {
+            batteryStats.noteBleScanStarted(workSource);
+        } catch (RemoteException e) {
+            /* ignore */
+        }
     }
 
     synchronized void recordScanStop() {
@@ -144,6 +177,15 @@ import com.android.bluetooth.btservice.BluetoothProto;
         scanEvent.setEventTimeMillis(System.currentTimeMillis());
         scanEvent.setInitiator(truncateAppName(appName));
         gattService.addScanEvent(scanEvent);
+
+        try {
+            // Inform battery stats of any results it might be missing on
+            // scan stop
+            batteryStats.noteBleScanResults(workSource, curr.results % 100);
+            batteryStats.noteBleScanStopped(workSource);
+        } catch (RemoteException e) {
+            /* ignore */
+        }
     }
 
     synchronized void setScanTimeout() {
