@@ -87,7 +87,7 @@ import android.os.SystemProperties;
  * support metadata, play status and event notification
  */
 public final class Avrcp {
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String TAG = "Avrcp";
     private static final String ABSOLUTE_VOLUME_BLACKLIST = "absolute_volume_blacklist";
 
@@ -5306,6 +5306,10 @@ public final class Avrcp {
 
     private int getIndexForDevice(BluetoothDevice device) {
         for (int i = 0; i < maxAvrcpConnections; i++) {
+            if (deviceFeatures[i].mCurrentDevice != null) {
+                Log.e(TAG, "Device " + i +
+                        " (" + deviceFeatures[i].mCurrentDevice.getAddress() + ") is not null");
+            }
             if (deviceFeatures[i].mCurrentDevice != null &&
                     deviceFeatures[i].mCurrentDevice.equals(device)) {
                 Log.i(TAG,"device found at index " + i);
@@ -5317,7 +5321,10 @@ public final class Avrcp {
     }
 
     public void cleanupDeviceFeaturesIndex (int index) {
-        Log.i(TAG,"cleanupDeviceFeaturesIndex index:" + index);
+        Log.i(TAG,"cleanupDeviceFeaturesIndex index:" + index + " device=" +
+                deviceFeatures[index].mCurrentDevice != null ?
+                        deviceFeatures[index].mCurrentDevice.getAddress() :
+                        "null");
         deviceFeatures[index].mCurrentDevice = null;
         deviceFeatures[index].mCurrentPlayState = new PlaybackState.Builder().setState(PlaybackState.STATE_NONE, -1L, 0.0f).build();;
         deviceFeatures[index].mPlayStatusChangedNT = NOTIFICATION_TYPE_CHANGED;
@@ -5356,7 +5363,6 @@ public final class Avrcp {
 
                 Log.i(TAG,"Device removed is " + device);
                 Log.i(TAG,"removed at " + i);
-                deviceFeatures[i].mCurrentDevice = null;
                 cleanupDeviceFeaturesIndex(i);
                 /* device is disconnect and some response form music app was
                  * pending for this device clear it.*/

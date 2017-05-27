@@ -1531,7 +1531,7 @@ final class A2dpStateMachine extends StateMachine {
         }
 
         private void processMultiA2dpDisconnected(BluetoothDevice device) {
-            log("Enter MultiConnectionPending processMultiA2dpDisconnected() ");
+            log("Enter MultiConnectionPending processMultiA2dpDisconnected() " + device.getAddress());
             log("processMultiA2dpDisconnected state: processMultiA2dpDisconnected");
 
             if (mCurrentDevice != null && mCurrentDevice.equals(device)) {
@@ -1550,7 +1550,7 @@ final class A2dpStateMachine extends StateMachine {
     }
 
     int getConnectionState(BluetoothDevice device) {
-        log("Enter getConnectionState() ");
+        log("Enter getConnectionState() " + device.getAddress());
         if (getCurrentState() == mDisconnected) {
             log( "currentState is Disconnected");
             return BluetoothProfile.STATE_DISCONNECTED;
@@ -1742,7 +1742,7 @@ final class A2dpStateMachine extends StateMachine {
     }
 
     private void broadcastReconfigureA2dp(BluetoothDevice device) {
-        log("broadcastReconfigureA2dp");
+        log("broadcastReconfigureA2dp " + device.getAddress());
         mAudioManager.setParameters("reconfigA2dp=true");
     }
 
@@ -1751,7 +1751,7 @@ final class A2dpStateMachine extends StateMachine {
     }
 
     private void onConnectionStateChanged(int state, byte[] address) {
-        log("Enter onConnectionStateChanged() ");
+        log("Enter onConnectionStateChanged() " + Utils.getAddressStringFromByte(address));
         StackEvent event = new StackEvent(EVENT_TYPE_CONNECTION_STATE_CHANGED);
         event.valueInt = state;
         event.device = getDevice(address);
@@ -1760,7 +1760,7 @@ final class A2dpStateMachine extends StateMachine {
     }
 
     private void onAudioStateChanged(int state, byte[] address) {
-        log("Enter onAudioStateChanged() ");
+        log("Enter onAudioStateChanged() " + Utils.getAddressStringFromByte(address));
         StackEvent event = new StackEvent(EVENT_TYPE_AUDIO_STATE_CHANGED);
         event.valueInt = state;
         event.device = getDevice(address);
@@ -1769,7 +1769,7 @@ final class A2dpStateMachine extends StateMachine {
     }
 
     private void onCheckConnectionPriority(byte[] address) {
-        log("Enter onCheckConnectionPriority() ");
+        log("Enter onCheckConnectionPriority() " + Utils.getAddressStringFromByte(address));
         BluetoothDevice device = getDevice(address);
         logw(" device " + device + " okToConnect " + okToConnect(device));
         if (okToConnect(device)) {
