@@ -4635,7 +4635,7 @@ public final class Avrcp {
                         getByteAddress(deviceFeatures[deviceIndex].mCurrentDevice));
                 Log.v(TAG, "GetFolderItems fail as player is not browsable");
             }
-        } else if (scope == SCOPE_NOW_PLAYING) {
+        } else if (mMediaController != null && scope == SCOPE_NOW_PLAYING) {
             if (mMediaPlayers.size() > 0) {
                 final Iterator<MediaPlayerInfo> rccIterator = mMediaPlayers.iterator();
                 while (rccIterator.hasNext()) {
