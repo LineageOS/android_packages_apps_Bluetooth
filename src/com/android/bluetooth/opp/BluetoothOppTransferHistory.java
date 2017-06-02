@@ -62,7 +62,7 @@ public class BluetoothOppTransferHistory extends Activity implements
         View.OnCreateContextMenuListener, OnItemClickListener {
     private static final String TAG = "BluetoothOppTransferHistory";
 
-    private static final boolean V = Log.isLoggable(Constants.TAG, Log.VERBOSE);
+    private static final boolean V = Constants.VERBOSE;
 
     private ListView mListView;
 
@@ -171,10 +171,6 @@ public class BluetoothOppTransferHistory extends Activity implements
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        if (mTransferCursor.getCount() == 0) {
-            Log.i(TAG," History is already Clear - Not clearing again ");
-            return true;
-        }
         mTransferCursor.moveToPosition(mContextMenuPosition);
         switch (item.getItemId()) {
             case R.id.transfer_menu_open:
@@ -295,6 +291,7 @@ public class BluetoothOppTransferHistory extends Activity implements
         if (transInfo.mDirection == BluetoothShare.DIRECTION_INBOUND
                 && BluetoothShare.isStatusSuccess(transInfo.mStatus)) {
             // if received file successfully, open this file
+            BluetoothOppUtility.updateVisibilityToHidden(this, contentUri);
             BluetoothOppUtility.openReceivedFile(this, transInfo.mFileName, transInfo.mFileType,
                     transInfo.mTimeStamp, contentUri);
         } else {

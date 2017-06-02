@@ -104,9 +104,6 @@ public class HfpClientConnectionService extends ConnectionService {
                         List<BluetoothHeadsetClientCall> calls =
                                 mHeadsetProfile.getCurrentCalls(mDevice);
                         Log.d(TAG, "Got calls " + calls);
-                        if (calls == null) {
-                            return;
-                        }
                         for (BluetoothHeadsetClientCall call : calls) {
                             handleCall(call);
                         }
@@ -333,7 +330,6 @@ public class HfpClientConnectionService extends ConnectionService {
         List<Connection> held = new ArrayList<>();
         List<Connection> active = new ArrayList<>();
         List<Connection> group = new ArrayList<>();
-        Log.d(TAG, "Enter updateConferenceableConnections");
         for (HfpClientConnection connection : all) {
             switch (connection.getState()) {
                 case Connection.STATE_ACTIVE:
@@ -397,11 +393,9 @@ public class HfpClientConnectionService extends ConnectionService {
                 mConference.setConferenceableConnections(notConferenced);
             }
         }
-        Log.d(TAG, "Exit updateConferenceableConnections");
     }
 
     private void disconnectAll() {
-        Log.d(TAG, "Enter disconnectAll");
         for (HfpClientConnection connection : mConnections.values()) {
             connection.onHfpDisconnected();
         }
@@ -409,7 +403,6 @@ public class HfpClientConnectionService extends ConnectionService {
             mConference.destroy();
             mConference = null;
         }
-        Log.d(TAG, "Exit disconnectAll");
     }
 
     private BluetoothDevice getDevice(PhoneAccountHandle handle) {

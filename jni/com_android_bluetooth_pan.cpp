@@ -59,10 +59,6 @@ static bool checkCallbackThread() {
 static void control_state_callback(btpan_control_state_t state, int local_role, bt_status_t error,
                 const char* ifname) {
     debug("state:%d, local_role:%d, ifname:%s", state, local_role, ifname);
-    if (mCallbacksObj == NULL) {
-        error("Callbacks Obj is NULL: '%s", __FUNCTION__);
-        return;
-    }
     CHECK_CALLBACK_ENV
     jstring js_ifname = sCallbackEnv->NewStringUTF(ifname);
     sCallbackEnv->CallVoidMethod(mCallbacksObj, method_onControlStateChanged, (jint)local_role, (jint)state,
@@ -74,10 +70,6 @@ static void connection_state_callback(btpan_connection_state_t state, bt_status_
                                       int local_role, int remote_role) {
     jbyteArray addr;
     debug("state:%d, local_role:%d, remote_role:%d", state, local_role, remote_role);
-    if (mCallbacksObj == NULL) {
-        error("Callbacks Obj is NULL: '%s", __FUNCTION__);
-        return;
-    }
     CHECK_CALLBACK_ENV
     addr = sCallbackEnv->NewByteArray(sizeof(bt_bdaddr_t));
     if (!addr) {

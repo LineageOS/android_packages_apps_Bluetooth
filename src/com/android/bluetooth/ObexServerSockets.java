@@ -87,20 +87,6 @@ public class ObexServerSockets {
 
     /**
      * Creates an RFCOMM {@link BluetoothServerSocket} and a L2CAP {@link BluetoothServerSocket}
-     * @param validator a reference to the {@link IObexConnectionHandler} object to call
-     *                  to validate an incoming connection.
-     * @param rfcommChannel fixed rfcomm channel number to listen on
-     * @param l2capPsm fixed l2cap psm to listen on
-     * @return a reference to a {@link ObexServerSockets} object instance.
-     * @throws IOException if it occurs while creating the {@link BluetoothServerSocket}s.
-     */
-    public static ObexServerSockets createWithFixedChannels(IObexConnectionHandler validator,
-            int rfcommChannel, int l2capPsm) {
-        return create(validator, rfcommChannel, l2capPsm);
-    }
-
-    /**
-     * Creates an RFCOMM {@link BluetoothServerSocket} and a L2CAP {@link BluetoothServerSocket}
      * with specific l2cap and RFCOMM channel numbers. It is the responsibility of the caller to
      * ensure the numbers are free and can be used, e.g. by calling {@link #getL2capPsm()} and
      * {@link #getRfcommChannel()} in {@link ObexServerSockets}.
@@ -128,10 +114,10 @@ public class ObexServerSockets {
         for (int i = 0; i < CREATE_RETRY_TIME; i++) {
             initSocketOK = true;
             try {
-                if(rfcommSocket == null && rfcommChannel != -1) {
+                if(rfcommSocket == null) {
                     rfcommSocket = bt.listenUsingRfcommOn(rfcommChannel);
                 }
-                if(l2capSocket == null && l2capPsm != -1) {
+                if(l2capSocket == null) {
                     l2capSocket = bt.listenUsingL2capOn(l2capPsm);
                 }
             } catch (IOException e) {
@@ -195,15 +181,11 @@ public class ObexServerSockets {
         if(D) Log.d(TAG,"startAccept()");
         prepareForNewConnect();
 
-        if (mRfcommSocket != null) {
-            mRfcommThread = new SocketAcceptThread(mRfcommSocket);
-            mRfcommThread.start();
-        }
+        mRfcommThread = new SocketAcceptThread(mRfcommSocket);
+        mRfcommThread.start();
 
-        if (mL2capSocket != null) {
-            mL2capThread = new SocketAcceptThread(mL2capSocket);
-            mL2capThread.start();
-        }
+        mL2capThread = new SocketAcceptThread(mL2capSocket);
+        mL2capThread.start();
     }
 
     /**
@@ -239,15 +221,9 @@ public class ObexServerSockets {
      * Signal to the {@link IObexConnectionHandler} that an error have occurred.
      */
     synchronized private void onAcceptFailed() {
-        //Donot block for Accept thread cleanup.
-        //Fix Handler Thread block during BT Turn OFF.
+        Log.w(TAG,"onAcceptFailed() calling shutdown...");
+        mConHandler.onAcceptFailed();
         shutdown(false);
-        BluetoothAdapter mAdapter = BluetoothAdapter.getDefaultAdapter();
-        if((mAdapter != null) && (mAdapter.getState() == BluetoothAdapter.STATE_ON)) {
-            Log.d(TAG,"onAcceptFailed() calling shutdown...");
-            mConHandler.onAcceptFailed();
-        }
-
     }
 
     /**

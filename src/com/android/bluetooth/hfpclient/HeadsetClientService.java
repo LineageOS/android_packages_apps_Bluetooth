@@ -31,7 +31,6 @@ import android.os.Bundle;
 import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
-import com.android.bluetooth.a2dp.A2dpService;
 import com.android.bluetooth.btservice.ProfileService;
 import com.android.bluetooth.hfpclient.connserv.HfpClientConnectionService;
 import com.android.bluetooth.Utils;
@@ -66,7 +65,6 @@ public class HeadsetClientService extends ProfileService {
 
     @Override
     protected boolean start() {
-        Log.d(TAG, "start");
         mStateMachine = HeadsetClientStateMachine.make(this);
         IntentFilter filter = new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION);
         filter.addAction(BluetoothDevice.ACTION_CONNECTION_ACCESS_REPLY);
@@ -87,7 +85,6 @@ public class HeadsetClientService extends ProfileService {
 
     @Override
     protected boolean stop() {
-        Log.d(TAG, "stop");
         try {
             unregisterReceiver(mBroadcastReceiver);
         } catch (Exception e) {
@@ -107,7 +104,6 @@ public class HeadsetClientService extends ProfileService {
 
     @Override
     protected boolean cleanup() {
-        Log.d(TAG, "cleanup");
         if (mStateMachine != null) {
             mStateMachine.cleanup();
         }
@@ -129,7 +125,7 @@ public class HeadsetClientService extends ProfileService {
                 Log.d(TAG, "Volume changed for stream: " +
                     intent.getExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE));
                 int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
-                if (streamType == AudioManager.STREAM_BLUETOOTH_SCO) {
+                if (streamType == AudioManager.STREAM_VOICE_CALL) {
                     int streamValue = intent
                             .getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, -1);
                     int streamPrevValue = intent.getIntExtra(
@@ -178,7 +174,6 @@ public class HeadsetClientService extends ProfileService {
         @Override
         public boolean connect(BluetoothDevice device) {
             HeadsetClientService service = getService();
-            Log.d(TAG, "connect");
             if (service == null) {
                 return false;
             }
@@ -188,7 +183,6 @@ public class HeadsetClientService extends ProfileService {
         @Override
         public boolean disconnect(BluetoothDevice device) {
             HeadsetClientService service = getService();
-            Log.d(TAG, "disconnect");
             if (service == null) {
                 return false;
             }
@@ -488,20 +482,11 @@ public class HeadsetClientService extends ProfileService {
     }
 
     public boolean connect(BluetoothDevice device) {
-        Log.d(TAG, "Enter connect");
         enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                 "Need BLUETOOTH ADMIN permission");
 
         if (getPriority(device) == BluetoothProfile.PRIORITY_OFF) {
             Log.w(TAG, "Connection not allowed: <" + device.getAddress() + "> is PRIORITY_OFF");
-            return false;
-        }
-
-        A2dpService a2dpService = A2dpService.getA2dpService();
-        //do not allow new connections with active multicast
-        if (a2dpService != null &&
-                (a2dpService.isMulticastOngoing(device))) {
-            Log.i(TAG,"A2dp Multicast is Ongoing, ignore Connection Request");
             return false;
         }
 
@@ -513,12 +498,10 @@ public class HeadsetClientService extends ProfileService {
         }
 
         mStateMachine.sendMessage(HeadsetClientStateMachine.CONNECT, device);
-        Log.d(TAG, "Exit connect");
         return true;
     }
 
     boolean disconnect(BluetoothDevice device) {
-        Log.d(TAG, "Enter disconnect");
         enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                 "Need BLUETOOTH ADMIN permission");
         int connectionState = mStateMachine.getConnectionState(device);
@@ -528,7 +511,6 @@ public class HeadsetClientService extends ProfileService {
         }
 
         mStateMachine.sendMessage(HeadsetClientStateMachine.DISCONNECT, device);
-        Log.d(TAG, "Exit disconnect");
         return true;
     }
 
@@ -537,7 +519,7 @@ public class HeadsetClientService extends ProfileService {
         return mStateMachine.getConnectedDevices();
     }
 
-    public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
+    private List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return mStateMachine.getDevicesMatchingConnectionStates(states);
     }
@@ -549,7 +531,6 @@ public class HeadsetClientService extends ProfileService {
 
     // TODO Should new setting for HeadsetClient priority be created?
     public boolean setPriority(BluetoothDevice device, int priority) {
-        Log.d(TAG, "Enter setPriority");
         enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                 "Need BLUETOOTH_ADMIN permission");
         Settings.Global.putInt(getContentResolver(),
@@ -558,23 +539,19 @@ public class HeadsetClientService extends ProfileService {
         if (DBG) {
             Log.d(TAG, "Saved priority " + device + " = " + priority);
         }
-        Log.d(TAG, "Exit setPriority");
         return true;
     }
 
     public int getPriority(BluetoothDevice device) {
-        Log.d(TAG, "Enter getPriority");
         enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                 "Need BLUETOOTH_ADMIN permission");
         int priority = Settings.Global.getInt(getContentResolver(),
                 Settings.Global.getBluetoothHeadsetPriorityKey(device.getAddress()),
                 BluetoothProfile.PRIORITY_UNDEFINED);
-        Log.d(TAG, "Exit getPriority");
         return priority;
     }
 
     boolean startVoiceRecognition(BluetoothDevice device) {
-        Log.d(TAG, "Enter startVoiceRecognition");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED &&
@@ -582,12 +559,10 @@ public class HeadsetClientService extends ProfileService {
             return false;
         }
         mStateMachine.sendMessage(HeadsetClientStateMachine.VOICE_RECOGNITION_START);
-        Log.d(TAG, "Exit startVoiceRecognition");
         return true;
     }
 
     boolean stopVoiceRecognition(BluetoothDevice device) {
-        Log.d(TAG, "Enter stopVoiceRecognition");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         // It seem that we really need to check the AudioOn state.
         // But since we allow startVoiceRecognition in STATE_CONNECTED and
@@ -598,7 +573,6 @@ public class HeadsetClientService extends ProfileService {
             return false;
         }
         mStateMachine.sendMessage(HeadsetClientStateMachine.VOICE_RECOGNITION_STOP);
-        Log.d(TAG, "Exit stopVoiceRecognition");
         return true;
     }
 
@@ -625,7 +599,6 @@ public class HeadsetClientService extends ProfileService {
     }
 
     boolean connectAudio() {
-        Log.d(TAG, "Enter connectAudio");
         enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM, "Need BLUETOOTH_ADMIN permission");
         if (!mStateMachine.isConnected()) {
             return false;
@@ -634,23 +607,19 @@ public class HeadsetClientService extends ProfileService {
             return false;
         }
         mStateMachine.sendMessage(HeadsetClientStateMachine.CONNECT_AUDIO);
-        Log.d(TAG, "Exit connectAudio");
         return true;
     }
 
     boolean disconnectAudio() {
-        Log.d(TAG, "Enter disconnectAudio");
         enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM, "Need BLUETOOTH_ADMIN permission");
         if (!mStateMachine.isAudioOn()) {
             return false;
         }
         mStateMachine.sendMessage(HeadsetClientStateMachine.DISCONNECT_AUDIO);
-        Log.d(TAG, "Exit disconnectAudio");
         return true;
     }
 
     boolean holdCall(BluetoothDevice device) {
-        Log.d(TAG, "Enter holdCall");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED &&
@@ -659,12 +628,10 @@ public class HeadsetClientService extends ProfileService {
         }
         Message msg = mStateMachine.obtainMessage(HeadsetClientStateMachine.HOLD_CALL);
         mStateMachine.sendMessage(msg);
-        Log.d(TAG, "Exit holdCall");
         return true;
     }
 
     boolean acceptCall(BluetoothDevice device, int flag) {
-        Log.d(TAG, "Enter acceptCall");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED &&
@@ -674,12 +641,10 @@ public class HeadsetClientService extends ProfileService {
         Message msg = mStateMachine.obtainMessage(HeadsetClientStateMachine.ACCEPT_CALL);
         msg.arg1 = flag;
         mStateMachine.sendMessage(msg);
-        Log.d(TAG, "Exit acceptCall");
         return true;
     }
 
     boolean rejectCall(BluetoothDevice device) {
-        Log.d(TAG, "Enter rejectCall");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED &&
@@ -689,12 +654,10 @@ public class HeadsetClientService extends ProfileService {
 
         Message msg = mStateMachine.obtainMessage(HeadsetClientStateMachine.REJECT_CALL);
         mStateMachine.sendMessage(msg);
-        Log.d(TAG, "Exit rejectCall");
         return true;
     }
 
     boolean terminateCall(BluetoothDevice device, int index) {
-        Log.d(TAG, "Enter terminateCall");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED &&
@@ -705,12 +668,10 @@ public class HeadsetClientService extends ProfileService {
         Message msg = mStateMachine.obtainMessage(HeadsetClientStateMachine.TERMINATE_CALL);
         msg.arg1 = index;
         mStateMachine.sendMessage(msg);
-        Log.d(TAG, "Exit terminateCall");
         return true;
     }
 
     boolean enterPrivateMode(BluetoothDevice device, int index) {
-        Log.d(TAG, "Enter enterPrivateMode");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED &&
@@ -721,12 +682,10 @@ public class HeadsetClientService extends ProfileService {
         Message msg = mStateMachine.obtainMessage(HeadsetClientStateMachine.ENTER_PRIVATE_MODE);
         msg.arg1 = index;
         mStateMachine.sendMessage(msg);
-        Log.d(TAG, "Exit enterPrivateMode");
         return true;
     }
 
     boolean redial(BluetoothDevice device) {
-        Log.d(TAG, "Enter redial");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED &&
@@ -736,12 +695,10 @@ public class HeadsetClientService extends ProfileService {
 
         Message msg = mStateMachine.obtainMessage(HeadsetClientStateMachine.REDIAL);
         mStateMachine.sendMessage(msg);
-        Log.d(TAG, "Exit redial");
         return true;
     }
 
     boolean dial(BluetoothDevice device, String number) {
-        Log.d(TAG, "Enter dial");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED &&
@@ -752,12 +709,10 @@ public class HeadsetClientService extends ProfileService {
         Message msg = mStateMachine.obtainMessage(HeadsetClientStateMachine.DIAL_NUMBER);
         msg.obj = number;
         mStateMachine.sendMessage(msg);
-        Log.d(TAG, "Exit dial");
         return true;
     }
 
     boolean dialMemory(BluetoothDevice device, int location) {
-        Log.d(TAG, "Enter dialMemory");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED &&
@@ -767,12 +722,10 @@ public class HeadsetClientService extends ProfileService {
         Message msg = mStateMachine.obtainMessage(HeadsetClientStateMachine.DIAL_MEMORY);
         msg.arg1 = location;
         mStateMachine.sendMessage(msg);
-        Log.d(TAG, "Exit dialMemory");
         return true;
     }
 
     public boolean sendDTMF(BluetoothDevice device, byte code) {
-        Log.d(TAG, "Enter sendDTMF");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED &&
@@ -782,12 +735,10 @@ public class HeadsetClientService extends ProfileService {
         Message msg = mStateMachine.obtainMessage(HeadsetClientStateMachine.SEND_DTMF);
         msg.arg1 = code;
         mStateMachine.sendMessage(msg);
-        Log.d(TAG, "Exit sendDTMF");
         return true;
     }
 
     public boolean getLastVoiceTagNumber(BluetoothDevice device) {
-        Log.d(TAG, "Enter getLastVoiceTagNumber");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED &&
@@ -796,23 +747,19 @@ public class HeadsetClientService extends ProfileService {
         }
         Message msg = mStateMachine.obtainMessage(HeadsetClientStateMachine.LAST_VTAG_NUMBER);
         mStateMachine.sendMessage(msg);
-        Log.d(TAG, "Exit getLastVoiceTagNumber");
         return true;
     }
 
     public List<BluetoothHeadsetClientCall> getCurrentCalls(BluetoothDevice device) {
-        Log.d(TAG, "Enter getCurrentCalls");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED) {
             return null;
         }
-        Log.d(TAG, "Exit getCurrentCalls");
         return mStateMachine.getCurrentCalls();
     }
 
     public boolean explicitCallTransfer(BluetoothDevice device) {
-        Log.d(TAG, "Enter explicitCallTransfer");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED &&
@@ -822,29 +769,24 @@ public class HeadsetClientService extends ProfileService {
         Message msg = mStateMachine
                 .obtainMessage(HeadsetClientStateMachine.EXPLICIT_CALL_TRANSFER);
         mStateMachine.sendMessage(msg);
-        Log.d(TAG, "Exit explicitCallTransfer");
         return true;
     }
 
     public Bundle getCurrentAgEvents(BluetoothDevice device) {
-        Log.d(TAG, "Enter getCurrentAgEvents");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED) {
             return null;
         }
-        Log.d(TAG, "Exit getCurrentAgEvents");
         return mStateMachine.getCurrentAgEvents();
     }
 
     public Bundle getCurrentAgFeatures(BluetoothDevice device) {
-        Log.d(TAG, "Enter getCurrentAgFeatures");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED) {
             return null;
         }
-        Log.d(TAG, "Exit getCurrentAgFeatures");
         return mStateMachine.getCurrentAgFeatures();
     }
 

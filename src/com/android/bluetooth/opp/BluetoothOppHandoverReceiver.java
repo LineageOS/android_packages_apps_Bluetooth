@@ -28,11 +28,12 @@ import java.util.ArrayList;
 public class BluetoothOppHandoverReceiver extends BroadcastReceiver {
     public static final String TAG ="BluetoothOppHandoverReceiver";
     private static final boolean D = Constants.DEBUG;
+    private static final boolean V = Constants.VERBOSE;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        if(D) Log.d(TAG, "Action :" + action);
+
         if (action.equals(Constants.ACTION_HANDOVER_SEND) ||
                action.equals(Constants.ACTION_HANDOVER_SEND_MULTIPLE)) {
 

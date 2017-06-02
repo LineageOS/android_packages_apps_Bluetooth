@@ -27,7 +27,7 @@ public class BluetoothMapAccountItem implements Comparable<BluetoothMapAccountIt
     private static final String TAG = "BluetoothMapAccountItem";
 
     private static final boolean D = BluetoothMapService.DEBUG;
-    private static final boolean V = Log.isLoggable(BluetoothMapService.LOG_TAG, Log.VERBOSE);
+    private static final boolean V = BluetoothMapService.VERBOSE;
 
     protected boolean mIsChecked;
     private final String mName;
@@ -40,8 +40,6 @@ public class BluetoothMapAccountItem implements Comparable<BluetoothMapAccountIt
     public final String mBase_uri_no_account;
     private final String mUci;
     private final String mUciPrefix;
-    private String mDisplayName;
-    private String mEmailAddress;
 
     public BluetoothMapAccountItem(String id, String name, String packageName, String authority,
             Drawable icon, BluetoothMapUtils.TYPE appType, String uci, String uciPrefix) {
@@ -203,23 +201,4 @@ public class BluetoothMapAccountItem implements Comparable<BluetoothMapAccountIt
         return mType;
     }
 
-    public void setDisplayName(String name) {
-        mDisplayName = name;
-        if(V) Log.v(TAG, "setDispName: " + mDisplayName );
-    }
-
-    public void setEmailAddress(String emailId) {
-        mEmailAddress = emailId;
-        if(V) Log.v(TAG, "setOrgEmail: " + mEmailAddress );
-    }
-
-    public String getDisplayName() {
-        if(V) Log.v(TAG, "getDispName: " + mDisplayName );
-        return mDisplayName;
-    }
-
-    public String getEmailAddress() {
-        if(V) Log.v(TAG, "getOrgEmail: " + mDisplayName );
-        return mEmailAddress;
-    }
 }

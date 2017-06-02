@@ -1,7 +1,4 @@
 /*
- * Copyright (C) 2013-2014, The Linux Foundation. All rights reserved.
- * Not a Contribution.
- *
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,8 +136,7 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     ALOGI("%s: succeeds", __FUNCTION__);
 }
 
-static void initNative(JNIEnv *env, jobject object, jint maxA2dpConnections,
-        jint multiCastState) {
+static void initNative(JNIEnv *env, jobject object) {
     const bt_interface_t* btInf;
     bt_status_t status;
 
@@ -167,8 +163,7 @@ static void initNative(JNIEnv *env, jobject object, jint maxA2dpConnections,
         return;
     }
 
-    if ( (status = sBluetoothA2dpInterface->init(&sBluetoothA2dpCallbacks,
-            maxA2dpConnections, multiCastState, NULL)) != BT_STATUS_SUCCESS) {
+    if ( (status = sBluetoothA2dpInterface->init(&sBluetoothA2dpCallbacks)) != BT_STATUS_SUCCESS) {
         ALOGE("Failed to initialize Bluetooth A2DP Sink, status: %d", status);
         sBluetoothA2dpInterface = NULL;
         return;
@@ -252,7 +247,7 @@ static void informAudioTrackGainNative(JNIEnv *env, jobject object, jfloat gain)
 
 static JNINativeMethod sMethods[] = {
     {"classInitNative", "()V", (void *) classInitNative},
-    {"initNative", "(II)V", (void *) initNative},
+    {"initNative", "()V", (void *) initNative},
     {"cleanupNative", "()V", (void *) cleanupNative},
     {"connectA2dpNative", "([B)Z", (void *) connectA2dpNative},
     {"disconnectA2dpNative", "([B)Z", (void *) disconnectA2dpNative},

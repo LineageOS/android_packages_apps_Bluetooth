@@ -1,7 +1,4 @@
 /*
- * Copyright (C) 2013-2014, The Linux Foundation. All rights reserved.
- * Not a Contribution.
- *
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,10 +22,8 @@ import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetoothA2dp;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.os.ParcelUuid;
 import android.provider.Settings;
-import android.os.SystemProperties;
 import android.util.Log;
 import com.android.bluetooth.avrcp.Avrcp;
 import com.android.bluetooth.btservice.ProfileService;
@@ -43,12 +38,11 @@ import java.util.Map;
  * @hide
  */
 public class A2dpService extends ProfileService {
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG="A2dpService";
 
     private A2dpStateMachine mStateMachine;
     private Avrcp mAvrcp;
-    private AudioManager mAudioManager;
     private static A2dpService sAd2dpService;
     static final ParcelUuid[] A2DP_SOURCE_UUID = {
         BluetoothUuid.AudioSource
@@ -67,57 +61,23 @@ public class A2dpService extends ProfileService {
     }
 
     protected boolean start() {
-        int maxConnections = 1;
-        int multiCastState = 0;
-        int maxA2dpConnection =
-                SystemProperties.getInt("persist.bt.max.a2dp.connections", 1);
-        int a2dpMultiCastState =
-                SystemProperties.getInt("persist.bt.enable.multicast", 0);
-        if (DBG) Log.d(TAG, "START of A2dpService");
-        String offload_cap =
-                SystemProperties.get("persist.bt.a2dp_offload_cap");
-        if (offload_cap.isEmpty() || "false".equals(offload_cap)) {
-            Log.i(TAG,"offload cap not set");
-            offload_cap = null;
-        }
-        if (offload_cap != null && a2dpMultiCastState == 1) {
-            Log.i(TAG,"Split a2dp mode is enabled, disabling multicast");
-            a2dpMultiCastState = 0;
-        }
-        if (a2dpMultiCastState == 1)
-                multiCastState = a2dpMultiCastState;
-        if (maxA2dpConnection == 2)
-                maxConnections = maxA2dpConnection;
-        // enable soft hands-off also when multicast is enabled.
-        if (multiCastState == 1 && maxConnections != 2) {
-            Log.i(TAG,"Enable soft handsoff as multicast is enabled");
-            maxConnections = 2;
-        }
-        log( "maxA2dpConnections = " + maxConnections);
-        log( "multiCastState = " + multiCastState);
-        mStateMachine = A2dpStateMachine.make(this, this,
-                maxConnections, multiCastState, offload_cap);
+        mAvrcp = Avrcp.make(this);
+        mStateMachine = A2dpStateMachine.make(this, this);
         setA2dpService(this);
-        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        mAvrcp = Avrcp.make(this, this, maxConnections);
-        if (DBG) Log.d(TAG, "Exit START of A2dpService");
         return true;
     }
 
     protected boolean stop() {
-        if (DBG) Log.d(TAG, "STOP of A2dpService");
         if (mStateMachine != null) {
             mStateMachine.doQuit();
         }
         if (mAvrcp != null) {
             mAvrcp.doQuit();
         }
-        if (DBG) Log.d(TAG, "Exit STOP of A2dpService");
         return true;
     }
 
     protected boolean cleanup() {
-        if (DBG) Log.d(TAG, "Enter cleanup");
         if (mStateMachine!= null) {
             mStateMachine.cleanup();
         }
@@ -126,7 +86,6 @@ public class A2dpService extends ProfileService {
             mAvrcp = null;
         }
         clearA2dpService();
-        if (DBG) Log.d(TAG, "Exit cleanup");
         return true;
     }
 
@@ -167,7 +126,6 @@ public class A2dpService extends ProfileService {
     }
 
     public boolean connect(BluetoothDevice device) {
-        if (DBG) Log.d(TAG, "Enter connect");
         enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                        "Need BLUETOOTH ADMIN permission");
 
@@ -188,12 +146,10 @@ public class A2dpService extends ProfileService {
         }
 
         mStateMachine.sendMessage(A2dpStateMachine.CONNECT, device);
-        if (DBG) Log.d(TAG, "Exit connect");
         return true;
     }
 
     boolean disconnect(BluetoothDevice device) {
-        if (DBG) Log.d(TAG, "Enter Disconnect");
         enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                        "Need BLUETOOTH ADMIN permission");
         int connectionState = mStateMachine.getConnectionState(device);
@@ -203,7 +159,6 @@ public class A2dpService extends ProfileService {
         }
 
         mStateMachine.sendMessage(A2dpStateMachine.DISCONNECT, device);
-        if (DBG) Log.d(TAG, "Exit disconnect");
         return true;
     }
 
@@ -223,25 +178,21 @@ public class A2dpService extends ProfileService {
     }
 
     public boolean setPriority(BluetoothDevice device, int priority) {
-        if (DBG) Log.d(TAG, "Enter setPriority");
         enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                        "Need BLUETOOTH_ADMIN permission");
         Settings.Global.putInt(getContentResolver(),
             Settings.Global.getBluetoothA2dpSinkPriorityKey(device.getAddress()),
             priority);
         if (DBG) Log.d(TAG,"Saved priority " + device + " = " + priority);
-        if (DBG) Log.d(TAG, "Exit setPriority");
         return true;
     }
 
     public int getPriority(BluetoothDevice device) {
-        if (DBG) Log.d(TAG, "Enter getPriority");
         enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                        "Need BLUETOOTH_ADMIN permission");
         int priority = Settings.Global.getInt(getContentResolver(),
             Settings.Global.getBluetoothA2dpSinkPriorityKey(device.getAddress()),
             BluetoothProfile.PRIORITY_UNDEFINED);
-        if (DBG) Log.d(TAG, "Exit getPriority");
         return priority;
     }
 
@@ -258,43 +209,8 @@ public class A2dpService extends ProfileService {
         mAvrcp.setAbsoluteVolume(volume);
     }
 
-    public void setAvrcpAudioState(int state, BluetoothDevice device) {
-        mAvrcp.setA2dpAudioState(state, device);
-    }
-
-    public List<BluetoothDevice> getA2dpPlayingDevice() {
-        return mStateMachine.getPlayingDevice();
-    }
-
-    public boolean isMulticastEnabled() {
-        return mStateMachine.isMulticastEnabled();
-    }
-
-    public boolean isMulticastFeatureEnabled() {
-        return mStateMachine.isMulticastFeatureEnabled();
-    }
-
-    // return status of multicast,needed for blocking outgoing connections
-    public boolean isMulticastOngoing(BluetoothDevice device) {
-
-        Log.i(TAG,"audio isMusicActive is " + mAudioManager.isMusicActive());
-        // we should never land is case where playing device size is bigger
-        // than 2 still have safe check.
-        if (device == null) {
-            if ((getA2dpPlayingDevice().size() >= 2) &&
-                    (mAudioManager.isMusicActive())) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        if ((getA2dpPlayingDevice().size() >= 2) &&
-                mAudioManager.isMusicActive() &&
-                !(getA2dpPlayingDevice().contains(device))) {
-            return true;
-        } else {
-            return false;
-        }
+    public void setAvrcpAudioState(int state) {
+        mAvrcp.setA2dpAudioState(state);
     }
 
     public void resetAvrcpBlacklist(BluetoothDevice device) {
@@ -339,11 +255,6 @@ public class A2dpService extends ProfileService {
         public boolean connect(BluetoothDevice device) {
             A2dpService service = getService();
             if (service == null) return false;
-            //do not allow new connections with active multicast
-            if (service.isMulticastOngoing(device)) {
-                Log.i(TAG,"A2dp Multicast is Ongoing, ignore Connection Request");
-                return false;
-            }
             return service.connect(device);
         }
 

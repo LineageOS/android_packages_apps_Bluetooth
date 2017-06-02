@@ -31,10 +31,6 @@ import android.util.Log;
 
 public class BluetoothMapbMessageMime extends BluetoothMapbMessage {
 
-    private static final boolean D = BluetoothMapService.DEBUG;
-    private static final boolean V = Log.isLoggable(BluetoothMapService.LOG_TAG, Log.VERBOSE);
-    protected static String TAG = "BluetoothMapbMessageMime";
-
     public static class MimePart {
         public long mId = INVALID_VALUE;   /* The _id from the content provider, can be used to
                                             * sort the parts if needed */
@@ -150,7 +146,7 @@ public class BluetoothMapbMessageMime extends BluetoothMapbMessage {
     private ArrayList<Rfc822Token> bcc = null;    // Can be empty
     private ArrayList<Rfc822Token> replyTo = null;// Can be empty
     private String messageId = null;
-    ArrayList<MimePart> parts = null;
+    private ArrayList<MimePart> parts = null;
     private String contentType = null;
     private String boundary = null;
     private boolean textOnly = false;
@@ -158,7 +154,7 @@ public class BluetoothMapbMessageMime extends BluetoothMapbMessage {
     private boolean hasHeaders = false;
     private String encoding = null;
 
-    String getBoundary() {
+    private String getBoundary() {
         if(boundary == null)
             // Include "=_" as these cannot occur in quoted printable text
             boundary = "--=_" + UUID.randomUUID();

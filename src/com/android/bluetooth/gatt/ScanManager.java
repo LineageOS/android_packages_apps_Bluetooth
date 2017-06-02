@@ -112,16 +112,6 @@ public class ScanManager {
         mRegularScanClients.clear();
         mBatchClients.clear();
         mScanNative.cleanup();
-
-        if (mHandler != null) {
-            // Shut down the thread
-            mHandler.removeCallbacksAndMessages(null);
-            Looper looper = mHandler.getLooper();
-            if (looper != null) {
-                looper.quit();
-            }
-            mHandler = null;
-        }
     }
 
     /**
@@ -262,7 +252,7 @@ public class ScanManager {
 
                 mScanNative.stopRegularScan(client);
 
-                if (mScanNative.numRegularScanClients() == 0 && mHandler != null) {
+                if (mScanNative.numRegularScanClients() == 0) {
                     mHandler.removeMessages(MSG_SCAN_TIMEOUT);
                 }
 
