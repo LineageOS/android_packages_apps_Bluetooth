@@ -43,7 +43,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.provider.LiveFolders;
 import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * This provider allows application to interact with Bluetooth OPP manager
@@ -53,7 +58,7 @@ public final class BluetoothOppProvider extends ContentProvider {
 
     private static final String TAG = "BluetoothOppProvider";
     private static final boolean D = Constants.DEBUG;
-    private static final boolean V = Log.isLoggable(Constants.TAG, Log.VERBOSE);
+    private static final boolean V = Constants.VERBOSE;
 
     /** Database filename */
     private static final String DB_NAME = "btopp.db";
@@ -240,6 +245,7 @@ public final class BluetoothOppProvider extends ContentProvider {
         }
         Integer dir = values.getAsInteger(BluetoothShare.DIRECTION);
         Integer con = values.getAsInteger(BluetoothShare.USER_CONFIRMATION);
+        String address = values.getAsString(BluetoothShare.DESTINATION);
 
         if (values.getAsInteger(BluetoothShare.DIRECTION) == null) {
             dir = BluetoothShare.DIRECTION_OUTBOUND;

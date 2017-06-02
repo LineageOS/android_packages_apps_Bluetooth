@@ -56,8 +56,6 @@ static jmethodID method_onSubscriberInfo;
 static jmethodID method_onInBandRing;
 static jmethodID method_onLastVoiceTagNumber;
 static jmethodID method_onRingIndication;
-static jmethodID method_onCgmi;
-static jmethodID method_onCgmm;
 
 static bool checkCallbackThread() {
     // Always fetch the latest callbackEnv from AdapterService.
@@ -253,28 +251,6 @@ static void ring_indication_cb () {
     checkAndClearExceptionFromCallback(sCallbackEnv, __FUNCTION__);
 }
 
-static void cgmi_cb (const char *str) {
-    jstring js_manf_id;
-
-    CHECK_CALLBACK_ENV
-
-    js_manf_id = sCallbackEnv->NewStringUTF(str);
-    sCallbackEnv->CallVoidMethod(mCallbacksObj, method_onCgmi, js_manf_id);
-    checkAndClearExceptionFromCallback(sCallbackEnv, __FUNCTION__);
-    sCallbackEnv->DeleteLocalRef(js_manf_id);
-}
-
-static void cgmm_cb (const char *str) {
-    jstring js_manf_model;
-
-    CHECK_CALLBACK_ENV
-
-    js_manf_model = sCallbackEnv->NewStringUTF(str);
-    sCallbackEnv->CallVoidMethod(mCallbacksObj, method_onCgmm, js_manf_model);
-    checkAndClearExceptionFromCallback(sCallbackEnv, __FUNCTION__);
-    sCallbackEnv->DeleteLocalRef(js_manf_model);
-}
-
 static bthf_client_callbacks_t sBluetoothHfpClientCallbacks = {
     sizeof(sBluetoothHfpClientCallbacks),
     connection_state_cb,
@@ -298,8 +274,6 @@ static bthf_client_callbacks_t sBluetoothHfpClientCallbacks = {
     in_band_ring_cb,
     last_voice_tag_number_cb,
     ring_indication_cb,
-    cgmi_cb,
-    cgmm_cb,
 };
 
 static void classInitNative(JNIEnv* env, jclass clazz) {
@@ -325,8 +299,6 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     method_onLastVoiceTagNumber = env->GetMethodID(clazz, "onLastVoiceTagNumber",
         "(Ljava/lang/String;)V");
     method_onRingIndication = env->GetMethodID(clazz, "onRingIndication","()V");
-    method_onCgmi = env->GetMethodID(clazz, "onCgmi","(Ljava/lang/String;)V");
-    method_onCgmm = env->GetMethodID(clazz, "onCgmm","(Ljava/lang/String;)V");
 
     ALOGI("%s succeeds", __FUNCTION__);
 }
@@ -509,16 +481,9 @@ static jboolean dialNative(JNIEnv *env, jobject object, jstring number_str) {
         number = env->GetStringUTFChars(number_str, NULL);
     }
 
-    if (number != NULL) {
-        if ( (status = sBluetoothHfpClientInterface->dial(number)) != BT_STATUS_SUCCESS) {
-            ALOGE("Failed to dial, status: %d", status);
-        }
-    } else {
-        if ( (status = sBluetoothHfpClientInterface->dial("")) != BT_STATUS_SUCCESS) {
-            ALOGE("Failed to dial, status: %d", status);
-        }
+    if ( (status = sBluetoothHfpClientInterface->dial(number)) != BT_STATUS_SUCCESS) {
+        ALOGE("Failed to dial, status: %d", status);
     }
-
     if (number != NULL) {
         env->ReleaseStringUTFChars(number_str, number);
     }

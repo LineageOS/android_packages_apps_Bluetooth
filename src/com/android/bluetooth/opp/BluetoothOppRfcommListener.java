@@ -52,7 +52,7 @@ import android.util.Log;
 public class BluetoothOppRfcommListener {
     private static final String TAG = "BtOppRfcommListener";
 
-    private static final boolean V = Log.isLoggable(Constants.TAG, Log.VERBOSE);
+    private static final boolean V = Constants.VERBOSE;
 
     public static final int MSG_INCOMING_BTOPP_CONNECTION = 100;
 
@@ -108,6 +108,43 @@ public class BluetoothOppRfcommListener {
                         }
                         if (V) Log.v(TAG, "TCP listen thread finished");
                     } else {
+                        boolean serverOK = true;
+
+                        /*
+                         * it's possible that create will fail in some cases.
+                         * retry for 10 times
+                         */
+                        for (int i = 0; i < CREATE_RETRY_TIME && !mInterrupted; i++) {
+                            try {
+                                if (V) Log.v(TAG, "Starting RFCOMM listener....");
+                                mBtServerSocket = mAdapter.listenUsingInsecureRfcommWithServiceRecord("OBEX Object Push", BluetoothUuid.ObexObjectPush.getUuid());
+                                if (V) Log.v(TAG, "Started RFCOMM listener....");
+                            } catch (IOException e1) {
+                                Log.e(TAG, "Error create RfcommServerSocket " + e1);
+                                serverOK = false;
+                            }
+
+                            if (!serverOK) {
+                                synchronized (this) {
+                                    try {
+                                        if (V) Log.v(TAG, "Wait 300 ms");
+                                        Thread.sleep(300);
+                                    } catch (InterruptedException e) {
+                                        Log.e(TAG, "socketAcceptThread thread was interrupted (3)");
+                                        mInterrupted = true;
+                                    }
+                                }
+                            } else {
+                                break;
+                            }
+                        }
+                        if (!serverOK) {
+                            Log.e(TAG, "Error start listening after " + CREATE_RETRY_TIME + " try");
+                            mInterrupted = true;
+                        }
+                        if (!mInterrupted) {
+                            Log.i(TAG, "Accept thread started.");
+                        }
                         BluetoothSocket clientSocket;
                         while (!mInterrupted) {
                             try {
@@ -121,7 +158,7 @@ public class BluetoothOppRfcommListener {
 
                                 } else {
                                     clientSocket = sSocket.accept();
-                                    Log.d(TAG, "Accepted connection from "
+                                    if (V) Log.v(TAG, "Accepted connection from "
                                         + clientSocket.getRemoteDevice());
                                     BluetoothObexTransport transport = new BluetoothObexTransport(
                                         clientSocket);
@@ -133,23 +170,9 @@ public class BluetoothOppRfcommListener {
                                 }
                             } catch (IOException e) {
                                 Log.e(TAG, "Error accept connection " + e);
-                                // Need to break out of this loop if BT is being turned off.
-                                if (V) Log.v(TAG, "Checking Bluetooth State ");
-                                if (mAdapter == null) break;
-                                int state = mAdapter.getState();
-                                if ((state != BluetoothAdapter.STATE_TURNING_ON) &&
-                                    (state != BluetoothAdapter.STATE_ON)) {
-                                    Log.w(TAG, state+" RFCOMM listener failed as BT is being "
-                                            +"turned off");
-                                    break;
-                                }
-
                                 try {
                                     Thread.sleep(500);
-                                } catch (InterruptedException ie) {
-                                    Log.e(TAG, "mSocketAcceptThread was interrupted " + ie);
-                                    mInterrupted = true;
-                                }
+                                } catch (InterruptedException ie) {}
                             }
                         }
                         Log.i(TAG, "BluetoothSocket listen thread finished");
@@ -191,66 +214,17 @@ public class BluetoothOppRfcommListener {
                     }
                 }
             }
-            if (mSocketAcceptThread != null) {
-                if (V) Log.v(TAG, "Interrupting mSocketAcceptThread :" + mSocketAcceptThread);
+            try {
                 mSocketAcceptThread.interrupt();
+                if (V) Log.v(TAG, "waiting for thread to terminate");
+                //mSocketAcceptThread.join(JOIN_TIMEOUT_MS);
+                mSocketAcceptThread.join();
+                if (V) Log.v(TAG, "done waiting for thread to terminate");
+                mSocketAcceptThread = null;
+                mCallback = null;
+            } catch (InterruptedException e) {
+                if (V) Log.v(TAG, "Interrupted waiting for Accept Thread to join");
             }
-            mSocketAcceptThread = null;
-            mCallback = null;
         }
-    }
-
-    public int getRfcommChannel() {
-        Log.d(TAG,"rfcomm channel is " +mBtServerSocket.getChannel());
-        return mBtServerSocket.getChannel();
-    }
-
-    public BluetoothServerSocket openRfcommSocket(){
-
-        boolean serverOK = true;
-
-        /*
-         * it's possible that create will fail in some cases.
-         * retry for 10 times
-         */
-         for (int i = 0; i < CREATE_RETRY_TIME && !mInterrupted; i++) {
-              try {
-                  if (V) Log.v(TAG, "Starting RFCOMM listener....");
-                  mBtServerSocket = mAdapter.listenUsingInsecureRfcommOn(BluetoothAdapter.SOCKET_CHANNEL_AUTO_STATIC_NO_SDP);
-              } catch (IOException e1) {
-                  Log.e(TAG, "Error create RfcommServerSocket " + e1);
-                  serverOK = false;
-              }
-              if (!serverOK) {
-                 // Need to break out of this loop if BT is being turned off.
-                 if (mAdapter == null) break;
-                 int state = mAdapter.getState();
-                 if ((state != BluetoothAdapter.STATE_TURNING_ON) &&
-                     (state != BluetoothAdapter.STATE_ON)) {
-                      Log.w(TAG, "L2cap listener failed as BT is (being) turned off");
-                      break;
-                 }
-                 synchronized (this) {
-                    try {
-                        if (V) Log.v(TAG, "Wait 300 ms");
-                        Thread.sleep(300);
-                    } catch (InterruptedException e) {
-                        Log.e(TAG, "socketAcceptThread thread was interrupted (3)");
-                        mInterrupted = true;
-                    }
-                 }
-              } else {
-                 break;
-              }
-         }
-         if (!serverOK) {
-            Log.e(TAG, "Error start listening after " + CREATE_RETRY_TIME + " try");
-            mInterrupted = true;
-         }
-         if (!mInterrupted) {
-             Log.i(TAG, "Accept thread started.");
-         }
-
-         return mBtServerSocket;
     }
 }

@@ -42,7 +42,6 @@ import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.sqlite.SQLiteException;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -56,17 +55,16 @@ import android.widget.Toast;
 public class BluetoothOppReceiver extends BroadcastReceiver {
     private static final String TAG = "BluetoothOppReceiver";
     private static final boolean D = Constants.DEBUG;
-    private static final boolean V = Log.isLoggable(Constants.TAG, Log.VERBOSE);
+    private static final boolean V = Constants.VERBOSE;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        if (D) Log.d(TAG, "Enter - onReceive for intent:" + action);
+
 
         if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-            if(D) Log.d(TAG," Bluetooth Adapter state = " + state);
-            if (BluetoothAdapter.STATE_ON == state) {
+            if (BluetoothAdapter.STATE_ON == intent.getIntExtra(
+                    BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)) {
                 if (V) Log.v(TAG, "Received BLUETOOTH_STATE_CHANGED_ACTION, BLUETOOTH_STATE_ON");
                 context.startService(new Intent(context, BluetoothOppService.class));
 
@@ -91,10 +89,6 @@ public class BluetoothOppReceiver extends BroadcastReceiver {
                     }
                 }
             }
-        } else if (action.equals(BluetoothDevicePicker.ACTION_DEVICE_NOT_SELECTED)) {
-            if (V) Log.v(TAG, "ACTION_DEVICE_NOT_SELECTED");
-            BluetoothOppManager mOppManager = BluetoothOppManager.getInstance(context);
-            mOppManager.cleanUpSendingFileInfo();
         } else if (action.equals(BluetoothDevicePicker.ACTION_DEVICE_SELECTED)) {
             BluetoothOppManager mOppManager = BluetoothOppManager.getInstance(context);
 
@@ -143,12 +137,6 @@ public class BluetoothOppReceiver extends BroadcastReceiver {
             values.put(BluetoothShare.USER_CONFIRMATION, BluetoothShare.USER_CONFIRMATION_CONFIRMED);
             context.getContentResolver().update(uri, values, null, null);
             cancelNotification(context, uri);
-
-        } else if (action.equals(BluetoothShare.INCOMING_FILE_CONFIRMATION_REQUEST_ACTION)) {
-            if (D) Log.d(TAG, "Receiver INCOMING_FILE_NOTIFICATION");
-
-            Toast.makeText(context, context.getString(R.string.incoming_file_toast_msg),
-                    Toast.LENGTH_SHORT).show();
 
         } else if (action.equals(Constants.ACTION_OPEN) || action.equals(Constants.ACTION_LIST)) {
             if (V) {
@@ -205,16 +193,12 @@ public class BluetoothOppReceiver extends BroadcastReceiver {
             context.startActivity(in);
         } else if (action.equals(Constants.ACTION_HIDE)) {
             if (V) Log.v(TAG, "Receiver hide for " + intent.getData());
-            Cursor cursor;
-            try {
-                cursor = context.getContentResolver().query(intent.getData(), null, null, null,
-                         null);
-            } catch (SQLiteException e) {
-                cursor = null;
-                Log.e(TAG, "SQLite exception: " + e);
-            }
+            Cursor cursor = context.getContentResolver().query(intent.getData(), null, null, null,
+                    null);
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
+                    int statusColumn = cursor.getColumnIndexOrThrow(BluetoothShare.STATUS);
+                    int status = cursor.getInt(statusColumn);
                     int visibilityColumn = cursor.getColumnIndexOrThrow(BluetoothShare.VISIBILITY);
                     int visibility = cursor.getInt(visibilityColumn);
                     int userConfirmationColumn = cursor
@@ -229,7 +213,6 @@ public class BluetoothOppReceiver extends BroadcastReceiver {
                         }
                 }
                 cursor.close();
-                cursor = null;
             }
         } else if (action.equals(Constants.ACTION_COMPLETE_HIDE)) {
             if (V) Log.v(TAG, "Receiver ACTION_COMPLETE_HIDE");
@@ -292,18 +275,11 @@ public class BluetoothOppReceiver extends BroadcastReceiver {
                     toastMsg = context.getString(R.string.download_fail_line1);
                 }
             }
-
-            if (BluetoothOppManager.getInstance(context).zero_length_file) {
-               toastMsg = context.getString(R.string.notification_sent_fail, transInfo.mFileName);
-               BluetoothOppManager.getInstance(context).zero_length_file = false;
-            }
-
             if (V) Log.v(TAG, "Toast msg == " + toastMsg);
             if (toastMsg != null) {
                 Toast.makeText(context, toastMsg, Toast.LENGTH_SHORT).show();
             }
         }
-        if (D) Log.d(TAG, "Exit - onReceive for intent:" + action);
     }
 
     private void cancelNotification(Context context, Uri uri) {

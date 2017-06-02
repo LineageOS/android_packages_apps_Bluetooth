@@ -189,12 +189,7 @@ public class HealthService extends ProfileService {
                 {
                     BluetoothHealthAppConfiguration appConfig =
                         (BluetoothHealthAppConfiguration) msg.obj;
-                    AppInfo appInfo = mApps.get(appConfig);
-                    if (appInfo == null) {
-                        Log.e(TAG, "No AppInfo found for AppConfig: " + appConfig);
-                        break;
-                    }
-                    int appId = appInfo.mAppId;
+                    int appId = (mApps.get(appConfig)).mAppId;
                     if (!unregisterHealthAppNative(appId)) {
                         Log.e(TAG, "Failed to unregister application: id: " + appId);
                         callStatusCallback(appConfig,
@@ -206,12 +201,7 @@ public class HealthService extends ProfileService {
                 {
                     HealthChannel chan = (HealthChannel) msg.obj;
                     byte[] devAddr = Utils.getByteAddress(chan.mDevice);
-                    AppInfo appInfo = mApps.get(chan.mConfig);
-                    if (appInfo == null) {
-                        Log.e(TAG, "No AppInfo found for AppConfig: " + chan.mConfig);
-                        break;
-                    }
-                    int appId = appInfo.mAppId;
+                    int appId = (mApps.get(chan.mConfig)).mAppId;
                     chan.mChannelId = connectChannelNative(devAddr, appId);
                     if (chan.mChannelId == -1) {
                         callHealthChannelCallback(chan.mConfig, chan.mDevice,
@@ -251,10 +241,6 @@ public class HealthService extends ProfileService {
                         regStatus == BluetoothHealth.APP_CONFIG_UNREGISTRATION_SUCCESS) {
                         //unlink to death once app is unregistered
                         AppInfo appInfo = mApps.get(appConfig);
-                        if (appInfo == null){
-                            Log.e(TAG, "No AppInfo found for AppConfig " + appConfig);
-                            break;
-                        }
                         appInfo.cleanup();
                         mApps.remove(appConfig);
                     }
@@ -268,7 +254,7 @@ public class HealthService extends ProfileService {
                             findAppConfigByAppId(channelStateEvent.mAppId);
                     int newState;
                     newState = convertHalChannelState(channelStateEvent.mState);
-                    if (newState  ==  BluetoothHealth.STATE_CHANNEL_DISCONNECTED ||
+                    if (newState  ==  BluetoothHealth.STATE_CHANNEL_DISCONNECTED &&
                         appConfig == null) {
                         Log.e(TAG,"Disconnected for non existing app");
                         break;
@@ -526,15 +512,9 @@ public class HealthService extends ProfileService {
 
     private void callStatusCallback(BluetoothHealthAppConfiguration config, int status) {
         if (VDBG) log ("Health Device Application: " + config + " State Change: status:" + status);
-        AppInfo appInfo = mApps.get(config);
-        if (appInfo == null) {
-            Log.e(TAG, " No AppInfo found for AppConfig " + config);
-            return;
-        }
-        IBluetoothHealthCallback callback = appInfo.mCallback;
+        IBluetoothHealthCallback callback = (mApps.get(config)).mCallback;
         if (callback == null) {
             Log.e(TAG, "Callback object null");
-            return;
         }
 
         try {
@@ -624,12 +604,8 @@ public class HealthService extends ProfileService {
                 Log.e(TAG, "Exception while duping: " + e);
             }
         }
-        AppInfo appInfo = mApps.get(config);
-        if (appInfo == null) {
-            Log.e(TAG, "No AppInfo found for AppConfig " + config);
-            return;
-        }
-        IBluetoothHealthCallback callback = appInfo.mCallback;
+
+        IBluetoothHealthCallback callback = (mApps.get(config)).mCallback;
         if (callback == null) {
             Log.e(TAG, "No callback found for config: " + config);
             return;

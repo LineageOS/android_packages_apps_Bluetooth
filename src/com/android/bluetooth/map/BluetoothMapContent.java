@@ -68,7 +68,7 @@ public class BluetoothMapContent {
     private static final String TAG = "BluetoothMapContent";
 
     private static final boolean D = BluetoothMapService.DEBUG;
-    private static final boolean V = Log.isLoggable(BluetoothMapService.LOG_TAG, Log.VERBOSE);
+    private static final boolean V = BluetoothMapService.VERBOSE;
 
     // Parameter Mask for selection of parameters to return in listings
     private static final int MASK_SUBJECT               = 0x00000001;
@@ -149,7 +149,6 @@ public class BluetoothMapContent {
             PduHeaders.MESSAGE_TYPE_NOTIFICATION_IND );
 
     public static final String INSERT_ADDRES_TOKEN = "insert-address-token";
-    private static final String HONDA_CARKIT = "64:D4:BD";
 
     private final Context mContext;
     private final ContentResolver mResolver;
@@ -1237,9 +1236,8 @@ public class BluetoothMapContent {
         int subLength = ap.getSubjectLength();
         if(subLength == BluetoothMapAppParams.INVALID_VALUE_PARAMETER)
             subLength = 256;
-        //Fix Subject Display issue with HONDA Carkit - Ignore subject Mask.
-        if (BluetoothMapService.getRemoteDevice().getAddress().startsWith(HONDA_CARKIT) ||
-                         (ap.getParameterMask() & MASK_SUBJECT) != 0) {
+
+        if ((ap.getParameterMask() & MASK_SUBJECT) != 0) {
             if (fi.mMsgType == FilterInfo.TYPE_SMS) {
                 subject = c.getString(fi.mSmsColSubject);
             } else if (fi.mMsgType == FilterInfo.TYPE_MMS) {
@@ -2065,9 +2063,9 @@ public class BluetoothMapContent {
          * should cause all parameters to be included in the message list. */
         if(ap.getParameterMask() == BluetoothMapAppParams.INVALID_VALUE_PARAMETER ||
                 ap.getParameterMask() == 0) {
-            ap.setParameterMask(PARAMETER_MASK_ALL_ENABLED);
+            ap.setParameterMask(PARAMETER_MASK_DEFAULT);
             if (V) Log.v(TAG, "msgListing(): appParameterMask is zero or not present, " +
-                    "changing to All Enabled by default: " + ap.getParameterMask());
+                    "changing to default: " + ap.getParameterMask());
         }
         if (V) Log.v(TAG, "folderElement hasSmsMmsContent = " + folderElement.hasSmsMmsContent() +
                 " folderElement.hasEmailContent = " + folderElement.hasEmailContent() +
@@ -3422,9 +3420,6 @@ public class BluetoothMapContent {
                     message.setType(TYPE.SMS_GSM);
                 } else if (tm.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA) {
                     message.setType(TYPE.SMS_CDMA);
-                } else {
-                    // set SMS_GSM by default
-                    message.setType(TYPE.SMS_GSM);
                 }
                 message.setVersionString(mMessageVersion);
                 String read = c.getString(c.getColumnIndex(Sms.READ));
