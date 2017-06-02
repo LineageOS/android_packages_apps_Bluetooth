@@ -44,7 +44,6 @@ import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothDevicePicker;
 import android.content.Intent;
-import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
@@ -65,7 +64,8 @@ import java.util.Locale;
 public class BluetoothOppLauncherActivity extends Activity {
     private static final String TAG = "BluetoothLauncherActivity";
     private static final boolean D = Constants.DEBUG;
-    private static final boolean V = Log.isLoggable(Constants.TAG, Log.VERBOSE);
+    private static final boolean V = Constants.VERBOSE;
+
     // Regex that matches characters that have special meaning in HTML. '<', '>', '&' and
     // multiple continuous spaces.
     private static final Pattern PLAIN_TEXT_TO_ESCAPE = Pattern.compile("[<>&]| {2,}|\r?\n");
@@ -88,11 +88,6 @@ public class BluetoothOppLauncherActivity extends Activity {
                 finish();
                 return;
             }
-
-            /*
-             * SECURITY_EXCEPTION Google Photo grant-uri-permission
-             */
-            grantReadPermissionToUri(intent.getClipData());
 
             /*
              * Other application is trying to share a file via Bluetooth,
@@ -228,17 +223,17 @@ public class BluetoothOppLauncherActivity extends Activity {
         final ContentResolver resolver = this.getContentResolver();
 
         // Check if airplane mode is on
-        final boolean isAirplaneModeOn = Settings.Global.getInt(resolver,
-                Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
+        final boolean isAirplaneModeOn = Settings.System.getInt(resolver,
+                Settings.System.AIRPLANE_MODE_ON, 0) == 1;
         if (!isAirplaneModeOn) {
             return true;
         }
 
         // Check if airplane mode matters
-        final String airplaneModeRadios = Settings.Global.getString(resolver,
-                Settings.Global.AIRPLANE_MODE_RADIOS);
+        final String airplaneModeRadios = Settings.System.getString(resolver,
+                Settings.System.AIRPLANE_MODE_RADIOS);
         final boolean isAirplaneSensitive = airplaneModeRadios == null ? true :
-                airplaneModeRadios.contains(Settings.Global.RADIO_BLUETOOTH);
+                airplaneModeRadios.contains(Settings.System.RADIO_BLUETOOTH);
         if (!isAirplaneSensitive) {
             return true;
         }
@@ -247,7 +242,7 @@ public class BluetoothOppLauncherActivity extends Activity {
         final String airplaneModeToggleableRadios = Settings.System.getString(resolver,
                 Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
         final boolean isAirplaneToggleable = airplaneModeToggleableRadios == null ? false :
-                airplaneModeToggleableRadios.contains(Settings.Global.RADIO_BLUETOOTH);
+                airplaneModeToggleableRadios.contains(Settings.System.RADIO_BLUETOOTH);
         if (isAirplaneToggleable) {
             return true;
         }
@@ -387,32 +382,4 @@ public class BluetoothOppLauncherActivity extends Activity {
         }
         return text;
     }
-
-    /*
-     *  Grant permission to access a specific Uri.
-     */
-    private void grantReadPermissionToUri(ClipData clipData) {
-        if (clipData == null) {
-            Log.i(TAG,"ClipData is null ");
-            return;
-        }
-        try {
-            String packageName = getPackageName();
-            for (int i = 0; i < clipData.getItemCount(); i++) {
-                ClipData.Item item = clipData.getItemAt(i);
-                Uri uri = item.getUri();
-                if (uri != null) {
-                    String scheme = uri.getScheme();
-                    if (scheme != null && scheme.equals(ContentResolver.SCHEME_CONTENT)) {
-                        grantUriPermission(packageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    }
-                }
-            }
-        } catch (Exception e) {
-          Log.e(TAG,"GrantUriPermission :" + e.toString());
-        }
-    }
-
-
 }
-

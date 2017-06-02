@@ -1,6 +1,4 @@
 /*
- * Copyright (C) 2014 The Linux Foundation. All rights reserved.
- * Not a Contribution
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,12 +21,8 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothDevice;
 import com.android.bluetooth.a2dp.A2dpService;
-//import com.android.bluetooth.a2dp.A2dpSinkService;
-import com.android.bluetooth.a2dpsink.A2dpSinkService;
-import com.android.bluetooth.hfp.HeadsetService;
-import com.android.bluetooth.hfpclient.HeadsetClientService;
 import com.android.bluetooth.hid.HidService;
-import com.android.bluetooth.pbapclient.PbapClientService;
+import com.android.bluetooth.hfp.HeadsetService;
 
 import android.bluetooth.OobData;
 import android.content.Context;
@@ -36,7 +30,6 @@ import android.content.Intent;
 import android.os.Message;
 import android.os.UserHandle;
 import android.util.Log;
-import android.os.PowerManager;
 
 import com.android.bluetooth.Utils;
 import com.android.bluetooth.btservice.RemoteDevices.DeviceProperties;
@@ -72,19 +65,12 @@ final class BondStateMachine extends StateMachine {
     private RemoteDevices mRemoteDevices;
     private BluetoothAdapter mAdapter;
 
-    /* The WakeLock is used for bringing up the LCD during a pairing request
-     * from remote device when Android is in Suspend state.*/
-    private PowerManager.WakeLock mWakeLock;
-
     private PendingCommandState mPendingCommandState = new PendingCommandState();
     private StableState mStableState = new StableState();
 
     public static final String OOBDATA = "oobdata";
 
-    private final ArrayList<BluetoothDevice> mDevices =
-        new ArrayList<BluetoothDevice>();
-
-    private BondStateMachine(PowerManager pm, AdapterService service,
+    private BondStateMachine(AdapterService service,
             AdapterProperties prop, RemoteDevices remoteDevices) {
         super("BondStateMachine:");
         addState(mStableState);
@@ -94,17 +80,12 @@ final class BondStateMachine extends StateMachine {
         mAdapterProperties = prop;
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         setInitialState(mStableState);
-
-        //WakeLock instantiation in RemoteDevices class
-        mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP
-                       | PowerManager.ON_AFTER_RELEASE, TAG);
-        mWakeLock.setReferenceCounted(false);
     }
 
-    public static BondStateMachine make(PowerManager pm, AdapterService service,
+    public static BondStateMachine make(AdapterService service,
             AdapterProperties prop, RemoteDevices remoteDevices) {
         Log.d(TAG, "make");
-        BondStateMachine bsm = new BondStateMachine(pm, service, prop, remoteDevices);
+        BondStateMachine bsm = new BondStateMachine(service, prop, remoteDevices);
         bsm.start();
         return bsm;
     }
@@ -147,9 +128,6 @@ final class BondStateMachine extends StateMachine {
                 /* if incoming pairing, transition to pending state */
                 if (newState == BluetoothDevice.BOND_BONDING)
                 {
-                    if(!mDevices.contains(dev)) {
-                        mDevices.add(dev);
-                    }
                     sendIntent(dev, newState, 0);
                     transitionTo(mPendingCommandState);
                 }
@@ -175,6 +153,8 @@ final class BondStateMachine extends StateMachine {
 
 
     private class PendingCommandState extends State {
+        private final ArrayList<BluetoothDevice> mDevices =
+            new ArrayList<BluetoothDevice>();
 
         @Override
         public void enter() {
@@ -217,14 +197,6 @@ final class BondStateMachine extends StateMachine {
                     sendIntent(dev, newState, reason);
                     if(newState != BluetoothDevice.BOND_BONDING )
                     {
-                        // check if bond none is received from device which
-                        // was in pairing state otherwise don't transition to
-                        // stable state.
-                        if (newState == BluetoothDevice.BOND_NONE &&
-                            !mDevices.contains(dev) && mDevices.size() != 0) {
-                            infoLog("not transitioning to stable state");
-                            break;
-                        }
                         /* this is either none/bonded, remove and transition */
                         result = !mDevices.remove(dev);
                         if (mDevices.isEmpty()) {
@@ -253,21 +225,11 @@ final class BondStateMachine extends StateMachine {
                 case SSP_REQUEST:
                     int passkey = msg.arg1;
                     int variant = msg.arg2;
-                    if(devProp == null)
-                    {
-                        Log.e(TAG,"Received msg from an unknown device");
-                        return false;
-                    }
                     sendDisplayPinIntent(devProp.getAddress(), passkey, variant);
                     break;
                 case PIN_REQUEST:
                     BluetoothClass btClass = dev.getBluetoothClass();
                     int btDeviceClass = btClass.getDeviceClass();
-                    if(devProp == null)
-                    {
-                        Log.e(TAG,"Received msg from an unknown device");
-                        return false;
-                    }
                     if (btDeviceClass == BluetoothClass.Device.PERIPHERAL_KEYBOARD ||
                          btDeviceClass == BluetoothClass.Device.PERIPHERAL_KEYBOARD_POINTING) {
                         // Its a keyboard. Follow the HID spec recommendation of creating the
@@ -305,7 +267,6 @@ final class BondStateMachine extends StateMachine {
     }
 
     private boolean cancelBond(BluetoothDevice dev) {
-        if(mAdapterService == null) return false;
         if (dev.getBondState() == BluetoothDevice.BOND_BONDING) {
             byte[] addr = Utils.getBytesFromAddress(dev.getAddress());
             if (!mAdapterService.cancelBondNative(addr)) {
@@ -318,7 +279,6 @@ final class BondStateMachine extends StateMachine {
     }
 
     private boolean removeBond(BluetoothDevice dev, boolean transition) {
-        if(mAdapterService == null) return false;
         if (dev.getBondState() == BluetoothDevice.BOND_BONDED) {
             byte[] addr = Utils.getBytesFromAddress(dev.getAddress());
             if (!mAdapterService.removeBondNative(addr)) {
@@ -334,7 +294,6 @@ final class BondStateMachine extends StateMachine {
 
     private boolean createBond(BluetoothDevice dev, int transport, OobData oobData,
                                boolean transition) {
-        if(mAdapterService == null) return false;
         if (dev.getBondState() == BluetoothDevice.BOND_NONE) {
             infoLog("Bond address is:" + dev);
             byte[] addr = Utils.getBytesFromAddress(dev.getAddress());
@@ -358,9 +317,6 @@ final class BondStateMachine extends StateMachine {
     }
 
     private void sendDisplayPinIntent(byte[] address, int pin, int variant) {
-
-        // Acquire wakelock during PIN code request to bring up LCD display
-        mWakeLock.acquire();
         Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_REQUEST);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mRemoteDevices.getDevice(address));
         if (pin != 0) {
@@ -369,8 +325,6 @@ final class BondStateMachine extends StateMachine {
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT, variant);
         intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         mAdapterService.sendOrderedBroadcast(intent, mAdapterService.BLUETOOTH_ADMIN_PERM);
-        // Release wakelock to allow the LCD to go off after the PIN popup notification.
-        mWakeLock.release();
     }
 
     private void sendIntent(BluetoothDevice device, int newState, int reason) {
@@ -492,22 +446,13 @@ final class BondStateMachine extends StateMachine {
         HidService hidService = HidService.getHidService();
         A2dpService a2dpService = A2dpService.getA2dpService();
         HeadsetService headsetService = HeadsetService.getHeadsetService();
-        A2dpSinkService a2dpSinkService = A2dpSinkService.getA2dpSinkService();
-        HeadsetClientService hsClientService = HeadsetClientService.getHeadsetClientService();
-        PbapClientService pbapClientService = PbapClientService.getPbapClientService();
 
         if (hidService != null)
-            hidService.setPriority(device, BluetoothProfile.PRIORITY_UNDEFINED);
+            hidService.setPriority(device,BluetoothProfile.PRIORITY_UNDEFINED);
         if(a2dpService != null)
-            a2dpService.setPriority(device, BluetoothProfile.PRIORITY_UNDEFINED);
+            a2dpService.setPriority(device,BluetoothProfile.PRIORITY_UNDEFINED);
         if(headsetService != null)
-            headsetService.setPriority(device, BluetoothProfile.PRIORITY_UNDEFINED);
-        if (hsClientService != null)
-            hsClientService.setPriority(device, BluetoothProfile.PRIORITY_UNDEFINED);
-        if (a2dpSinkService != null)
-            a2dpSinkService.setPriority(device, BluetoothProfile.PRIORITY_UNDEFINED);
-        if(pbapClientService != null)
-            pbapClientService.setPriority(device, BluetoothProfile.PRIORITY_UNDEFINED);
+            headsetService.setPriority(device,BluetoothProfile.PRIORITY_UNDEFINED);
 
         // Clear Absolute Volume black list
         if(a2dpService != null)

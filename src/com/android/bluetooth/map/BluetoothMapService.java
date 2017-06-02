@@ -56,7 +56,6 @@ import java.util.Set;
 
 public class BluetoothMapService extends ProfileService {
     private static final String TAG = "BluetoothMapService";
-    public static final String LOG_TAG = "BluetoothMap";
 
     /**
      * To enable MAP DEBUG/VERBOSE logging - run below cmd in adb shell, and
@@ -66,8 +65,8 @@ public class BluetoothMapService extends ProfileService {
      */
 
     public static final boolean DEBUG = true; //FIXME set to false;
-    public static boolean VERBOSE = Log.isLoggable(LOG_TAG, Log.VERBOSE);
 
+    public static final boolean VERBOSE = false;
 
     /**
      * Intent indicating timeout for user confirmation, which is sent to
@@ -114,8 +113,7 @@ public class BluetoothMapService extends ProfileService {
 
     private PowerManager.WakeLock mWakeLock = null;
 
-    private static final int CREATE_MAS_INSTANCES = 5;
-    private static final int UPDATE_MAS_INSTANCES = 6;
+    private static final int UPDATE_MAS_INSTANCES = 5;
 
     public static final int UPDATE_MAS_INSTANCES_ACCOUNT_ADDED = 0;
     public static final int UPDATE_MAS_INSTANCES_ACCOUNT_REMOVED = 1;
@@ -135,7 +133,7 @@ public class BluetoothMapService extends ProfileService {
     private HashMap<BluetoothMapAccountItem, BluetoothMapMasInstance> mMasInstanceMap =
             new HashMap<BluetoothMapAccountItem, BluetoothMapMasInstance>(1);
 
-    private static BluetoothDevice mRemoteDevice = null;
+    private static BluetoothDevice mRemoteDevice = null; // The remote connected device - protect access
 
     private ArrayList<BluetoothMapAccountItem> mEnabledAccounts = null;
     private static String sRemoteDeviceName = null;
@@ -152,7 +150,6 @@ public class BluetoothMapService extends ProfileService {
     private boolean mSdpSearchInitiated = false;
     SdpMnsRecord mMnsRecord = null;
     private MapServiceMessageHandler mSessionStatusHandler;
-    /**Indicate MAPService internal state: started or stopped*/
     private boolean mStartError = true;
 
     private boolean mSmsCapable = true;
@@ -175,8 +172,7 @@ public class BluetoothMapService extends ProfileService {
 
     private synchronized void closeService() {
         if (DEBUG) Log.d(TAG, "MAP Service closeService in");
-        // Mark MapService stop while shutdown ongoing.
-        mStartError = true;
+
         if (mBluetoothMnsObexClient != null) {
             mBluetoothMnsObexClient.shutdown();
             mBluetoothMnsObexClient = null;
@@ -190,11 +186,8 @@ public class BluetoothMapService extends ProfileService {
 
         mIsWaitingAuthorization = false;
         mPermission = BluetoothDevice.ACCESS_UNKNOWN;
-        // TODO: setState Intent ignored while BT Turning off.
-        // This as no significance as of now as CloseService is invoked during BT TURN OFF.
-        if (getState() != BluetoothMap.STATE_DISCONNECTED) {
-            setState(BluetoothMap.STATE_DISCONNECTED);
-        }
+        setState(BluetoothMap.STATE_DISCONNECTED);
+
         if (mWakeLock != null) {
             mWakeLock.release();
             if (VERBOSE) Log.v(TAG, "CloseService(): Release Wake Lock");
@@ -214,7 +207,8 @@ public class BluetoothMapService extends ProfileService {
             if(VERBOSE) Log.i(TAG, "Remove Handler");
         }
         mRemoteDevice = null;
-        if (DEBUG) Log.d(TAG, "MAP Service closeService out");
+
+        if (VERBOSE) Log.v(TAG, "MAP Service closeService out");
     }
 
     /**
@@ -249,7 +243,7 @@ public class BluetoothMapService extends ProfileService {
                     "StartingObexMapTransaction");
             mWakeLock.setReferenceCounted(false);
             mWakeLock.acquire();
-            if (DEBUG) Log.d(TAG, "startObexSessions(): Acquire Wake Lock");
+            if (VERBOSE) Log.v(TAG, "startObexSessions(): Acquire Wake Lock");
         }
 
         if(mBluetoothMnsObexClient == null) {
@@ -294,7 +288,7 @@ public class BluetoothMapService extends ProfileService {
      * @param masId use -1 to stop all instances
      */
     private void stopObexServerSessions(int masId) {
-        if (DEBUG) Log.d(TAG, "MAP Service STOP ObexServerSessions() masId: " + masId);
+        if (DEBUG) Log.d(TAG, "MAP Service STOP ObexServerSessions()");
 
         boolean lastMasInst = true;
 
@@ -308,22 +302,9 @@ public class BluetoothMapService extends ProfileService {
         } // Else just close down it all
 
         /* Shutdown the MNS client - currently must happen before MAS close */
-        if (mBluetoothMnsObexClient != null ) {
-            if (lastMasInst) {
-                mBluetoothMnsObexClient.shutdown();
-                mBluetoothMnsObexClient = null;
-            } else if(masId != -1 && mMasInstances != null) {
-                //Trigger MNS OFF to handle MCE that dosen't issue MNS OFF before MAS DISC
-                BluetoothMapMasInstance masInst = mMasInstances.get(masId);
-                if (masInst != null && masInst.mObserver != null) {
-                    try {
-                        masInst.mObserver.setNotificationRegistration(BluetoothMapAppParams
-                            .NOTIFICATION_STATUS_NO);
-                    } catch (RemoteException e) {
-                        Log.e(TAG,"setNoficationRegistarion OFF Failed: "+ e);
-                    }
-                }
-            }
+        if(mBluetoothMnsObexClient != null && lastMasInst) {
+            mBluetoothMnsObexClient.shutdown();
+            mBluetoothMnsObexClient = null;
         }
 
         BluetoothMapMasInstance masInst = mMasInstances.get(masId); // returns null for -1
@@ -354,27 +335,14 @@ public class BluetoothMapService extends ProfileService {
     }
 
     private final class MapServiceMessageHandler extends Handler {
-        Context mContxt;
-        private MapServiceMessageHandler(Context contxt, Looper looper) {
+        private MapServiceMessageHandler(Looper looper) {
             super(looper);
-            mContxt = contxt;
         }
         @Override
         public void handleMessage(Message msg) {
-            if (DEBUG) Log.d(TAG, "Handler(): got msg=" + msg.what);
+            if (VERBOSE) Log.v(TAG, "Handler(): got msg=" + msg.what);
 
             switch (msg.what) {
-                case CREATE_MAS_INSTANCES:
-                    Log.d(TAG, "CREATE_MAS_INSTANCES ");
-                    mAppObserver =
-                        new BluetoothMapAppObserver(mContxt, (BluetoothMapService)mContxt);
-                    if (mAppObserver != null ) {
-                        mEnabledAccounts = mAppObserver.getEnabledAccountItems();
-                    }
-                   /** Uses mEnabledAccounts, hence getEnabledAccountItems()
-                      * must be called before this. */
-                    createMasInstances();
-                    break;
                 case UPDATE_MAS_INSTANCES:
                     updateMasInstancesHandler();
                     break;
@@ -396,11 +364,11 @@ public class BluetoothMapService extends ProfileService {
                 case USER_TIMEOUT:
                     if (mIsWaitingAuthorization){
                         Intent intent = new Intent(BluetoothDevice.ACTION_CONNECTION_ACCESS_CANCEL);
+                        intent.setClassName(ACCESS_AUTHORITY_PACKAGE, ACCESS_AUTHORITY_CLASS);
                         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mRemoteDevice);
                         intent.putExtra(BluetoothDevice.EXTRA_ACCESS_REQUEST_TYPE,
                                         BluetoothDevice.REQUEST_TYPE_MESSAGE_ACCESS);
-                        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                        sendBroadcast(intent, BLUETOOTH_PERM);
+                        sendBroadcast(intent);
                         cancelUserTimeoutAlarm();
                         mIsWaitingAuthorization = false;
                         stopObexServerSessions(-1);
@@ -632,11 +600,8 @@ public class BluetoothMapService extends ProfileService {
         HandlerThread thread = new HandlerThread("BluetoothMapHandler");
         thread.start();
         Looper looper = thread.getLooper();
-        mSessionStatusHandler = new MapServiceMessageHandler(this, looper);
+        mSessionStatusHandler = new MapServiceMessageHandler(looper);
 
-        if(!VERBOSE)
-        VERBOSE = Log.isLoggable(LOG_TAG, Log.VERBOSE);
-        if (VERBOSE) Log.v(TAG, "verbose logging is enabled");
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_CONNECTION_ACCESS_REPLY);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -666,10 +631,15 @@ public class BluetoothMapService extends ProfileService {
             }
         }
         mAdapter = BluetoothAdapter.getDefaultAdapter();
+        mAppObserver = new BluetoothMapAppObserver(this, this);
+
+        mEnabledAccounts = mAppObserver.getEnabledAccountItems();
+
         mSmsCapable = getResources().getBoolean(
                 com.android.internal.R.bool.config_sms_capable);
-        // Move SDP records create to Handler Thread instead of main thread.
-        sendCreateMasInstances();
+        // Uses mEnabledAccounts, hence getEnabledAccountItems() must be called before this.
+        createMasInstances();
+
         // start RFCOMM listener
         sendStartListenerMessage(-1);
         mStartError = false;
@@ -708,10 +678,8 @@ public class BluetoothMapService extends ProfileService {
     private boolean updateMasInstancesHandler(){
         if (DEBUG) Log.d(TAG,"updateMasInstancesHandler() state = " + getState());
         boolean changed = false;
-            if (mAppObserver == null) {
-                Log.w( TAG, "updateMasInstancesHandler: NoAppObeserver Found");
-                return changed;
-            }
+
+        if(getState() == BluetoothMap.STATE_DISCONNECTED) {
             ArrayList<BluetoothMapAccountItem> newAccountList =
                     mAppObserver.getEnabledAccountItems();
             ArrayList<BluetoothMapAccountItem> newAccounts = null;
@@ -719,13 +687,12 @@ public class BluetoothMapService extends ProfileService {
             newAccounts = new ArrayList<BluetoothMapAccountItem>();
             removedAccounts = mEnabledAccounts; // reuse the current enabled list, to track removed
                                                 // accounts
-            if (newAccountList != null) {
-                for (BluetoothMapAccountItem account: newAccountList) {
-                    if (removedAccounts != null && !removedAccounts.remove(account)) {
-                        newAccounts.add(account);
-                    }
+            for(BluetoothMapAccountItem account: newAccountList) {
+                if(!removedAccounts.remove(account)) {
+                    newAccounts.add(account);
                 }
             }
+
             if(removedAccounts != null) {
                 /* Remove all disabled/removed accounts */
                 for(BluetoothMapAccountItem account : removedAccounts) {
@@ -772,6 +739,9 @@ public class BluetoothMapService extends ProfileService {
                 }
             }
             mAccountChanged = false;
+        } else {
+            mAccountChanged = true;
+        }
         return changed;
     }
 
@@ -819,19 +789,17 @@ public class BluetoothMapService extends ProfileService {
             mMasInstanceMap.put(null, smsMmsInst);
         }
 
-        if (mEnabledAccounts != null) {
-            // get list of accounts already set to be visible through MAP
-            for (BluetoothMapAccountItem account : mEnabledAccounts) {
-                masId++;  // SMS/MMS is masId=0, increment before adding next
-                BluetoothMapMasInstance newInst =
-                        new BluetoothMapMasInstance(this,
-                                this,
-                                account,
-                                masId,
-                                false);
-                mMasInstances.append(masId, newInst);
-                mMasInstanceMap.put(account, newInst);
-            }
+        // get list of accounts already set to be visible through MAP
+        for(BluetoothMapAccountItem account : mEnabledAccounts) {
+            masId++;  // SMS/MMS is masId=0, increment before adding next
+            BluetoothMapMasInstance newInst =
+                    new BluetoothMapMasInstance(this,
+                            this,
+                            account,
+                            masId,
+                            false);
+            mMasInstances.append(masId, newInst);
+            mMasInstanceMap.put(account, newInst);
         }
     }
 
@@ -842,9 +810,7 @@ public class BluetoothMapService extends ProfileService {
             try {
                 mRegisteredMapReceiver = false;
                 unregisterReceiver(mMapReceiver);
-                if (mAppObserver != null) {
-                    mAppObserver.shutdown();
-                }
+                mAppObserver.shutdown();
             } catch (Exception e) {
                 Log.e(TAG,"Unable to unregister map receiver",e);
             }
@@ -852,16 +818,10 @@ public class BluetoothMapService extends ProfileService {
         //Stop MapProfile if already started.
         //TODO: Check if the profile state can be retreived from ProfileService or AdapterService.
         if (!isMapStarted()) {
-            if (DEBUG) Log.d(TAG, "Service Not Available to STOP or Shutdown already" +
-                " in progress - Ignoring");
+            if (DEBUG) Log.d(TAG, "Service Not Available to STOP, ignoring");
             return true;
         } else {
             if (VERBOSE) Log.d(TAG, "Service Stoping()");
-        }
-        // setState Disconnect already handled from closeService.
-        // Handle it otherwise - Redundant for backup?
-        if (getState() != BluetoothMap.STATE_DISCONNECTED) {
-            setState(BluetoothMap.STATE_DISCONNECTED, BluetoothMap.RESULT_CANCELED);
         }
         if (mSessionStatusHandler != null) {
             sendShutdownMessage();
@@ -873,26 +833,10 @@ public class BluetoothMapService extends ProfileService {
 
     public boolean cleanup()  {
         if (DEBUG) Log.d(TAG, "cleanup()");
-        //Stop MapProfile if already started.
-        //TODO: Check if the profile state can be retreived from ProfileService or AdapterService.
-        if (!isMapStarted()) {
-            if (DEBUG) Log.d(TAG, "Service Not Available to STOP or Shutdown already" +
-                " in progress - Ignoring");
-            return true;
-        } else {
-            if (VERBOSE) Log.d(TAG, "Service Stoping()");
-        }
-        // SetState Disconnect already handled from closeService.
-        // Handle it otherwise. Redundant for backup ?
-        if (getState() != BluetoothMap.STATE_DISCONNECTED) {
-            setState(BluetoothMap.STATE_DISCONNECTED, BluetoothMap.RESULT_CANCELED);
-        }
+        setState(BluetoothMap.STATE_DISCONNECTED, BluetoothMap.RESULT_CANCELED);
         //Cleanup already handled in Stop().
         //Move this  extra check to Handler.
-        if (mSessionStatusHandler != null) {
-            sendShutdownMessage();
-        }
-        mStartError = true;
+        sendShutdownMessage();
         return true;
     }
 
@@ -942,7 +886,6 @@ public class BluetoothMapService extends ProfileService {
             intent.putExtra(BluetoothDevice.EXTRA_ACCESS_REQUEST_TYPE,
                             BluetoothDevice.REQUEST_TYPE_MESSAGE_ACCESS);
             intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mRemoteDevice);
-            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             sendOrderedBroadcast(intent, BLUETOOTH_ADMIN_PERM);
 
             if (VERBOSE) Log.v(TAG, "waiting for authorization for connection from: "
@@ -981,24 +924,6 @@ public class BluetoothMapService extends ProfileService {
         AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(pIntent);
         mRemoveTimeoutMsg = false;
-    }
-
-    /**
-      * Create both MAP SMS/MMS and EMAIL SDP in a handler thread.
-      */
-    public void sendCreateMasInstances() {
-        if (mSessionStatusHandler != null && !mSessionStatusHandler
-                .hasMessages(CREATE_MAS_INSTANCES)) {
-            Log.d(TAG, "mSessionStatusHandler CREATE_MAS_INSTANCES ");
-            Message msg = mSessionStatusHandler.obtainMessage(CREATE_MAS_INSTANCES);
-            /* We add a small delay here to ensure the call returns true before this message is
-             * handled. It seems wrong to add a delay, but the alternative is to build a lock
-             * system to handle synchronization, which isn't nice either... */
-            mSessionStatusHandler.sendMessage(msg);
-        } else if(mSessionStatusHandler != null ) {
-                if(DEBUG)
-                    Log.w(TAG, "mSessionStatusHandler START_MAPEMAIL message already in Queue");
-        }
     }
 
     /**
@@ -1042,7 +967,6 @@ public class BluetoothMapService extends ProfileService {
     }
 
     private void sendShutdownMessage() {
-        if (VERBOSE) Log.d(TAG, "sendShutdownMessage() In");
         /* Any pending messages are no longer valid.
         To speed up things, simply delete them. */
         if (mRemoveTimeoutMsg) {
@@ -1084,17 +1008,7 @@ public class BluetoothMapService extends ProfileService {
                                                BluetoothAdapter.ERROR);
                 if (state == BluetoothAdapter.STATE_TURNING_OFF) {
                     if (DEBUG) Log.d(TAG, "STATE_TURNING_OFF");
-                    //Stop MapProfile if already started.
-                   if (!isMapStarted()) {
-                       if (DEBUG) Log.d(TAG, "Service Not Available to STOP or Shutdown already" +
-                           " in progress - Ignoring");
-                   } else if (mSessionStatusHandler != null) {
-                       if (VERBOSE) Log.d(TAG, "Service Stoping()");
-                       sendShutdownMessage();
-                   } else {
-                       if (DEBUG) Log.d(TAG, "Unable to perform STOP or Shutdown already" +
-                           " in progress - Ignoring");
-                   }
+                    sendShutdownMessage();
                 } else if (state == BluetoothAdapter.STATE_ON) {
                     if (DEBUG) Log.d(TAG, "STATE_ON");
                     // start ServerSocket listener threads
@@ -1214,7 +1128,8 @@ public class BluetoothMapService extends ProfileService {
                         return;
                     }
                 }
-            } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
+            } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED) &&
+                    mIsWaitingAuthorization) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
                 if (mRemoteDevice == null || device == null) {
@@ -1227,17 +1142,15 @@ public class BluetoothMapService extends ProfileService {
                 if (mRemoteDevice.equals(device)) {
                     // Send any pending timeout now, as ACL got disconnected.
                     mSessionStatusHandler.removeMessages(USER_TIMEOUT);
-                    if (mIsWaitingAuthorization) {
-                        Intent timeoutIntent =
-                                new Intent(BluetoothDevice.ACTION_CONNECTION_ACCESS_CANCEL);
-                        timeoutIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mRemoteDevice);
-                        timeoutIntent.putExtra(BluetoothDevice.EXTRA_ACCESS_REQUEST_TYPE,
+
+                    Intent timeoutIntent =
+                            new Intent(BluetoothDevice.ACTION_CONNECTION_ACCESS_CANCEL);
+                    timeoutIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mRemoteDevice);
+                    timeoutIntent.putExtra(BluetoothDevice.EXTRA_ACCESS_REQUEST_TYPE,
                                            BluetoothDevice.REQUEST_TYPE_MESSAGE_ACCESS);
-                        timeoutIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                        sendBroadcast(timeoutIntent, BLUETOOTH_PERM);
-                        mIsWaitingAuthorization = false;
-                        cancelUserTimeoutAlarm();
-                    }
+                    sendBroadcast(timeoutIntent, BLUETOOTH_PERM);
+                    mIsWaitingAuthorization = false;
+                    cancelUserTimeoutAlarm();
                     mSessionStatusHandler.obtainMessage(MSG_SERVERSESSION_CLOSE, -1, 0)
                             .sendToTarget();
                 }
@@ -1354,9 +1267,7 @@ public class BluetoothMapService extends ProfileService {
         println(sb, "mRemoteDevice: " + mRemoteDevice);
         println(sb, "sRemoteDeviceName: " + sRemoteDeviceName);
         println(sb, "mState: " + mState);
-        if (mAppObserver != null) {
-            println(sb, "mAppObserver: " + mAppObserver);
-        }
+        println(sb, "mAppObserver: " + mAppObserver);
         println(sb, "mIsWaitingAuthorization: " + mIsWaitingAuthorization);
         println(sb, "mRemoveTimeoutMsg: " + mRemoveTimeoutMsg);
         println(sb, "mPermission: " + mPermission);
@@ -1367,10 +1278,8 @@ public class BluetoothMapService extends ProfileService {
             println(sb, "  " + key + " : " + mMasInstanceMap.get(key));
         }
         println(sb, "mEnabledAccounts:");
-        if (mEnabledAccounts != null) {
-            for (BluetoothMapAccountItem account : mEnabledAccounts) {
-                println(sb, "  " + account);
-            }
+        for (BluetoothMapAccountItem account : mEnabledAccounts) {
+            println(sb, "  " + account);
         }
     }
 }

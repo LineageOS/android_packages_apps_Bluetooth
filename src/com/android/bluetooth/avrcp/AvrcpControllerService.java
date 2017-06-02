@@ -43,8 +43,6 @@ import java.util.List;
 import java.util.HashMap;
 import java.nio.charset.Charset;
 import java.nio.ByteBuffer;
-import android.os.Bundle;
-
 /**
  * Provides Bluetooth AVRCP Controller profile, as a service in the Bluetooth application.
  * @hide
@@ -86,7 +84,6 @@ public class AvrcpControllerService extends ProfileService {
     }
 
     protected boolean start() {
-        if (DBG) Log.d(TAG, "Start");
         HandlerThread thread = new HandlerThread("BluetoothAvrcpHandler");
         thread.start();
         Looper looper = thread.getLooper();
@@ -99,7 +96,6 @@ public class AvrcpControllerService extends ProfileService {
     }
 
     protected void resetRemoteData() {
-        if (DBG) Log.d(TAG, "resetRemoteData");
         try {
             unregisterReceiver(mBroadcastReceiver);
         }
@@ -120,7 +116,6 @@ public class AvrcpControllerService extends ProfileService {
         }
     }
     protected boolean stop() {
-        if (DBG) Log.d(TAG, "Stop");
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
             Looper looper = mHandler.getLooper();
@@ -133,7 +128,6 @@ public class AvrcpControllerService extends ProfileService {
     }
 
     protected boolean cleanup() {
-        if (DBG) Log.d(TAG, "cleanup");
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
             Looper looper = mHandler.getLooper();
@@ -189,19 +183,16 @@ public class AvrcpControllerService extends ProfileService {
     }
 
     List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
-        if (DBG) Log.d(TAG, "Enter getDevicesMatchingConnectionStates");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         for (int i = 0; i < states.length; i++) {
             if (states[i] == BluetoothProfile.STATE_CONNECTED) {
                 return mConnectedDevices;
             }
         }
-        if (DBG) Log.d(TAG, "Exit getDevicesMatchingConnectionStates");
         return new ArrayList<BluetoothDevice>();
     }
 
     int getConnectionState(BluetoothDevice device) {
-        if (DBG) Log.d(TAG, "Enter getConnectionState");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return (mConnectedDevices.contains(device) ? BluetoothProfile.STATE_CONNECTED
                                                 : BluetoothProfile.STATE_DISCONNECTED);
@@ -223,7 +214,6 @@ public class AvrcpControllerService extends ProfileService {
         Message msg = mHandler.obtainMessage(AvrcpControllerConstants.
                 MESSAGE_SEND_GROUP_NAVIGATION_CMD,keyCode, keyState, device);
         mHandler.sendMessage(msg);
-        if (DBG) Log.d(TAG, "Exit sendGroupNavigationCmd");
     }
 
     public void sendPassThroughCmd(BluetoothDevice device, int keyCode, int keyState) {
@@ -302,7 +292,6 @@ public class AvrcpControllerService extends ProfileService {
         else {
             Log.e(TAG," Not in right state, don't send Pass Thru cmd ");
         }
-        if (DBG) Log.d(TAG, "Exit sendPassThroughCmd");
     }
 
     public void startAvrcpUpdates() {
@@ -335,7 +324,6 @@ public class AvrcpControllerService extends ProfileService {
         return getCurrentPlayerAppSetting();
     }
     public boolean setPlayerApplicationSetting(BluetoothAvrcpPlayerSettings plAppSetting) {
-        if (DBG) Log.d(TAG, "Enter setPlayerApplicationSetting");
         if ((mAvrcpRemoteDevice == null)||(mRemoteMediaPlayers == null)) {
             return false;
         }
@@ -388,7 +376,6 @@ public class AvrcpControllerService extends ProfileService {
                 MESSAGE_SEND_SET_CURRENT_PLAYER_APPLICATION_SETTINGS, numAttributes, 0, bb);
             mHandler.sendMessage(msg);
         }
-        if (DBG) Log.d(TAG, "Exit setPlayerApplicationSetting");
         return isSettingSupported;
     }
 
@@ -494,26 +481,21 @@ public class AvrcpControllerService extends ProfileService {
         return Integer.parseInt(utf8ToString(array));
     }
     private BluetoothAvrcpPlayerSettings getCurrentPlayerAppSetting() {
-        if(DBG) Log.d(TAG,"Enter getCurrentPlayerAppSetting");
         if((mRemoteMediaPlayers == null) || (mRemoteMediaPlayers.getAddressedPlayer() == null))
             return null;
-        if(DBG) Log.d(TAG,"Exit getCurrentPlayerAppSetting");
         return mRemoteMediaPlayers.getAddressedPlayer().getSupportedPlayerAppSetting();
     }
     private PlaybackState getCurrentPlayBackState() {
-        if(DBG) Log.d(TAG,"Enter getCurrentPlayBackState");
         if ((mRemoteMediaPlayers == null) || (mRemoteMediaPlayers.getAddressedPlayer() == null)) {
             return new PlaybackState.Builder().setState(PlaybackState.STATE_ERROR,
                                                         PlaybackState.PLAYBACK_POSITION_UNKNOWN,
                                                         0).build();
         }
-        if(DBG) Log.d(TAG,"Exit getCurrentPlayBackState");
         return AvrcpUtils.mapBtPlayStatustoPlayBackState(
                 mRemoteMediaPlayers.getAddressedPlayer().mPlayStatus,
                 mRemoteMediaPlayers.getAddressedPlayer().mPlayTime);
     }
     private MediaMetadata getCurrentMetaData(int scope, int trackId) {
-        if(DBG) Log.d(TAG,"Enter getCurrentMetaData");
         /* if scope is now playing */
         if(scope == AvrcpControllerConstants.AVRCP_SCOPE_NOW_PLAYING) {
             if((mRemoteNowPlayingList == null) || (mRemoteNowPlayingList.
@@ -526,13 +508,10 @@ public class AvrcpControllerService extends ProfileService {
         else if(scope == AvrcpControllerConstants.AVRCP_SCOPE_VFS) {
             /* TODO for browsing */
         }
-        if(DBG) Log.d(TAG,"Exit getCurrentMetaData");
         return null;
     }
     private void broadcastMetaDataChanged(MediaMetadata mMetaData) {
         Intent intent = new Intent(BluetoothAvrcpController.ACTION_TRACK_EVENT);
-        if (mMetaData == null)
-            return;
         intent.putExtra(BluetoothAvrcpController.EXTRA_METADATA, mMetaData);
         if(DBG) Log.d(TAG," broadcastMetaDataChanged = " +
                                                    AvrcpUtils.displayMetaData(mMetaData));
@@ -703,13 +682,9 @@ public class AvrcpControllerService extends ProfileService {
                 }
                 break;
             case AvrcpControllerConstants.MESSAGE_PROCESS_PLAY_POS_CHANGED:
-                Bundle data = new Bundle();
-                data = msg.getData();
                 if(mRemoteMediaPlayers != null) {
-                    mRemoteMediaPlayers.getAddressedPlayer().mPlayTime =
-                                                   data.getInt("curposition");
-                    mRemoteMediaPlayers.getAddressedPlayer().mPlayStatus =
-                                                    data.getByte("Playstatus");
+                    mRemoteMediaPlayers.getAddressedPlayer().mPlayTime = msg.arg2;
+
                     if (!mBroadcastMetadata) {
                         Log.d(TAG, "Metadata is not broadcasted, ignoring.");
                         return;
@@ -720,8 +695,7 @@ public class AvrcpControllerService extends ProfileService {
                                     mRemoteMediaPlayers.getAddressedPlayer().mPlayTime));
                 }
                 if(mRemoteNowPlayingList != null) {
-                   mRemoteNowPlayingList.getCurrentTrack().mTrackLen =
-                                                     data.getInt("songlen");
+                    mRemoteNowPlayingList.getCurrentTrack().mTrackLen = msg.arg1;
                 }
                 break;
             case AvrcpControllerConstants.MESSAGE_PROCESS_PLAY_STATUS_CHANGED:
@@ -765,7 +739,6 @@ public class AvrcpControllerService extends ProfileService {
     {
         int maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         int currIndex = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-        if(DBG) Log.d(TAG,"Enter setAbsVolume");
         if (mAvrcpRemoteDevice.mFirstAbsVolCmdRecvd) {
             int newIndex = (maxVolume*absVol)/AvrcpControllerConstants.ABS_VOL_BASE;
             Log.d(TAG," setAbsVolume ="+absVol + " maxVol = " + maxVolume + " cur = " + currIndex +
@@ -786,7 +759,6 @@ public class AvrcpControllerService extends ProfileService {
             Log.d(TAG," SetAbsVol recvd for first time, respond with " + absVol);
         }
         sendAbsVolRspNative(getByteAddress(mAvrcpRemoteDevice.mBTDevice), absVol, label);
-        if(DBG) Log.d(TAG,"Exit setAbsVolume");
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -865,7 +837,6 @@ public class AvrcpControllerService extends ProfileService {
                         oldState, device);
             mHandler.sendMessage(msg);
         }
-        if(DBG) Log.d(TAG,"Exit onConnectionStateChanged");
     }
 
     private void getRcFeatures(byte[] address, int features) {
@@ -888,7 +859,6 @@ public class AvrcpControllerService extends ProfileService {
         Message msg = mHandler.obtainMessage(AvrcpControllerConstants.
                 MESSAGE_PROCESS_REGISTER_ABS_VOL_NOTIFICATION, label, 0);
         mHandler.sendMessage(msg);
-        if(DBG) Log.d(TAG,"Exit handleRegisterNotificationAbsVol");
     }
 
     private void handleSetAbsVolume(byte[] address, byte absVol, byte label)
@@ -901,7 +871,6 @@ public class AvrcpControllerService extends ProfileService {
         Message msg = mHandler.obtainMessage(
                 AvrcpControllerConstants.MESSAGE_PROCESS_SET_ABS_VOL_CMD, absVol, label);
         mHandler.sendMessage(msg);
-        if(DBG) Log.d(TAG,"Exit handleSetAbsVolume");
     }
 
     private void onTrackChanged(byte[] address, byte numAttributes, int[] attributes,
@@ -916,24 +885,17 @@ public class AvrcpControllerService extends ProfileService {
         Message msg = mHandler.obtainMessage(AvrcpControllerConstants.
                 MESSAGE_PROCESS_TRACK_CHANGED, numAttributes, 0, mTrack);
         mHandler.sendMessage(msg);
-        if(DBG) Log.d(TAG,"Exit onTrackChanged");
     }
 
-    private void onPlayPositionChanged(byte[] address, int songLen, int currSongPosition, byte playStatus) {
+    private void onPlayPositionChanged(byte[] address, int songLen, int currSongPosition) {
         Log.d(TAG,"onPlayPositionChanged ");
         BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice
                 (Utils.getAddressStringFromByte(address));
         if (!mConnectedDevices.contains(device))
             return;
-        Bundle data = new Bundle();
-        data.putByte("Playstatus", playStatus);
-        data.putInt("songlen", songLen);
-        data.putInt("curposition", currSongPosition);
         Message msg = mHandler.obtainMessage(AvrcpControllerConstants.
-                                             MESSAGE_PROCESS_PLAY_POS_CHANGED);
-        msg.setData(data);
+                MESSAGE_PROCESS_PLAY_POS_CHANGED, songLen, currSongPosition);
         mHandler.sendMessage(msg);
-        if(DBG) Log.d(TAG,"Exit onPlayPositionChanged");
     }
 
     private void onPlayStatusChanged(byte[] address, byte playStatus) {
@@ -945,7 +907,6 @@ public class AvrcpControllerService extends ProfileService {
         Message msg = mHandler.obtainMessage(AvrcpControllerConstants.
                 MESSAGE_PROCESS_PLAY_STATUS_CHANGED, playStatus, 0);
         mHandler.sendMessage(msg);
-        if(DBG) Log.d(TAG,"Exit onPlayStatusChanged");
     }
 
     private void handlePlayerAppSetting(byte[] address, byte[] playerAttribRsp, int rspLen) {
@@ -958,7 +919,6 @@ public class AvrcpControllerService extends ProfileService {
         Message msg = mHandler.obtainMessage(AvrcpControllerConstants.
                 MESSAGE_PROCESS_SUPPORTED_PLAYER_APP_SETTING, 0, 0, bb);
         mHandler.sendMessage(msg);
-        if(DBG) Log.d(TAG,"Exit handlePlayerAppSetting");
     }
 
     private void onPlayerAppSettingChanged(byte[] address, byte[] playerAttribRsp, int rspLen) {
@@ -971,7 +931,6 @@ public class AvrcpControllerService extends ProfileService {
         Message msg = mHandler.obtainMessage(AvrcpControllerConstants.
                 MESSAGE_PROCESS_PLAYER_APP_SETTING_CHANGED, 0, 0, bb);
         mHandler.sendMessage(msg);
-        if(DBG) Log.d(TAG,"Exit onPlayerAppSettingChanged");
     }
 
     private void handleGroupNavigationRsp(int id, int keyState) {

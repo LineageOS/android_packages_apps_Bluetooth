@@ -24,12 +24,8 @@ import com.android.bluetooth.map.BluetoothMapUtils.TYPE;
 
 public class BluetoothMapbMessageSms extends BluetoothMapbMessage {
 
-    private static final boolean D = BluetoothMapService.DEBUG;
-    private static final boolean V = Log.isLoggable(BluetoothMapService.LOG_TAG, Log.VERBOSE);
     private ArrayList<SmsPdu> mSmsBodyPdus = null;
     private String mSmsBody = null;
-    private String PCM_CARKIT = "9C:DF:03";
-    private String FORD_SYNC_CARKIT ="00:1E:AE";
 
     public void setSmsBodyPdus(ArrayList<SmsPdu> smsBodyPdus) {
         this.mSmsBodyPdus = smsBodyPdus;
@@ -81,16 +77,6 @@ public class BluetoothMapbMessageSms extends BluetoothMapbMessage {
          */
         if(mSmsBody != null) {
             String tmpBody = mSmsBody.replaceAll("END:MSG", "/END\\:MSG"); // Replace any occurrences of END:MSG with \END:MSG
-            /* Fix IOT issue with PCM carkit where carkit is unable to parse
-               message if carriage return is present in it */
-            if(BluetoothMapService.getRemoteDevice().getAddress().startsWith(PCM_CARKIT)) {
-               tmpBody = tmpBody.replaceAll("\r", "");
-            /* Fix Message Display issue with FORD SYNC carkit -
-             * Remove line feed and include only carriage return */
-            } else if(BluetoothMapService.getRemoteDevice().getAddress()
-                    .startsWith(FORD_SYNC_CARKIT)) {
-               tmpBody = tmpBody.replaceAll("\n", "");
-            }
             bodyFragments.add(tmpBody.getBytes("UTF-8"));
         }else if (mSmsBodyPdus != null && mSmsBodyPdus.size() > 0) {
             for (SmsPdu pdu : mSmsBodyPdus) {

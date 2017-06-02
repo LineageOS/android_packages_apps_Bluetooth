@@ -14,7 +14,6 @@
 */
 package com.android.bluetooth.map;
 
-import com.android.bluetooth.R;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,7 +44,7 @@ public class BluetoothMapAppObserver{
     private static final String TAG = "BluetoothMapAppObserver";
 
     private static final boolean D = BluetoothMapService.DEBUG;
-    private static final boolean V = Log.isLoggable(BluetoothMapService.LOG_TAG, Log.VERBOSE);
+    private static final boolean V = BluetoothMapService.VERBOSE;
     /*  */
     private LinkedHashMap<BluetoothMapAccountItem, ArrayList<BluetoothMapAccountItem>> mFullList;
     private LinkedHashMap<String,ContentObserver> mObserverMap =
@@ -62,14 +61,7 @@ public class BluetoothMapAppObserver{
         mContext    = context;
         mMapService = mapService;
         mResolver   = context.getContentResolver();
-        boolean isDisabledNonAosp = context.getResources().getBoolean
-                (R.bool.disable_non_aosp_bt_features);
-        if (D) Log.d(TAG, "isDisabledNonAosp :" + isDisabledNonAosp);
-        if (isDisabledNonAosp) {
-            mLoader = new BluetoothMapAccountLoader(mContext);
-        } else {
-            mLoader = new BluetoothMapAccountEmailLoader(mContext);
-        }
+        mLoader     = new BluetoothMapAccountLoader(mContext);
         mFullList   = mLoader.parsePackages(false); /* Get the current list of apps */
         createReceiver();
         initObservers();

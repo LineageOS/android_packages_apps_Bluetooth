@@ -14,18 +14,10 @@ LOCAL_SRC_FILES:= \
     com_android_bluetooth_hdp.cpp \
     com_android_bluetooth_pan.cpp \
     com_android_bluetooth_gatt.cpp \
-    com_android_bluetooth_sdp.cpp \
-    com_android_bluetooth_btservice_vendor.cpp
+    com_android_bluetooth_sdp.cpp
 
-ifneq ($(TARGET_SUPPORTS_WEARABLES),true)
 LOCAL_C_INCLUDES += \
-     $(JNI_H_INCLUDE) \
-     vendor/qcom/opensource/bluetooth/hal/include
-else
-LOCAL_C_INCLUDES += \
-     $(JNI_H_INCLUDE) \
-     device/qcom/msm8909w/opensource/bluetooth/hal/include
-endif
+    $(JNI_H_INCLUDE) \
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \

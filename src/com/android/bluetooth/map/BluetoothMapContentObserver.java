@@ -83,7 +83,7 @@ public class BluetoothMapContentObserver {
     private static final String TAG = "BluetoothMapContentObserver";
 
     private static final boolean D = BluetoothMapService.DEBUG;
-    private static final boolean V = Log.isLoggable(BluetoothMapService.LOG_TAG, Log.VERBOSE);
+    private static final boolean V = BluetoothMapService.VERBOSE;
 
     private static final String EVENT_TYPE_NEW              = "NewMessage";
     private static final String EVENT_TYPE_DELETE           = "MessageDeleted";
@@ -601,7 +601,7 @@ public class BluetoothMapContentObserver {
         }
     }
 
-    class Event {
+    private class Event {
         String eventType;
         long handle;
         String folder = null;
@@ -777,9 +777,7 @@ public class BluetoothMapContentObserver {
                             subject.substring(0,subject.length() < 256 ? subject.length() : 256));
                 }
                 if (senderName != null) {
-                    xmlEvtReport.attribute("", "sender_name",
-                            senderName.substring(0, senderName.length() < 256 ?
-                                senderName.length() : 256));
+                    xmlEvtReport.attribute("", "sender_name", senderName);
                 }
                 if (priority != null) {
                     xmlEvtReport.attribute("", "priority", priority);
@@ -841,8 +839,6 @@ public class BluetoothMapContentObserver {
         long folderId = -1;     // Email folder ID
         long oldFolderId = -1;  // Used for email undelete
         boolean localInitiatedSend = false; // Used for MMS to filter out events
-        boolean localInitiatedReadStatus = false; // Used for SetMsgStatusRead to filter out event
-        boolean localInitiatedShift = false; // Used for SetMsgStatusDelete to filter out events
         boolean transparent = false; // Used for EMAIL to delete message sent with transparency
         int flagRead = -1;      // Message status read/unread
 
@@ -1328,14 +1324,14 @@ public class BluetoothMapContentObserver {
         boolean listChanged = false;
 
         Cursor c;
+        if (mMapEventReportVersion == BluetoothMapUtils.MAP_EVENT_REPORT_V10) {
+            c = mResolver.query(Sms.CONTENT_URI,
+                    SMS_PROJECTION_SHORT, null, null, null);
+        } else {
+            c = mResolver.query(Sms.CONTENT_URI,
+                    SMS_PROJECTION_SHORT_EXT, null, null, null);
+        }
         synchronized(getMsgListSms()) {
-            if (mMapEventReportVersion == BluetoothMapUtils.MAP_EVENT_REPORT_V10) {
-                c = mResolver.query(Sms.CONTENT_URI,
-                        SMS_PROJECTION_SHORT, null, null, null);
-            } else {
-                c = mResolver.query(Sms.CONTENT_URI,
-                        SMS_PROJECTION_SHORT_EXT, null, null, null);
-            }
             try {
                 if (c != null && c.moveToFirst()) {
                     do {
@@ -1361,9 +1357,6 @@ public class BluetoothMapContentObserver {
                                 String date = BluetoothMapUtils.getDateTimeString(
                                         c.getLong(c.getColumnIndex(Sms.DATE)));
                                 String subject = c.getString(c.getColumnIndex(Sms.BODY));
-                                if (subject == null ) {
-                                    subject = "";
-                                }
                                 String name = "";
                                 String phone = "";
                                 if (type == 1) { //inbox
@@ -1480,15 +1473,15 @@ public class BluetoothMapContentObserver {
         HashMap<Long, Msg> msgListMms = new HashMap<Long, Msg>();
         boolean listChanged = false;
         Cursor c;
-        synchronized(getMsgListMms()) {
-            if (mMapEventReportVersion == BluetoothMapUtils.MAP_EVENT_REPORT_V10) {
-                c = mResolver.query(Mms.CONTENT_URI,
-                        MMS_PROJECTION_SHORT, null, null, null);
-            } else {
-                c = mResolver.query(Mms.CONTENT_URI,
-                        MMS_PROJECTION_SHORT_EXT, null, null, null);
-            }
+        if (mMapEventReportVersion == BluetoothMapUtils.MAP_EVENT_REPORT_V10) {
+            c = mResolver.query(Mms.CONTENT_URI,
+                    MMS_PROJECTION_SHORT, null, null, null);
+        } else {
+            c = mResolver.query(Mms.CONTENT_URI,
+                    MMS_PROJECTION_SHORT_EXT, null, null, null);
+        }
 
+        synchronized(getMsgListMms()) {
             try{
                 if (c != null && c.moveToFirst()) {
                     do {
@@ -1527,9 +1520,6 @@ public class BluetoothMapContentObserver {
                                     /* Get subject from mms text body parts - if any exists */
                                     subject = BluetoothMapContent.getTextPartsMms(mResolver, id);
                                 }
-                                if (subject == null ) {
-                                    subject = "";
-                                }
                                 int tmpPri = c.getInt(c.getColumnIndex(Mms.PRIORITY));
                                 Log.d(TAG, "TEMP handleMsgListChangesMms, " +
                                         "newMessage 'read' state: " + read +
@@ -1537,9 +1527,6 @@ public class BluetoothMapContentObserver {
 
                                 String address = BluetoothMapContent.getAddressMms(
                                         mResolver,id,BluetoothMapContent.MMS_FROM);
-                                if (address == null ) {
-                                    address = "";
-                                }
                                 String priority = "no";
                                 if(tmpPri == PduHeaders.PRIORITY_HIGH)
                                     priority = "yes";
@@ -3095,6 +3082,22 @@ public class BluetoothMapContentObserver {
                 int status = -1;
                 if(msgInfo.timestamp == timestamp) {
                     msgInfo.partsDelivered++;
+                    byte[] pdu = intent.getByteArrayExtra("pdu");
+                    String format = intent.getStringExtra("format");
+
+                    SmsMessage message = SmsMessage.createFromPdu(pdu, format);
+                    if (message == null) {
+                        Log.d(TAG, "actionMessageDelivery: Can't get message from pdu");
+                        return;
+                    }
+                    status = message.getStatus();
+                    if(status != 0/*0 is success*/) {
+                        msgInfo.statusDelivered = status;
+                        if(D) Log.d(TAG, "msgInfo.statusDelivered = " + status);
+                        Sms.moveMessageToFolder(mContext, msgInfo.uri, Sms.MESSAGE_TYPE_FAILED, 0);
+                    } else {
+                        Sms.moveMessageToFolder(mContext, msgInfo.uri, Sms.MESSAGE_TYPE_SENT, 0);
+                    }
                 }
                 if (msgInfo.partsDelivered == msgInfo.parts) {
                     actionMessageDelivery(context, intent, msgInfo);

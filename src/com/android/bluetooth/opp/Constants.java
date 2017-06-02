@@ -223,20 +223,15 @@ public class Constants {
         "text/plain",
         "text/html",
         "text/xml",
-        "text/comma-separated-values",
-        "text/calendar",
-        "application/ogg",
         "application/zip",
         "application/vnd.ms-excel",
         "application/msword",
         "application/vnd.ms-powerpoint",
         "application/pdf",
-        "application/epub+zip",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation",
         "application/x-hwp",
-        "application/vnd.android.package-archive",
     };
 
     /**
@@ -258,7 +253,7 @@ public class Constants {
     /**
      * Verbose level logging
      */
-    public static final boolean VERBOSE = true;
+    public static final boolean VERBOSE = false;
 
     /** use TCP socket instead of Rfcomm Socket to develop */
     public static final boolean USE_TCP_DEBUG = false;

@@ -34,7 +34,7 @@ public abstract class BluetoothMapbMessage {
 
     protected static String TAG = "BluetoothMapbMessage";
     protected static final boolean D = BluetoothMapService.DEBUG;
-    protected static final boolean V = Log.isLoggable(BluetoothMapService.LOG_TAG, Log.VERBOSE);
+    protected static final boolean V = BluetoothMapService.VERBOSE;
 
     private String mVersionString = "VERSION:1.0";
 
@@ -192,14 +192,6 @@ public abstract class BluetoothMapbMessage {
             } else
                 return null;
         }
-
-        public String[] getEmailAddresses() {
-            if (mEmailAddresses.length > 0) {
-                return mEmailAddresses;
-            } else
-                throw new IllegalArgumentException("No Recipient Email Address");
-        }
-
         public String getFirstBtUci() {
             if(mBtUcis.length > 0) {
                 return mBtUcis[0];
@@ -288,7 +280,6 @@ public abstract class BluetoothMapbMessage {
                         // Empty phone number - ignore
                 }
                 else if(line.startsWith("EMAIL:")){
-                    line = line.replace("&lt;", "<").replace("&gt;", ">");
                     parts = line.split("[^\\\\]:"); // Split on "un-escaped" :
                     if(parts.length == 2) {
                         String[] subParts = parts[1].split("[^\\\\];");
@@ -339,33 +330,6 @@ public abstract class BluetoothMapbMessage {
             this.mInStream = is;
         }
 
-        private byte[] getLineTerminatorAsBytes() {
-            int readByte;
-            // Donot skip Empty Line.
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            try {
-                while ((readByte = mInStream.read()) != -1) {
-                    if (readByte == '\r') {
-                        if ((readByte = mInStream.read()) != -1 && readByte == '\n') {
-                            if (output.size() == 0) {
-                                Log.v(TAG,"outputsize 0");
-                                output.write('\r');
-                                output.write('\n');
-                            }
-                            break;
-                        } else {
-                            output.write('\r');
-                        }
-                    }
-                    output.write(readByte);
-                }
-            } catch (IOException e) {
-                Log.w(TAG, e);
-                return null;
-            }
-            return output.toByteArray();
-        }
-
         private byte[] getLineAsBytes() {
             int readByte;
 
@@ -404,41 +368,16 @@ public abstract class BluetoothMapbMessage {
         }
 
         /**
-         * Read a line of text from the BMessage including empty lines.
-         * @return the next line of text, or null at end of file, or if UTF-8 is not supported.
-         * @hide
-         */
-        public String getLineTerminator() {
-            try {
-                byte[] line = getLineTerminatorAsBytes();
-                if (line == null) {
-                    return null;
-                } else if (line.length == 0){
-                    return null;
-                } else {
-                    return new String(line, "UTF-8");
-                }
-            } catch (UnsupportedEncodingException e) {
-                Log.w(TAG, e);
-                return null;
-            }
-        }
-
-        /**
          * Read a line of text from the BMessage.
          * @return the next line of text, or null at end of file, or if UTF-8 is not supported.
-         * @hide
          */
         public String getLine() {
             try {
                 byte[] line = getLineAsBytes();
-                if (line == null) {
-                   return null;
-                } else if (line.length == 0) {
-                   return null;
-                } else {
-                   return new String(line, "UTF-8");
-                }
+                if (line.length == 0)
+                    return null;
+                else
+                    return new String(line, "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 Log.w(TAG, e);
                 return null;
@@ -486,18 +425,12 @@ public abstract class BluetoothMapbMessage {
          */
         public void expect(String subString, String subString2) throws IllegalArgumentException{
             String line = getLine();
-            if (line == null || subString == null) {
-                throw new IllegalArgumentException("Line or substring is null");
-            } else if (!line.toUpperCase().contains(subString.toUpperCase())) {
+            if(!line.toUpperCase().contains(subString.toUpperCase()))
                 throw new IllegalArgumentException("Expected \"" + subString + "\" in: \""
                                                    + line + "\"");
-            }
-            if (line == null || subString2 == null) {
-                throw new IllegalArgumentException("Line or substring is null");
-            } else if (!line.toUpperCase().contains(subString2.toUpperCase())) {
+            if(!line.toUpperCase().contains(subString2.toUpperCase()))
                 throw new IllegalArgumentException("Expected \"" + subString + "\" in: \""
                                                    + line + "\"");
-            }
         }
 
         /**
@@ -522,56 +455,6 @@ public abstract class BluetoothMapbMessage {
                 return null;
             }
             return data;
-        }
-        /**
-         * Read a part of BMessage including empty lines for last occurence of  terminator
-         * @return the string till terminator, or null at end of file, or if UTF-8 is not supported
-         * @hide
-         */
-        public String getLastStringTerminator(String terminator) {
-            StringBuilder dataStr = new StringBuilder();
-            String lineCur = getLineTerminator();
-            while (lineCur != null) {
-                String firstOccur = getStringTerminator(terminator);
-                if (firstOccur != null) {
-                    if (dataStr.length() != 0) {
-                        dataStr.append(terminator);
-                        dataStr.append("\r\n");
-                    }
-                    dataStr.append(lineCur);
-                    if (!lineCur.equals("\r\n")) {
-                        dataStr.append("\r\n");
-                    }
-                    dataStr.append(firstOccur);
-                } else {
-                    //No more occureences of terminator
-                    break;
-                }
-                lineCur = getLineTerminator();
-            }
-            return dataStr.toString();
-        }
-        /**
-         * Read a part of BMessage including empty lines till terminator
-         * @return the string till terminator, or null at end of file, or if UTF-8 is not supported
-         * @hide
-         */
-        public String getStringTerminator(String terminator) {
-            StringBuilder dataStr= new StringBuilder();
-            String lineCur = getLineTerminator();
-            while (lineCur != null && (!lineCur.equals(terminator))) {
-                dataStr.append(lineCur);
-                if (!lineCur.equals("\r\n")) {
-                   dataStr.append("\r\n");
-                }
-                lineCur = getLineTerminator();
-           }
-           //Return string if only terminator is present.
-           if (lineCur != null && lineCur.equals(terminator)) {
-               return dataStr.toString();
-           } else {
-               return null;
-           }
         }
     };
 
@@ -715,7 +598,7 @@ public abstract class BluetoothMapbMessage {
                         newBMsg = new BluetoothMapbMessageMime();
                         break;
                     case EMAIL:
-                        newBMsg = new BluetoothMapbMessageExtEmail();
+                        newBMsg = new BluetoothMapbMessageEmail();
                         break;
                     case IM:
                         newBMsg = new BluetoothMapbMessageMime();
@@ -754,10 +637,6 @@ public abstract class BluetoothMapbMessage {
         }
         if(line.contains("BEGIN:BENV")) {
             newBMsg.parseEnvelope(reader, 0);
-            if ( type == TYPE.EMAIL && newBMsg instanceof BluetoothMapbMessageExtEmail) {
-                ((BluetoothMapbMessageExtEmail)newBMsg)
-                    .parseBodyEmail(reader.getLastStringTerminator("END:BBODY"));
-            }
         } else
             throw new IllegalArgumentException("Bmessage has no BEGIN:BENV - line:" + line);
 
@@ -793,7 +672,7 @@ public abstract class BluetoothMapbMessage {
             if(D) Log.d(TAG,"Decoding nested envelope");
             parseEnvelope(reader, ++level); // Nested BENV
         }
-        if (mType != TYPE.EMAIL && line.contains("BEGIN:BBODY")) {
+        if(line.contains("BEGIN:BBODY")){
             if(D) Log.d(TAG,"Decoding bbody");
             parseBody(reader);
         }
@@ -867,16 +746,24 @@ public abstract class BluetoothMapbMessage {
                  * END:MSG in the actual message content, it is now safe to use the END:MSG tag
                  * as terminator, and simply ignore the length field.*/
 
-                String data = reader.getStringTerminator("END:MSG");
+                /* 2 added to compensate for the removed \r\n */
+                byte[] rawData = reader.getDataBytes(mBMsgLength - (line.getBytes().length + 2));
+                String data;
+                try {
+                    data = new String(rawData, "UTF-8");
                     if(V) {
                         Log.v(TAG,"MsgLength: " + mBMsgLength);
-                        Log.v(TAG,"data.getBytes().length: " + data.getBytes().length);
+                        Log.v(TAG,"line.getBytes().length: " + line.getBytes().length);
                         String debug = line.replaceAll("\\n", "<LF>\n");
                         debug = debug.replaceAll("\\r", "<CR>");
                         Log.v(TAG,"The line: \"" + debug + "\"");
                         debug = data.replaceAll("\\n", "<LF>\n");
                         debug = debug.replaceAll("\\r", "<CR>");
-                        Log.v(TAG, "The msgString: \"" + data + "\"");
+                        Log.v(TAG,"The msgString: \"" + debug + "\"");
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    Log.w(TAG,e);
+                    throw new IllegalArgumentException("Unable to convert to UTF-8");
                 }
                 /* Decoding of MSG:
                  * 1) split on "\r\nEND:MSG\r\n"

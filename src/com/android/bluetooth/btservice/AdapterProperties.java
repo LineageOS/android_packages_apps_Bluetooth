@@ -500,8 +500,8 @@ class AdapterProperties {
                         mService.sendBroadcast(intent, mService.BLUETOOTH_PERM);
                         debugLog("Scan Mode:" + mScanMode);
                         if (mBluetoothDisabling) {
-                            mBluetoothDisabling = false;
-                            mService.startBrEdrCleanup();
+                            mBluetoothDisabling=false;
+                            mService.startBluetoothDisable();
                         }
                         break;
                     case AbstractionLayer.BT_PROPERTY_UUIDS:
@@ -605,10 +605,6 @@ class AdapterProperties {
         }
     }
 
-    void clearDisableFlag() {
-        mBluetoothDisabling = false;
-    }
-
     void onBluetoothDisable() {
         // From STATE_ON to BLE_ON
         // When BT disable is invoked, set the scan_mode to NONE
@@ -629,7 +625,7 @@ class AdapterProperties {
         infoLog("Callback:discoveryStateChangeCallback with state:" + state);
         synchronized (mObject) {
             Intent intent;
-            if ((state == AbstractionLayer.BT_DISCOVERY_STOPPED) && mDiscovering) {
+            if (state == AbstractionLayer.BT_DISCOVERY_STOPPED) {
                 mDiscovering = false;
                 intent = new Intent(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
                 mService.sendBroadcast(intent, mService.BLUETOOTH_PERM);
