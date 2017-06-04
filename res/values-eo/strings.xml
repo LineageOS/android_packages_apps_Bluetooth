@@ -104,8 +104,10 @@
   <!-- Bluetooth OPP Transfer History -->
   <string name="transfer_menu_open">Malfermi</string>
   <!-- Do not translate. file name used for sharing. -->
+  <string name="bluetooth_share_file_name" translate="false">bluetooth_content_share</string>
   <!-- Used to run Bluetooth.apk in another process if needed -->
   <!-- Do not translate. android:sharedUserId string of this application. -->
   <!-- Do not translate. android:process of this application. -->
+  <string name="bluetooth_map_settings_save">Save</string>
   <string name="bluetooth_map_settings_cancel">Nuligi</string>
 </resources>
