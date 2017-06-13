@@ -393,7 +393,6 @@ public final class Avrcp {
             }
 
             Log.v(TAG, "onQueueChanged: NowPlaying list changed, Queue Size = "+ queue.size());
-            mAddressedMediaPlayer.updateNowPlayingList(queue);
             mHandler.sendEmptyMessage(MSG_NOW_PLAYING_CHANGED_RSP);
         }
     }
@@ -474,8 +473,7 @@ public final class Avrcp {
             case MSG_NOW_PLAYING_CHANGED_RSP:
                 if (DEBUG) Log.v(TAG, "MSG_NOW_PLAYING_CHANGED_RSP");
                 removeMessages(MSG_NOW_PLAYING_CHANGED_RSP);
-                registerNotificationRspNowPlayingChangedNative(
-                        AvrcpConstants.NOTIFICATION_TYPE_CHANGED);
+                mAddressedMediaPlayer.updateNowPlayingList(mMediaController);
                 break;
 
             case MSG_ADDRESSED_PLAYER_CHANGED_RSP:
@@ -491,7 +489,6 @@ public final class Avrcp {
                 break;
 
             case MSG_PLAY_INTERVAL_TIMEOUT:
-                if (DEBUG) Log.v(TAG, "MSG_PLAY_INTERVAL_TIMEOUT");
                 sendPlayPosNotificationRsp(false);
                 break;
 
@@ -1166,15 +1163,19 @@ public final class Avrcp {
         }
 
         long playPositionMs = getPlayPosition();
+        String debugLine = "sendPlayPosNotificationRsp: ";
 
         // mNextPosMs is set to -1 when the previous position was invalid
         // so this will be true if the new position is valid & old was invalid.
         // mPlayPositionMs is set to -1 when the new position is invalid,
         // and the old mPrevPosMs is >= 0 so this is true when the new is invalid
         // and the old was valid.
-        if (DEBUG) Log.d(TAG, "sendPlayPosNotificationRsp: (" + requested + ") "
-                + mPrevPosMs + " <=? " + playPositionMs + " <=? " + mNextPosMs);
-        if (DEBUG) Log.d(TAG, "sendPlayPosNotificationRsp: currentPlayState " + mCurrentPlayState);
+        if (DEBUG) {
+            debugLine += "(" + requested + ") " + mPrevPosMs + " <=? " + playPositionMs + " <=? "
+                    + mNextPosMs;
+            if (isPlayingState(mCurrentPlayState)) debugLine += " Playing";
+            debugLine += " State: " + mCurrentPlayState.getState();
+        }
         if (requested || ((mLastReportedPosition != playPositionMs) &&
                 (playPositionMs >= mNextPosMs) || (playPositionMs <= mPrevPosMs))) {
             if (!requested) mPlayPosChangedNT = AvrcpConstants.NOTIFICATION_TYPE_CHANGED;
@@ -1196,9 +1197,10 @@ public final class Avrcp {
             if (mNextPosMs != -1) {
                 delay = mNextPosMs - (playPositionMs > 0 ? playPositionMs : 0);
             }
-            if (DEBUG) Log.d(TAG, "PLAY_INTERVAL_TIMEOUT set for " + delay + "ms from now");
+            if (DEBUG) debugLine += " Timeout " + delay + "ms";
             mHandler.sendMessageDelayed(msg, delay);
         }
+        if (DEBUG) Log.d(TAG, debugLine);
     }
 
     /**
@@ -2116,7 +2118,7 @@ public final class Avrcp {
                 mMediaController = newController;
                 if (mMediaController != null) {
                     mMediaController.registerCallback(mMediaControllerCb, mHandler);
-                    mAddressedMediaPlayer.updateNowPlayingList(mMediaController.getQueue());
+                    mAddressedMediaPlayer.updateNowPlayingList(mMediaController);
                 } else {
                     mAddressedMediaPlayer.updateNowPlayingList(null);
                     registerRsp = false;
