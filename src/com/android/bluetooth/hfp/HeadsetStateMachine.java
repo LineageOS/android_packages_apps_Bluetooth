@@ -205,8 +205,18 @@ final class HeadsetStateMachine extends StateMachine {
         classInitNative();
 
         VENDOR_SPECIFIC_AT_COMMAND_COMPANY_ID = new HashMap<String, Integer>();
-        VENDOR_SPECIFIC_AT_COMMAND_COMPANY_ID.put("+XEVENT", BluetoothAssignedNumbers.PLANTRONICS);
-        VENDOR_SPECIFIC_AT_COMMAND_COMPANY_ID.put("+ANDROID", BluetoothAssignedNumbers.GOOGLE);
+        VENDOR_SPECIFIC_AT_COMMAND_COMPANY_ID.put(
+                BluetoothHeadset.VENDOR_SPECIFIC_HEADSET_EVENT_XEVENT,
+                BluetoothAssignedNumbers.PLANTRONICS);
+        VENDOR_SPECIFIC_AT_COMMAND_COMPANY_ID.put(
+                BluetoothHeadset.VENDOR_RESULT_CODE_COMMAND_ANDROID,
+                BluetoothAssignedNumbers.GOOGLE);
+        VENDOR_SPECIFIC_AT_COMMAND_COMPANY_ID.put(
+                BluetoothHeadset.VENDOR_SPECIFIC_HEADSET_EVENT_XAPL,
+                BluetoothAssignedNumbers.APPLE);
+        VENDOR_SPECIFIC_AT_COMMAND_COMPANY_ID.put(
+                BluetoothHeadset.VENDOR_SPECIFIC_HEADSET_EVENT_IPHONEACCEV,
+                BluetoothAssignedNumbers.APPLE);
     }
 
     private HeadsetStateMachine(HeadsetService context) {
@@ -2931,36 +2941,61 @@ final class HeadsetStateMachine extends StateMachine {
     }
 
     /**
-     * @return {@code true} if the given string is a valid vendor-specific AT command.
+     * Process vendor specific AT commands
+     * @param atString AT command after the "AT+" prefix
+     * @param device Remote device that has sent this command
      */
-    private boolean processVendorSpecificAt(String atString) {
+    private void processVendorSpecificAt(String atString, BluetoothDevice device) {
         log("processVendorSpecificAt - atString = " + atString);
 
         // Currently we accept only SET type commands.
         int indexOfEqual = atString.indexOf("=");
         if (indexOfEqual == -1) {
             Log.e(TAG, "processVendorSpecificAt: command type error in " + atString);
-            return false;
+            atResponseCodeNative(HeadsetHalConstants.AT_RESPONSE_ERROR, 0, getByteAddress(device));
+            return;
         }
 
         String command = atString.substring(0, indexOfEqual);
         Integer companyId = VENDOR_SPECIFIC_AT_COMMAND_COMPANY_ID.get(command);
         if (companyId == null) {
             Log.e(TAG, "processVendorSpecificAt: unsupported command: " + atString);
-            return false;
+            atResponseCodeNative(HeadsetHalConstants.AT_RESPONSE_ERROR, 0, getByteAddress(device));
+            return;
         }
 
         String arg = atString.substring(indexOfEqual + 1);
         if (arg.startsWith("?")) {
             Log.e(TAG, "processVendorSpecificAt: command type error in " + atString);
-            return false;
+            atResponseCodeNative(HeadsetHalConstants.AT_RESPONSE_ERROR, 0, getByteAddress(device));
+            return;
         }
 
         Object[] args = generateArgs(arg);
+        if (command.equals(BluetoothHeadset.VENDOR_SPECIFIC_HEADSET_EVENT_XAPL)) {
+            processAtXapl(args, device);
+        }
         broadcastVendorSpecificEventIntent(
-                command, companyId, BluetoothHeadset.AT_CMD_TYPE_SET, args, mCurrentDevice);
-        atResponseCodeNative(HeadsetHalConstants.AT_RESPONSE_OK, 0, getByteAddress(mCurrentDevice));
-        return true;
+                command, companyId, BluetoothHeadset.AT_CMD_TYPE_SET, args, device);
+        atResponseCodeNative(HeadsetHalConstants.AT_RESPONSE_OK, 0, getByteAddress(device));
+    }
+
+    /**
+     * Process AT+XAPL AT command
+     * @param args command arguments after the equal sign
+     * @param device Remote device that has sent this command
+     */
+    private void processAtXapl(Object[] args, BluetoothDevice device) {
+        if (args.length != 2) {
+            Log.w(TAG, "processAtXapl() args length must be 2: " + String.valueOf(args.length));
+            return;
+        }
+        if (!(args[0] instanceof String) || !(args[1] instanceof Integer)) {
+            Log.w(TAG, "processAtXapl() argument types not match");
+            return;
+        }
+        // feature = 2 indicates that we support battery level reporting only
+        atResponseStringNative("+XAPL=iPhone," + String.valueOf(2), getByteAddress(device));
     }
 
     private void processUnknownAt(String atString, BluetoothDevice device) {
@@ -2973,14 +3008,15 @@ final class HeadsetStateMachine extends StateMachine {
         log("processUnknownAt - atString = " + atString);
         String atCommand = parseUnknownAt(atString);
         int commandType = getAtCommandType(atCommand);
-        if (atCommand.startsWith("+CSCS"))
+        if (atCommand.startsWith("+CSCS")) {
             processAtCscs(atCommand.substring(5), commandType, device);
-        else if (atCommand.startsWith("+CPBS"))
+        } else if (atCommand.startsWith("+CPBS")) {
             processAtCpbs(atCommand.substring(5), commandType, device);
-        else if (atCommand.startsWith("+CPBR"))
+        } else if (atCommand.startsWith("+CPBR")) {
             processAtCpbr(atCommand.substring(5), commandType, device);
-        else if (!processVendorSpecificAt(atCommand))
-            atResponseCodeNative(HeadsetHalConstants.AT_RESPONSE_ERROR, 0, getByteAddress(device));
+        } else {
+            processVendorSpecificAt(atCommand, device);
+        }
     }
 
     private void processKeyPressed(BluetoothDevice device) {
@@ -3026,12 +3062,17 @@ final class HeadsetStateMachine extends StateMachine {
         }
     }
 
-    private void sendIndicatorIntent(BluetoothDevice device, int ind_id, String ind_value) {
+    /**
+     * Send HF indicator value changed intent
+     * @param device Device whose HF indicator value has changed
+     * @param ind_id Indicator ID [0-65535]
+     * @param ind_value Indicator Value [0-65535], -1 means invalid but ind_id is supported
+     */
+    private void sendIndicatorIntent(BluetoothDevice device, int ind_id, int ind_value) {
         Intent intent = new Intent(BluetoothHeadset.ACTION_HF_INDICATORS_VALUE_CHANGED);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
         intent.putExtra(BluetoothHeadset.EXTRA_HF_INDICATORS_IND_ID, ind_id);
-        if (ind_value != null)
-            intent.putExtra(BluetoothHeadset.EXTRA_HF_INDICATORS_IND_VALUE, ind_value);
+        intent.putExtra(BluetoothHeadset.EXTRA_HF_INDICATORS_IND_VALUE, ind_value);
 
         mService.sendBroadcast(intent, HeadsetService.BLUETOOTH_PERM);
     }
@@ -3049,7 +3090,7 @@ final class HeadsetStateMachine extends StateMachine {
             String id = at_string.substring(iter, iter1);
 
             try {
-                ind_id = new Integer(id);
+                ind_id = Integer.valueOf(id);
             } catch (NumberFormatException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
@@ -3058,12 +3099,12 @@ final class HeadsetStateMachine extends StateMachine {
                 case HeadsetHalConstants.HF_INDICATOR_ENHANCED_DRIVER_SAFETY:
                     log("Send Broadcast intent for the"
                             + "Enhanced Driver Safety indicator.");
-                    sendIndicatorIntent(device, ind_id, null);
+                    sendIndicatorIntent(device, ind_id, -1);
                     break;
                 case HeadsetHalConstants.HF_INDICATOR_BATTERY_LEVEL_STATUS:
                     log("Send Broadcast intent for the"
                             + "Battery Level indicator.");
-                    sendIndicatorIntent(device, ind_id, null);
+                    sendIndicatorIntent(device, ind_id, -1);
                     break;
                 default:
                     log("Invalid HF Indicator Received");
@@ -3076,12 +3117,7 @@ final class HeadsetStateMachine extends StateMachine {
 
     private void processAtBiev(int ind_id, int ind_value, BluetoothDevice device) {
         log(" Process AT + BIEV Command : " + ind_id + ", " + ind_value);
-
-        String ind_value_str = Integer.toString(ind_value);
-
-        Intent intent = new Intent(BluetoothHeadset.ACTION_HF_INDICATORS_VALUE_CHANGED);
-        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
-        sendIndicatorIntent(device, ind_id, ind_value_str);
+        sendIndicatorIntent(device, ind_id, ind_value);
     }
 
     private void onConnectionStateChanged(int state, byte[] address) {
