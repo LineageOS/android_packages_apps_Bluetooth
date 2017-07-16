@@ -1552,8 +1552,15 @@ public final class Avrcp {
         // checking for error cases
         if (mMediaPlayerInfoList.isEmpty()) {
             status = AvrcpConstants.RSP_NO_AVBL_PLAY;
-            Log.w(TAG, " No Available Players to set, sending response back ");
+            Log.w(TAG, "setBrowsedPlayer: No available players! ");
         } else {
+            // Workaround for broken controllers selecting ID 0
+            // Seen at least on Ford, Chevrolet MyLink
+            if (selectedId == 0) {
+                Log.w(TAG, "setBrowsedPlayer: workaround invalid id 0");
+                selectedId = mCurrAddrPlayerID;
+            }
+
             // update current browse player id and start browsing service
             updateNewIds(mCurrAddrPlayerID, selectedId);
             String browsedPackage = getPackageName(selectedId);
@@ -2218,6 +2225,12 @@ public final class Avrcp {
     }
 
     private void handleGetItemAttr(AvrcpCmd.ItemAttrCmd itemAttr) {
+        if (itemAttr.mUidCounter != sUIDCounter) {
+            Log.e(TAG, "handleGetItemAttr: invaild uid counter.");
+            getItemAttrRspNative(
+                    itemAttr.mAddress, AvrcpConstants.RSP_UID_CHANGED, (byte) 0, null, null);
+            return;
+        }
         if (itemAttr.mScope == AvrcpConstants.BTRC_SCOPE_NOW_PLAYING) {
             if (mCurrAddrPlayerID == NO_PLAYER_ID) {
                 getItemAttrRspNative(
