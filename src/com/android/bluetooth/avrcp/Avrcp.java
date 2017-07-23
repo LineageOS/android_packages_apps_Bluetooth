@@ -1845,11 +1845,10 @@ public final class Avrcp {
                 mAvailablePlayerViewChanged = true;
             }
             mMediaPlayerInfoList.put(updateId, info);
-            if (DEBUG)
-                Log.d(TAG, (updated ? "update #" : "add #") + updateId + ":" + info.toString());
-            if (currentRemoved || updateId == mCurrAddrPlayerID) {
-                updateCurrentController(updateId, mCurrBrowsePlayerID);
-            }
+        }
+        if (DEBUG) Log.d(TAG, (updated ? "update #" : "add #") + updateId + ":" + info.toString());
+        if (currentRemoved || updateId == mCurrAddrPlayerID) {
+            updateCurrentController(updateId, mCurrBrowsePlayerID);
         }
         return updated;
     }
@@ -2147,10 +2146,9 @@ public final class Avrcp {
                 } else {
                     registerRsp = false;
                 }
-                mHandler.sendEmptyMessageDelayed(MSG_NOW_PLAYING_CHANGED_RSP, MEDIA_DWELL_TIME);
             }
         }
-        scheduleMediaUpdate();
+        updateCurrentMediaState(false);
         return registerRsp;
     }
 
