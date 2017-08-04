@@ -44,6 +44,7 @@
   <!-- Label for a cancel button. -->
   <string name="bt_enable_cancel">Encaboxar</string>
   <!-- Label for a confirm button.-->
+  <string name="bt_enable_ok">Activar</string>
   <!-- Bluetooth File Transfer Acceptance Dialog -->
   <!--Title -->
   <string name="incoming_file_confirm_title">Tresferencia de ficheros</string>
@@ -84,6 +85,7 @@
   <string name="incoming_line3">Tamañu</string>
   <!-- Bluetooth failed Download  Dialog -->
   <!--Line 1  -->
+  <string name="download_fail_line1">Nun se recibió\'l ficheru</string>
   <!--Line 2  -->
   <!--Line 3  -->
   <!-- Label for ok button.-->
