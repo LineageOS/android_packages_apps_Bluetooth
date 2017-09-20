@@ -22,10 +22,13 @@
         any application that was granted that permission. This specific
         permission controls access to the Bluetooth Avrcp Data Manager.
     -->
+  <string name="permlab_bluetoothAvrcpDataManager">Cothrom fhaighinn air meata-dàta AVRCP.</string>
   <!--
         This is the long description of a permission associated with the
         Bluetooth Avrcp Data Manager. It is displayed as part of the description of
         any application that was granted that permission. This specific
         permission controls access to the Bluetooth Avrcp Data Manager.
     -->
+  <string name="permdesc_bluetoothAvrcpDataManager">Leigidh seo leis an aplacaid cothrom fhaighinn air meata-dàta Bluetooth AVRCP agus a thaisbeanadh air an UI.</string>
+  <string name="upload_fail_waiting">Cha ghabh am faidhle a chur, a’ feuchainn ris a-rithist...</string>
 </resources>
