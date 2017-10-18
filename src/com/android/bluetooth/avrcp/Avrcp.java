@@ -855,7 +855,7 @@ public final class Avrcp {
             // As a result of that, if we pause the music, on carkits the
             // Play status indicator will continue to display "Playing"
             // for 3 more seconds which can be confusing.
-            if (mAudioManagerIsPlaying
+            if ((mAudioManagerIsPlaying && newState.getState() != PlaybackState.STATE_PLAYING)
                     || (controllerState == null && mAudioManager != null
                                && mAudioManager.isMusicActive())) {
                 // Use AudioManager playback state if we don't have the state
@@ -2701,8 +2701,12 @@ public final class Avrcp {
                 return KeyEvent.KEYCODE_VOLUME_DOWN;
             case BluetoothAvrcp.PASSTHROUGH_ID_MUTE:
                 return KeyEvent.KEYCODE_MUTE;
+            case BluetoothAvrcp.PASSTHROUGH_ID_PLAY:
+                return KeyEvent.KEYCODE_MEDIA_PLAY;
             case BluetoothAvrcp.PASSTHROUGH_ID_STOP:
                 return KeyEvent.KEYCODE_MEDIA_STOP;
+            case BluetoothAvrcp.PASSTHROUGH_ID_PAUSE:
+                return KeyEvent.KEYCODE_MEDIA_PAUSE;
             case BluetoothAvrcp.PASSTHROUGH_ID_RECORD:
                 return KeyEvent.KEYCODE_MEDIA_RECORD;
             case BluetoothAvrcp.PASSTHROUGH_ID_REWIND:
@@ -2725,12 +2729,6 @@ public final class Avrcp {
                 return KeyEvent.KEYCODE_F4;
             case BluetoothAvrcp.PASSTHROUGH_ID_F5:
                 return KeyEvent.KEYCODE_F5;
-            // Interop workaround for headphones/car kits
-            // which do not properly key track of playback
-            // state...
-            case BluetoothAvrcp.PASSTHROUGH_ID_PLAY:
-            case BluetoothAvrcp.PASSTHROUGH_ID_PAUSE:
-                return KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
             // Fallthrough for all unknown key mappings
             case BluetoothAvrcp.PASSTHROUGH_ID_SELECT:
             case BluetoothAvrcp.PASSTHROUGH_ID_ROOT_MENU:
