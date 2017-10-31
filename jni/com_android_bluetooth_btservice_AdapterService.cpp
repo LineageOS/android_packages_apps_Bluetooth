@@ -729,6 +729,36 @@ static jboolean startDiscoveryNative(JNIEnv* env, jobject obj) {
   return (ret == BT_STATUS_SUCCESS) ? JNI_TRUE : JNI_FALSE;
 }
 
+static jint sendNvCustomCommandNative(JNIEnv* env, jobject obj, jbyteArray address,
+                jint cmd, jbyteArray data, jint bufferSize) {
+    ALOGV("%s: cmd = %d, data = %s, bufferSize = %d", __FUNCTION__, cmd, data, bufferSize);
+
+    jint status;
+    jbyte *addr = NULL;
+    jint ret = -1;
+    jbyte *c_report = NULL;
+
+    if (!sBluetoothInterface) return ret;
+
+    if (address)
+        addr = env->GetByteArrayElements(address, NULL);
+
+    if (data)
+        c_report = env->GetByteArrayElements(data, NULL);
+
+    /*if ((status = sBluetoothInterface->send_nv_custom_command((bt_bdaddr_t *) addr, cmd, (const char *)c_report, bufferSize))
+            != BT_STATUS_SUCCESS) {
+        ALOGE("NvCustom_remote_response, status: %d", status);
+    }*/
+
+    if (c_report)
+        env->ReleaseByteArrayElements(data, c_report, 0);
+    if (addr)
+        env->ReleaseByteArrayElements(address, addr, 0);
+    return status;
+
+}
+
 static jboolean cancelDiscoveryNative(JNIEnv* env, jobject obj) {
   ALOGV("%s", __func__);
 
@@ -1221,6 +1251,7 @@ static JNINativeMethod sMethods[] = {
     {"getDevicePropertyNative", "([BI)Z", (void*)getDevicePropertyNative},
     {"setDevicePropertyNative", "([BI[B)Z", (void*)setDevicePropertyNative},
     {"startDiscoveryNative", "()Z", (void*)startDiscoveryNative},
+    {"sendNvCustomCommandNative", "([BI[BI)I", (void*) sendNvCustomCommandNative},
     {"cancelDiscoveryNative", "()Z", (void*)cancelDiscoveryNative},
     {"createBondNative", "([BI)Z", (void*)createBondNative},
     {"createBondOutOfBandNative", "([BILandroid/bluetooth/OobData;)Z",

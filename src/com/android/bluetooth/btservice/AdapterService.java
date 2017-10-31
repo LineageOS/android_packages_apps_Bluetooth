@@ -923,6 +923,17 @@ public class AdapterService extends Service {
             return service.startDiscovery();
         }
 
+        public int sendNvCustomCommand(BluetoothDevice device, int cmd, byte[] data, int bufferSize) {
+            if (!Utils.checkCaller()) {
+                Log.w(TAG, "sendNvCustomCommand() - Not allowed for non-active user");
+                return -1;
+            }
+
+            AdapterService service = getService();
+            if (service == null) return -1;
+            return service.sendNvCustomCommand(device, cmd, data, bufferSize);
+        }
+
         public boolean cancelDiscovery() {
             if (!Utils.checkCaller()) {
                 Log.w(TAG, "cancelDiscovery() - Not allowed for non-active user");
@@ -1504,6 +1515,13 @@ public class AdapterService extends Service {
                                        "Need BLUETOOTH ADMIN permission");
 
         return startDiscoveryNative();
+    }
+
+     int sendNvCustomCommand(BluetoothDevice device, int cmd, byte[] data, int bufferSize) {
+         enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                        "Need BLUETOOTH ADMIN permission");
+
+        return sendNvCustomCommandNative(Utils.getByteAddress(device), cmd, data, bufferSize);
     }
 
      boolean cancelDiscovery() {
@@ -2265,6 +2283,7 @@ public class AdapterService extends Service {
     /*package*/ native int getConnectionStateNative(byte[] address);
 
     private native boolean startDiscoveryNative();
+    private native int sendNvCustomCommandNative(byte[] address, int cmd, byte[] data, int bufferSize);
     private native boolean cancelDiscoveryNative();
 
     private native boolean pinReplyNative(byte[] address, boolean accept, int len, byte[] pin);
