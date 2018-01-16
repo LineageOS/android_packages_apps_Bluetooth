@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
@@ -83,7 +84,8 @@ public class ScanManager {
     // Timeout for each controller operation.
     private static final int OPERATION_TIME_OUT_MILLIS = 500;
 
-    private int mLastConfiguredScanSetting = Integer.MIN_VALUE;
+    private int mLastConfiguredScanSettingLE1M = Integer.MIN_VALUE;
+    private int mLastConfiguredScanSettingLECoded = Integer.MIN_VALUE;
     // Scan parameters for batch scan.
     private BatchScanParams mBatchScanParms;
 
@@ -116,6 +118,18 @@ public class ScanManager {
             this.importance = importance;
         }
     }
+
+    private class PhyInfo {
+        public int scanPhy;
+        public int scanModeLE1M;
+        public int scanModeLECoded;
+
+        PhyInfo(int scanPhy, int scanModeLE1M, int scanModeLECoded) {
+            this.scanPhy = scanPhy;
+            this.scanModeLE1M = scanModeLE1M;
+            this.scanModeLECoded = scanModeLECoded;
+        }
+    };
 
     ScanManager(GattService service) {
         mRegularScanClients =
@@ -576,39 +590,84 @@ public class ScanManager {
             if (DBG) {
                 Log.d(TAG, "configureRegularScanParams() - queue=" + mRegularScanClients.size());
             }
-            int curScanSetting = Integer.MIN_VALUE;
+            int curScanSettingLE1M = Integer.MIN_VALUE;
+            int curScanSettingLECoded = Integer.MIN_VALUE;
+            int scanPhy = BluetoothDevice.PHY_LE_1M;
             ScanClient client = getAggressiveClient(mRegularScanClients);
+            PhyInfo phyInfoResult = getPhyInfo(mRegularScanClients);
+            boolean scanModeChanged = false;
+            int scanWindowLE1M = Integer.MIN_VALUE;
+            int scanIntervalLE1M = Integer.MIN_VALUE;
+            int scanWindowLECoded = Integer.MIN_VALUE;
+            int scanIntervalLECoded = Integer.MIN_VALUE;
+            int[] scanInterval = new int[2];
+            int[] scanWindow  = new int[2];
+            int phyCnt = 0;
+
+
             if (client != null) {
-                curScanSetting = client.settings.getScanMode();
+                curScanSettingLE1M = phyInfoResult.scanModeLE1M;
+                curScanSettingLECoded = phyInfoResult.scanModeLECoded;
+                scanPhy = phyInfoResult.scanPhy;
             }
 
             if (DBG) {
-                Log.d(TAG, "configureRegularScanParams() - ScanSetting Scan mode=" + curScanSetting
-                        + " mLastConfiguredScanSetting=" + mLastConfiguredScanSetting);
+                Log.d(TAG, "configureRegularScanParams() - ScanSetting LE 1M Scan mode=" + curScanSettingLE1M
+                        + "ScanSetting LE Coded Scan mode=" + curScanSettingLECoded
+                        + " mLastConfiguredScanSettingLE1M=" + mLastConfiguredScanSettingLE1M
+                        + " mLastConfiguredScanSettingLECoded=" + mLastConfiguredScanSettingLECoded
+                        + "scanPhy=" + scanPhy);
             }
 
-            if (curScanSetting != Integer.MIN_VALUE
-                    && curScanSetting != ScanSettings.SCAN_MODE_OPPORTUNISTIC) {
-                if (curScanSetting != mLastConfiguredScanSetting) {
-                    int scanWindow = getScanWindowMillis(client.settings);
-                    int scanInterval = getScanIntervalMillis(client.settings);
+            if ((curScanSettingLE1M != Integer.MIN_VALUE
+                    && curScanSettingLE1M != ScanSettings.SCAN_MODE_OPPORTUNISTIC)) {
+                if (curScanSettingLE1M != mLastConfiguredScanSettingLE1M) {
+                    scanModeChanged = true;
+                    ScanSettings settings = new ScanSettings.Builder().setScanMode(curScanSettingLE1M).build();
+                    scanWindowLE1M = getScanWindowMillis(settings);
+                    scanIntervalLE1M = getScanIntervalMillis(settings);
                     // convert scanWindow and scanInterval from ms to LE scan units(0.625ms)
-                    scanWindow = Utils.millsToUnit(scanWindow);
-                    scanInterval = Utils.millsToUnit(scanInterval);
-                    gattClientScanNative(false);
-                    if (DBG) {
-                        Log.d(TAG, "configureRegularScanParams - scanInterval = " + scanInterval
-                                + "configureRegularScanParams - scanWindow = " + scanWindow);
-                    }
-                    gattSetScanParametersNative(client.scannerId, scanInterval, scanWindow);
-                    gattClientScanNative(true);
-                    mLastConfiguredScanSetting = curScanSetting;
+                    scanWindow[phyCnt] = Utils.millsToUnit(scanWindowLE1M);
+                    scanInterval[phyCnt] = Utils.millsToUnit(scanIntervalLE1M);
+                    phyCnt++;
                 }
-            } else {
-                mLastConfiguredScanSetting = curScanSetting;
+            }
+            else {
+                mLastConfiguredScanSettingLE1M = curScanSettingLE1M;
                 if (DBG) {
                     Log.d(TAG, "configureRegularScanParams() - queue emtpy, scan stopped");
                 }
+            }
+            if((curScanSettingLECoded != Integer.MIN_VALUE
+                    && curScanSettingLECoded != ScanSettings.SCAN_MODE_OPPORTUNISTIC)) {
+                if (curScanSettingLECoded != mLastConfiguredScanSettingLECoded) {
+                    scanModeChanged = true;
+                    ScanSettings settings = new ScanSettings.Builder().setScanMode(curScanSettingLECoded).build();
+                    scanWindowLECoded = getScanWindowMillis(settings);
+                    scanIntervalLECoded = getScanIntervalMillis(settings);
+                    // convert scanWindow and scanInterval from ms to LE scan units(0.625ms)
+                    scanWindow[phyCnt] = Utils.millsToUnit(scanWindowLECoded);
+                    scanInterval[phyCnt] = Utils.millsToUnit(scanIntervalLECoded);
+                }
+            }
+            else {
+                mLastConfiguredScanSettingLECoded = curScanSettingLECoded;
+                if (DBG) {
+                    Log.d(TAG, "configureRegularScanParams() - queue emtpy, scan stopped");
+                }
+            }
+            if(scanModeChanged) {
+                gattClientScanNative(false);
+                if (DBG) {
+                    Log.d(TAG, "configureRegularScanParams - scanInterval LE 1M = " + scanIntervalLE1M
+                            + "configureRegularScanParams - scanWindow LE 1M= " + scanWindowLE1M
+                            + "configureRegularScanParams - scanWindow LE Coded= " + scanWindowLECoded
+                            + "configureRegularScanParams - scanWindow LE Coded= " + scanWindowLECoded);
+                }
+                gattSetScanParametersNative(client.scannerId, scanPhy, scanInterval, scanWindow);
+                gattClientScanNative(true);
+                mLastConfiguredScanSettingLE1M = curScanSettingLE1M;
+                mLastConfiguredScanSettingLECoded = curScanSettingLECoded;
             }
         }
 
@@ -623,6 +682,29 @@ public class ScanManager {
                     curScanSetting = client.settings.getScanMode();
                 }
             }
+            return result;
+        }
+
+        PhyInfo getPhyInfo(Set<ScanClient> cList) {
+            PhyInfo result = null;
+            int curScanSettingLE1M = Integer.MIN_VALUE;
+            int curScanSettingLECoded = Integer.MIN_VALUE;
+            int curScanPhy = BluetoothDevice.PHY_LE_1M;
+            int aggregateScanPhy = BluetoothDevice.PHY_LE_1M;
+            for (ScanClient client : cList) {
+                // Get the most aggresive scan mode for each PHY
+                curScanPhy = client.settings.getPhy();
+                if (((curScanPhy & BluetoothDevice.PHY_LE_1M)== BluetoothDevice.PHY_LE_1M) &&
+                        (client.settings.getScanMode() > curScanSettingLE1M)) {
+                    curScanSettingLE1M = client.settings.getScanMode();
+                }
+                if (((curScanPhy & BluetoothDevice.PHY_LE_CODED)== BluetoothDevice.PHY_LE_CODED) &&
+                        (client.settings.getScanMode() > curScanSettingLECoded)) {
+                    curScanSettingLECoded = client.settings.getScanMode();
+                }
+                aggregateScanPhy |= client.settings.getPhy();
+            }
+            result = new PhyInfo(aggregateScanPhy, curScanSettingLE1M, curScanSettingLECoded);
             return result;
         }
 
@@ -1266,8 +1348,8 @@ public class ScanManager {
 
         private native void gattClientScanNative(boolean start);
 
-        private native void gattSetScanParametersNative(int clientIf, int scanInterval,
-                int scanWindow);
+        private native void gattSetScanParametersNative(int clientIf, int scan_phy, int[] scanInterval,
+                                                        int[] scanWindow);
 
         /************************** Filter related native methods ********************************/
         private native void gattClientScanFilterAddNative(int clientId,

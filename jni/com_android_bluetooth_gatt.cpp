@@ -1166,11 +1166,24 @@ void set_scan_params_cmpl_cb(int client_if, uint8_t status) {
 }
 
 static void gattSetScanParametersNative(JNIEnv* env, jobject object,
-                                        jint client_if, jint scan_interval_unit,
-                                        jint scan_window_unit) {
+                                        jint client_if, jint scan_phy,
+                                        jintArray scan_interval_unit,
+                                        jintArray scan_window_unit) {
+  std::vector<uint32_t> scan_interval = {0,0};
+  std::vector<uint32_t> scan_window = {0,0};
   if (!sGattIf) return;
+
+  int scan_int_cnt = env->GetArrayLength(scan_interval_unit);
+  if(scan_int_cnt > 0) {
+    env->GetIntArrayRegion(scan_interval_unit, 0, scan_int_cnt, (jint *)&scan_interval[0]);
+  }
+
+  int scan_window_cnt = env->GetArrayLength(scan_window_unit);
+  if(scan_window_cnt > 0) {
+    env->GetIntArrayRegion(scan_window_unit, 0, scan_window_cnt, (jint *)&scan_window[0]);
+  }
   sGattIf->scanner->SetScanParameters(
-      scan_interval_unit, scan_window_unit,
+      scan_phy, scan_interval, scan_window,
       base::Bind(&set_scan_params_cmpl_cb, client_if));
 }
 
@@ -2129,7 +2142,7 @@ static JNINativeMethod sScanMethods[] = {
      (void*)gattClientScanFilterClearNative},
     {"gattClientScanFilterEnableNative", "(IZ)V",
      (void*)gattClientScanFilterEnableNative},
-    {"gattSetScanParametersNative", "(III)V",
+    {"gattSetScanParametersNative", "(II[I[I)V",
      (void*)gattSetScanParametersNative},
 };
 
