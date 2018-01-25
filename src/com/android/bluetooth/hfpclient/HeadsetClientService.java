@@ -169,22 +169,27 @@ public class HeadsetClientService extends ProfileService {
                 }
                 int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
                 if (streamType == AudioManager.STREAM_VOICE_CALL) {
-                    int streamValue = intent
-                            .getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, -1);
-                    int hfVol = HeadsetClientStateMachine.amToHfVol(streamValue);
-                    if (DBG) {
-                        Log.d(TAG,
-                                "Setting volume to audio manager: " + streamValue
-                                        + " hands free: " + hfVol);
-                    }
-                    mAudioManager.setParameters("hfp_volume=" + hfVol);
-                    synchronized (this) {
-                        for (HeadsetClientStateMachine sm : mStateMachineMap.values()) {
-                            if (sm != null) {
-                                sm.sendMessage(
-                                        HeadsetClientStateMachine.SET_SPEAKER_VOLUME, streamValue);
+                    try {
+                        int streamValue = intent
+                                .getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, -1);
+                        int hfVol = HeadsetClientStateMachine.amToHfVol(streamValue);
+                        if (DBG) {
+                            Log.d(TAG,
+                                    "Setting volume to audio manager: " + streamValue
+                                            + " hands free: " + hfVol);
+                        }
+                        mAudioManager.setParameters("hfp_volume=" + hfVol);
+                        synchronized (this) {
+                            for (HeadsetClientStateMachine sm : mStateMachineMap.values()) {
+                                if (sm != null) {
+                                    sm.sendMessage(
+                                            HeadsetClientStateMachine.SET_SPEAKER_VOLUME, streamValue);
+                                }
                             }
                         }
+                    } catch (Exception ex) {
+                        // HeadsetClientStateMachine is likely uninitialized
+                        // thus it throws an exception when calling amToHfVol()
                     }
                 }
             }
