@@ -171,16 +171,16 @@ public class HeadsetClientService extends ProfileService {
                 if (streamType == AudioManager.STREAM_VOICE_CALL) {
                     int streamValue = intent
                             .getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, -1);
-                    int hfVol = HeadsetClientStateMachine.amToHfVol(streamValue);
-                    if (DBG) {
-                        Log.d(TAG,
-                                "Setting volume to audio manager: " + streamValue
-                                        + " hands free: " + hfVol);
-                    }
-                    mAudioManager.setParameters("hfp_volume=" + hfVol);
                     synchronized (this) {
                         for (HeadsetClientStateMachine sm : mStateMachineMap.values()) {
                             if (sm != null) {
+                                int hfVol = sm.amToHfVol(streamValue);
+                                if (DBG) {
+                                    Log.d(TAG,
+                                            "Setting volume to audio manager: " + streamValue
+                                                    + " hands free: " + hfVol);
+                                }
+                                mAudioManager.setParameters("hfp_volume=" + hfVol);
                                 sm.sendMessage(
                                         HeadsetClientStateMachine.SET_SPEAKER_VOLUME, streamValue);
                             }
