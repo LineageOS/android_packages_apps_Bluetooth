@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "457c5b3b_5cd10043",
+        "filename": "src/com/android/bluetooth/hfpclient/HeadsetClientService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 2936
+      },
+      "writtenOn": "2018-01-26T02:42:37Z",
+      "side": 1,
+      "message": "Isn\u0027t this now iterating over N values? Does that mean you are issuing N setParameters calls?",
+      "range": {
+        "startLine": 177,
+        "startChar": 44,
+        "endLine": 177,
+        "endChar": 46
+      },
+      "revId": "277d4f32639854950427d4b557ae6268a9352c77",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
