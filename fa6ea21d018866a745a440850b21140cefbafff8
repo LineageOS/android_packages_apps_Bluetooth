@@ -16,6 +16,24 @@
       "revId": "fa6ea21d018866a745a440850b21140cefbafff8",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6092eac3_11ec7d2d",
+        "filename": "src/com/android/bluetooth/hfpclient/HeadsetClientService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 10067
+      },
+      "writtenOn": "2018-01-28T01:31:44Z",
+      "side": 1,
+      "message": "Yeah, the first volume should be fine. After all it\u0027s just about uninitialized min, max voice call volumes. I\u0027ll push next PS without ternary.",
+      "parentUuid": "80863ba0_aa666019",
+      "revId": "fa6ea21d018866a745a440850b21140cefbafff8",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
     }
   ]
 }
