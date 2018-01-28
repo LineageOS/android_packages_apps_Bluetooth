@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ec5328f_ea8547cb",
+        "filename": "src/com/android/bluetooth/hfpclient/HeadsetClientService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 2936
+      },
+      "writtenOn": "2018-01-28T01:54:58Z",
+      "side": 1,
+      "message": "hfVol \u003d\u003d -1",
+      "range": {
+        "startLine": 178,
+        "startChar": 42,
+        "endLine": 178,
+        "endChar": 44
+      },
+      "revId": "2df036a2cea1cefc5e066f5237efb212b458e5f9",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
