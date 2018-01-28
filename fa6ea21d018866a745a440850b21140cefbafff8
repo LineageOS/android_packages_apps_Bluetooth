@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "80863ba0_aa666019",
+        "filename": "src/com/android/bluetooth/hfpclient/HeadsetClientService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 2936
+      },
+      "writtenOn": "2018-01-28T01:25:10Z",
+      "side": 1,
+      "message": "This gets the first state machine\u0027s amToHfVol value. Is that always the desired one?\n\nAlso, I have a personal preference for writing this as:\n\n  if (hfVol \u003d\u003d -1) {\n    sm.amToHfVol(streamValue)\n  }\n  ...\n\nsince it\u0027s slightly easier to read than the ternary.",
+      "revId": "fa6ea21d018866a745a440850b21140cefbafff8",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
