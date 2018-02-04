@@ -15,6 +15,4 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>
-  <string name="incoming_file_toast_msg">Mae ffeil yn dod mewn o ddyfais arall. Cadarnha dy fod am dderbyn y ffeil hon.</string>
-</resources>
+<resources></resources>

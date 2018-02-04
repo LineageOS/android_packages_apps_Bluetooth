@@ -15,4 +15,6 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources></resources>
+<resources>
+  <string name="incoming_file_toast_msg">Дојдовен фајл од друг уред. Потврдете ако сакате да ја примите оваа датотека.</string>
+</resources>

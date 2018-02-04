@@ -46,11 +46,8 @@
   <!-- Label for a cancel button. -->
   <!-- Label for a confirm button.-->
   <!-- Label for timeout OK button.-->
-  <string name="incoming_file_confirm_timeout_ok">Iawn</string>
   <!-- content for timeout-->
   <!-- Bluetooth File Transfer Acceptance Notification item -->
-  <string name="incoming_file_confirm_Notification_title">Ffeil yn dod mewn</string>
-  <string name="incoming_file_confirm_Notification_content">Mae <xliff:g id="sender">%1$s</xliff:g> yn barod i anfon <xliff:g id="file">%2$s</xliff:g></string>
   <!-- Inbound File Transfer Progress Notification item -->
   <!-- label for the notification item of receiving file -->
   <!-- label for the notification item of received file -->
@@ -76,7 +73,6 @@
   <!--Line 2  -->
   <!--Line 3  -->
   <!-- Label for ok button.-->
-  <string name="download_fail_ok">Iawn</string>
   <!-- Bluetooth Successful Download  Dialog -->
   <!--Line 4 in "Bluetooth Download Progress Dialog" -->
   <!-- Label for a OK button.-->
@@ -84,12 +80,10 @@
   <!-- Bluetooth Successful Upload Progress Dialog -->
   <!--Line 4 -->
   <!-- Label for a confirm button.-->
-  <string name="upload_succ_ok">Iawn</string>
   <!-- Bluetooth Failed Upload File Transfer Dialog -->
   <!-- Label for a try again button.-->
   <!-- Label for a cancel button.-->
   <!-- Bluetooth error dialog -->
-  <string name="bt_error_btn_ok">Iawn</string>
   <!-- Bluetooth  Enabling progress dialog -->
   <!-- Bluetooth Toast Message -->
   <!-- Bluetooth System Messages [CHAR LIMIT=NONE] -->
@@ -102,7 +96,4 @@
   <!-- Used to run Bluetooth.apk in another process if needed -->
   <!-- Do not translate. android:sharedUserId string of this application. -->
   <!-- Do not translate. android:process of this application. -->
-  <string name="bluetooth_map_settings_intro">Dewisa\'r cyfrifon wyt am eu rhannu trwy Bluetooth. Mi fydd dal yn rhaid caniatáu unrhyw fynediad i\'r cyfrifon wrth gysylltu.</string>
-  <string name="bluetooth_connected">Sain Bluetooth wedi\'i chysylltu</string>
-  <string name="bluetooth_disconnected">Sain Bluetooth wedi\'i datgysylltu</string>
 </resources>
