@@ -61,6 +61,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.bluetooth.BluetoothMetricsProto;
 import com.android.bluetooth.Utils;
 import com.android.bluetooth.btservice.RemoteDevices.DeviceProperties;
 import com.android.bluetooth.gatt.GattService;
@@ -69,7 +70,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 
-import com.google.protobuf.micro.InvalidProtocolBufferMicroException;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -269,9 +270,11 @@ public class AdapterService extends Service {
                     }
                     mRunningProfiles.add(profile);
                     if (GattService.class.getSimpleName().equals(profile.getName())) {
-                        mAdapterStateMachine.sendMessage(AdapterState.BLE_STARTED);
+                        enableNativeWithGuestFlag();
                     } else if (mRegisteredProfiles.size() == Config.getSupportedProfiles().length
                             && mRegisteredProfiles.size() == mRunningProfiles.size()) {
+                        updateUuids();
+                        setBluetoothClassFromConfig();
                         mAdapterStateMachine.sendMessage(AdapterState.BREDR_STARTED);
                     }
                     break;
@@ -290,6 +293,7 @@ public class AdapterService extends Service {
                             .equals(mRunningProfiles.get(0).getName())))) {
                         mAdapterStateMachine.sendMessage(AdapterState.BREDR_STOPPED);
                     } else if (mRunningProfiles.size() == 0) {
+                        disableNative();
                         mAdapterStateMachine.sendMessage(AdapterState.BLE_STOPPED);
                     }
                     break;
@@ -368,8 +372,8 @@ public class AdapterService extends Service {
         mRemoteDevices.init();
         mBinder = new AdapterServiceBinder(this);
         mAdapterProperties = new AdapterProperties(this);
-        mAdapterStateMachine = AdapterState.make(this, mAdapterProperties);
-        mJniCallbacks = new JniCallbacks(mAdapterStateMachine, mAdapterProperties);
+        mAdapterStateMachine = AdapterState.make(this);
+        mJniCallbacks = new JniCallbacks(this, mAdapterProperties);
         initNative();
         mNativeAvailable = true;
         mCallbacks = new RemoteCallbackList<IBluetoothCallback>();
@@ -472,7 +476,7 @@ public class AdapterService extends Service {
         }
     };
 
-    void bleOnProcessStart() {
+    void bringUpBle() {
         debugLog("bleOnProcessStart()");
 
         if (getResources().getBoolean(
@@ -507,6 +511,20 @@ public class AdapterService extends Service {
         setProfileServiceState(GattService.class, BluetoothAdapter.STATE_ON);
     }
 
+    void bringDownBle() {
+        stopGattProfileService();
+    }
+
+    void stateChangeCallback(int status) {
+        if (status == AbstractionLayer.BT_STATE_OFF) {
+            debugLog("stateChangeCallback: disableNative() completed");
+        } else if (status == AbstractionLayer.BT_STATE_ON) {
+            mAdapterStateMachine.sendMessage(AdapterState.BLE_STARTED);
+        } else {
+            Log.e(TAG, "Incorrect status " + status + " in stateChangeCallback");
+        }
+    }
+
     /**
      * Sets the Bluetooth CoD value of the local adapter if there exists a config value for it.
      */
@@ -533,31 +551,42 @@ public class AdapterService extends Service {
         return result;
     }
 
-    void startCoreServices() {
+    void startProfileServices() {
         debugLog("startCoreServices()");
         Class[] supportedProfileServices = Config.getSupportedProfiles();
-        setAllProfileServiceStates(supportedProfileServices, BluetoothAdapter.STATE_ON);
-    }
-
-    void startBluetoothDisable() {
-        mAdapterStateMachine.sendMessage(AdapterState.BEGIN_DISABLE);
+        if (supportedProfileServices.length == 1 && GattService.class.getSimpleName()
+                .equals(supportedProfileServices[0].getSimpleName())) {
+            updateUuids();
+            setBluetoothClassFromConfig();
+            mAdapterStateMachine.sendMessage(AdapterState.BREDR_STARTED);
+        } else {
+            setAllProfileServiceStates(supportedProfileServices, BluetoothAdapter.STATE_ON);
+        }
     }
 
     void stopProfileServices() {
+        mAdapterProperties.onBluetoothDisable();
         Class[] supportedProfileServices = Config.getSupportedProfiles();
-        if (mRunningProfiles.size() == 0) {
+        if (supportedProfileServices.length == 1 && (mRunningProfiles.size() == 1
+                && GattService.class.getSimpleName().equals(mRunningProfiles.get(0).getName()))) {
             debugLog("stopProfileServices() - No profiles services to stop or already stopped.");
-            return;
+            mAdapterStateMachine.sendMessage(AdapterState.BREDR_STOPPED);
+        } else {
+            setAllProfileServiceStates(supportedProfileServices, BluetoothAdapter.STATE_OFF);
         }
-        setAllProfileServiceStates(supportedProfileServices, BluetoothAdapter.STATE_OFF);
     }
 
-    boolean stopGattProfileService() {
+    private void stopGattProfileService() {
+        mAdapterProperties.onBleDisable();
+        if (mRunningProfiles.size() == 0) {
+            debugLog("stopGattProfileService() - No profiles services to stop.");
+            mAdapterStateMachine.sendMessage(AdapterState.BLE_STOPPED);
+        }
         setProfileServiceState(GattService.class, BluetoothAdapter.STATE_OFF);
-        return true;
     }
 
     void updateAdapterState(int prevState, int newState) {
+        mAdapterProperties.setState(newState);
         if (mCallbacks != null) {
             int n = mCallbacks.beginBroadcast();
             debugLog("updateAdapterState() - Broadcasting state " + BluetoothAdapter.nameForState(
@@ -1575,7 +1604,7 @@ public class AdapterService extends Service {
         enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM, "Need BLUETOOTH ADMIN permission");
 
         debugLog("disable() called with mRunningProfiles.size() = " + mRunningProfiles.size());
-        mAdapterStateMachine.sendMessage(AdapterState.BLE_TURN_OFF);
+        mAdapterStateMachine.sendMessage(AdapterState.USER_TURN_OFF);
         return true;
     }
 
@@ -2184,12 +2213,12 @@ public class AdapterService extends Service {
         return mAdapterProperties.getTotalNumOfTrackableAdvertisements();
     }
 
-    public void onLeServiceUp() {
+    void onLeServiceUp() {
         mAdapterStateMachine.sendMessage(AdapterState.USER_TURN_ON);
     }
 
-    public void onBrEdrDown() {
-        mAdapterStateMachine.sendMessage(AdapterState.USER_TURN_OFF);
+    void onBrEdrDown() {
+        mAdapterStateMachine.sendMessage(AdapterState.BLE_TURN_OFF);
     }
 
     private static int convertScanModeToHal(int mode) {
@@ -2383,6 +2412,9 @@ public class AdapterService extends Service {
                             + device.getName());
         }
 
+        writer.println();
+        mAdapterStateMachine.dump(fd, writer, args);
+
         StringBuilder sb = new StringBuilder();
         for (ProfileService profile : mRegisteredProfiles) {
             profile.dump(sb);
@@ -2395,22 +2427,23 @@ public class AdapterService extends Service {
     }
 
     private void dumpMetrics(FileDescriptor fd) {
-        BluetoothProto.BluetoothLog metrics = new BluetoothProto.BluetoothLog();
-        metrics.setNumBondedDevices(getBondedDevices().length);
-        for (ProfileService profile : mRegisteredProfiles) {
-            profile.dumpProto(metrics);
-        }
+        BluetoothMetricsProto.BluetoothLog.Builder metricsBuilder =
+                BluetoothMetricsProto.BluetoothLog.newBuilder();
         byte[] nativeMetricsBytes = dumpMetricsNative();
         debugLog("dumpMetrics: native metrics size is " + nativeMetricsBytes.length);
         if (nativeMetricsBytes.length > 0) {
             try {
-                metrics.mergeFrom(nativeMetricsBytes);
-            } catch (InvalidProtocolBufferMicroException ex) {
+                metricsBuilder.mergeFrom(nativeMetricsBytes);
+            } catch (InvalidProtocolBufferException ex) {
                 Log.w(TAG, "dumpMetrics: problem parsing metrics protobuf, " + ex.getMessage());
                 return;
             }
         }
-        byte[] metricsBytes = Base64.encode(metrics.toByteArray(), Base64.DEFAULT);
+        metricsBuilder.setNumBondedDevices(getBondedDevices().length);
+        for (ProfileService profile : mRegisteredProfiles) {
+            profile.dumpProto(metricsBuilder);
+        }
+        byte[] metricsBytes = Base64.encode(metricsBuilder.build().toByteArray(), Base64.DEFAULT);
         debugLog("dumpMetrics: combined metrics size is " + metricsBytes.length);
         try (FileOutputStream protoOut = new FileOutputStream(fd)) {
             protoOut.write(metricsBytes);
@@ -2445,7 +2478,14 @@ public class AdapterService extends Service {
         }
     };
 
-    private static native void classInitNative();
+    private void enableNativeWithGuestFlag() {
+        boolean isGuest = UserManager.get(this).isGuestUser();
+        if (!enableNative(isGuest)) {
+            Log.e(TAG, "enableNative() returned false");
+        }
+    }
+
+    static native void classInitNative();
 
     native boolean initNative();
 
