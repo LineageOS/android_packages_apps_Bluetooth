@@ -273,6 +273,7 @@ public class AdapterService extends Service {
                         enableNativeWithGuestFlag();
                     } else if (mRegisteredProfiles.size() == Config.getSupportedProfiles().length
                             && mRegisteredProfiles.size() == mRunningProfiles.size()) {
+                        mAdapterProperties.onBluetoothReady();
                         updateUuids();
                         setBluetoothClassFromConfig();
                         mAdapterStateMachine.sendMessage(AdapterState.BREDR_STARTED);
@@ -556,6 +557,7 @@ public class AdapterService extends Service {
         Class[] supportedProfileServices = Config.getSupportedProfiles();
         if (supportedProfileServices.length == 1 && GattService.class.getSimpleName()
                 .equals(supportedProfileServices[0].getSimpleName())) {
+            mAdapterProperties.onBluetoothReady();
             updateUuids();
             setBluetoothClassFromConfig();
             mAdapterStateMachine.sendMessage(AdapterState.BREDR_STARTED);
@@ -1402,6 +1404,16 @@ public class AdapterService extends Service {
             return service.getMaxConnectedAudioDevices();
         }
 
+        //@Override
+        public boolean isA2dpOffloadEnabled() {
+            // don't check caller, may be called from system UI
+            AdapterService service = getService();
+            if (service == null) {
+                return false;
+            }
+            return service.isA2dpOffloadEnabled();
+        }
+
         @Override
         public boolean factoryReset() {
             AdapterService service = getService();
@@ -2158,6 +2170,16 @@ public class AdapterService extends Service {
     public int getMaxConnectedAudioDevices() {
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return mAdapterProperties.getMaxConnectedAudioDevices();
+    }
+
+    /**
+     * Check whether A2DP offload is enabled.
+     *
+     * @return true if A2DP offload is enabled
+     */
+    public boolean isA2dpOffloadEnabled() {
+        enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return mAdapterProperties.isA2dpOffloadEnabled();
     }
 
     private BluetoothActivityEnergyInfo reportActivityInfo() {
