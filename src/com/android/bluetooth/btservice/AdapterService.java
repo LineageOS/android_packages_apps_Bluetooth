@@ -52,6 +52,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -60,6 +61,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.StatsLog;
 
 import com.android.bluetooth.BluetoothMetricsProto;
 import com.android.bluetooth.Utils;
@@ -108,6 +110,9 @@ public class AdapterService extends Service {
 
     private static final String ACTION_ALARM_WAKEUP =
             "com.android.bluetooth.btservice.action.ALARM_WAKEUP";
+
+    static final String BLUETOOTH_BTSNOOP_ENABLE_PROPERTY = "persist.bluetooth.btsnoopenable";
+    private boolean mSnoopLogSettingAtEnable = false;
 
     public static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
     public static final String BLUETOOTH_PRIVILEGED =
@@ -503,6 +508,8 @@ public class AdapterService extends Service {
         } catch (RemoteException e) {
             Log.w(TAG, "RemoteException trying to send a reset to BatteryStats");
         }
+        StatsLog.write_non_chained(StatsLog.BLE_SCAN_STATE_CHANGED, -1, null,
+                StatsLog.BLE_SCAN_STATE_CHANGED__STATE__RESET, false, false, false);
 
         //Start Gatt service
         setProfileServiceState(GattService.class, BluetoothAdapter.STATE_ON);
@@ -597,6 +604,18 @@ public class AdapterService extends Service {
                 }
             }
             mCallbacks.finishBroadcast();
+        }
+        // Turn the Adapter all the way off if we are disabling and the snoop log setting changed.
+        if (newState == BluetoothAdapter.STATE_BLE_TURNING_ON) {
+            mSnoopLogSettingAtEnable =
+                    SystemProperties.getBoolean(BLUETOOTH_BTSNOOP_ENABLE_PROPERTY, false);
+        } else if (newState == BluetoothAdapter.STATE_BLE_ON
+                   && prevState != BluetoothAdapter.STATE_OFF) {
+            boolean snoopLogSetting =
+                    SystemProperties.getBoolean(BLUETOOTH_BTSNOOP_ENABLE_PROPERTY, false);
+            if (mSnoopLogSettingAtEnable != snoopLogSetting) {
+                mAdapterStateMachine.sendMessage(AdapterState.BLE_TURN_OFF);
+            }
         }
     }
 
@@ -2420,6 +2439,7 @@ public class AdapterService extends Service {
 
         writer.println();
         mAdapterProperties.dump(fd, writer, args);
+        writer.println("mSnoopLogSettingAtEnable = " + mSnoopLogSettingAtEnable);
 
         writer.println();
         mAdapterStateMachine.dump(fd, writer, args);
