@@ -212,6 +212,9 @@ public class HearingAidService extends ProfileService {
         if (DBG) {
             Log.d(TAG, "connect(): " + device);
         }
+        if (device == null) {
+            return false;
+        }
 
         if (getPriority(device) == BluetoothProfile.PRIORITY_OFF) {
             return false;
@@ -222,15 +225,34 @@ public class HearingAidService extends ProfileService {
             return false;
         }
 
-        synchronized (mStateMachines) {
-            HearingAidStateMachine smConnect = getOrCreateStateMachine(device);
-            if (smConnect == null) {
-                Log.e(TAG, "Cannot connect to " + device + " : no state machine");
-                return false;
+        long hiSyncId = mDeviceHiSyncIdMap.getOrDefault(device,
+                BluetoothHearingAid.HI_SYNC_ID_INVALID);
+
+        if (hiSyncId != mActiveDeviceHiSyncId) {
+            for (BluetoothDevice connectedDevice : getConnectedDevices()) {
+                disconnect(connectedDevice);
             }
-            smConnect.sendMessage(HearingAidStateMachine.CONNECT);
-            return true;
         }
+
+        for (BluetoothDevice storedDevice : mDeviceHiSyncIdMap.keySet()) {
+            if (mDeviceHiSyncIdMap.getOrDefault(storedDevice,
+                    BluetoothHearingAid.HI_SYNC_ID_INVALID) == hiSyncId) {
+                synchronized (mStateMachines) {
+                    HearingAidStateMachine sm = getOrCreateStateMachine(storedDevice);
+                    if (sm == null) {
+                        Log.e(TAG, "Ignored connect request for " + device + " : no state machine");
+                        continue;
+                    }
+                    sm.sendMessage(HearingAidStateMachine.CONNECT);
+
+                }
+                if (hiSyncId == BluetoothHearingAid.HI_SYNC_ID_INVALID
+                        && !device.equals(storedDevice)) {
+                    break;
+                }
+            }
+        }
+        return true;
     }
 
     boolean disconnect(BluetoothDevice device) {
@@ -243,31 +265,23 @@ public class HearingAidService extends ProfileService {
         }
         long hiSyncId = mDeviceHiSyncIdMap.getOrDefault(device,
                 BluetoothHearingAid.HI_SYNC_ID_INVALID);
-        synchronized (mStateMachines) {
-            HearingAidStateMachine sm = mStateMachines.get(device);
-            if (sm == null) {
-                Log.e(TAG, "Ignored disconnect request for " + device + " : no state machine");
-            } else {
-                sm.sendMessage(HearingAidStateMachine.DISCONNECT);
-            }
-        }
-        if (hiSyncId == BluetoothHearingAid.HI_SYNC_ID_INVALID) {
-            return true;
-        }
 
         for (BluetoothDevice storedDevice : mDeviceHiSyncIdMap.keySet()) {
             if (mDeviceHiSyncIdMap.getOrDefault(storedDevice,
-                    BluetoothHearingAid.HI_SYNC_ID_INVALID) != hiSyncId
-                    || storedDevice.equals(device)) {
-                continue;
-            }
-            synchronized (mStateMachines) {
-                HearingAidStateMachine sm = mStateMachines.get(storedDevice);
-                if (sm == null) {
-                    Log.e(TAG, "Ignored disconnect request for " + device + " : no state machine");
-                    continue;
+                    BluetoothHearingAid.HI_SYNC_ID_INVALID) == hiSyncId) {
+                synchronized (mStateMachines) {
+                    HearingAidStateMachine sm = mStateMachines.get(storedDevice);
+                    if (sm == null) {
+                        Log.e(TAG, "Ignored disconnect request for " + device
+                                + " : no state machine");
+                        continue;
+                    }
+                    sm.sendMessage(HearingAidStateMachine.DISCONNECT);
                 }
-                sm.sendMessage(HearingAidStateMachine.DISCONNECT);
+                if (hiSyncId == BluetoothHearingAid.HI_SYNC_ID_INVALID
+                        && !device.equals(storedDevice)) {
+                    break;
+                }
             }
         }
         return true;
@@ -300,18 +314,25 @@ public class HearingAidService extends ProfileService {
             Log.e(TAG, "okToConnect: cannot connect to " + device + " : quiet mode enabled");
             return false;
         }
-        // Check priority and accept or reject the connection
+        // Check priority and accept or reject the connection.
+        // Note: Logic can be simplified, but keeping it this way for readability
         int priority = getPriority(device);
         int bondState = mAdapterService.getBondState(device);
-        // Allow the connection only if the device is bonded or bonding.
-        if ((priority == BluetoothProfile.PRIORITY_UNDEFINED)
-                && (bondState == BluetoothDevice.BOND_NONE)) {
-            Log.e(TAG, "okToConnect: cannot connect to " + device + " : priority=" + priority
-                    + " bondState=" + bondState);
-            return false;
-        }
-        if (priority <= BluetoothProfile.PRIORITY_OFF) {
-            Log.e(TAG, "okToConnect: cannot connect to " + device + " : priority=" + priority);
+        // If priority is undefined, it is likely that service discovery has not completed and peer
+        // initiated the connection. Allow this connection only if the device is bonded or bonding
+        boolean serviceDiscoveryPending = (priority == BluetoothProfile.PRIORITY_UNDEFINED)
+                && (bondState == BluetoothDevice.BOND_BONDING
+                   || bondState == BluetoothDevice.BOND_BONDED);
+        // Also allow connection when device is bonded/bonding and priority is ON/AUTO_CONNECT.
+        boolean isEnabled = (priority == BluetoothProfile.PRIORITY_ON
+                || priority == BluetoothProfile.PRIORITY_AUTO_CONNECT)
+                && (bondState == BluetoothDevice.BOND_BONDED
+                   || bondState == BluetoothDevice.BOND_BONDING);
+        if (!serviceDiscoveryPending && !isEnabled) {
+            // Otherwise, reject the connection if no service discovery is pending and priority is
+            // neither PRIORITY_ON nor PRIORITY_AUTO_CONNECT
+            Log.w(TAG, "okToConnect: return false, priority=" + priority + ", bondState="
+                    + bondState);
             return false;
         }
         return true;
