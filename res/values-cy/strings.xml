@@ -22,6 +22,7 @@
         permission controls access to the Bluetooth Share Manager by
         applications that initiate Bluetooth share.
     -->
+  <string name="permlab_bluetoothShareManager">Mynediad at y rheolwr lawrlwytho</string>
   <!--
         This is the long description of a permission associated with the
         Android Download Manager. It is displayed as part of the description
@@ -39,12 +40,14 @@
   <!--Line 1 -->
   <!--Line 2 -->
   <!-- Label for a cancel button. -->
+  <string name="bt_enable_cancel">Diddymu</string>
   <!-- Label for a confirm button.-->
   <!-- Bluetooth File Transfer Acceptance Dialog -->
   <!--Title -->
   <!--content -->
   <!-- Label for a cancel button. -->
   <!-- Label for a confirm button.-->
+  <string name="incoming_file_confirm_ok">Derbyn</string>
   <!-- Label for timeout OK button.-->
   <string name="incoming_file_confirm_timeout_ok">Iawn</string>
   <!-- content for timeout-->
@@ -70,6 +73,7 @@
   <!-- Label for a hide button.-->
   <!--Line 1 -->
   <!--Line 2 -->
+  <string name="incoming_line2">Enw\'r ffeil</string>
   <!--Line 3 -->
   <!-- Bluetooth failed Download  Dialog -->
   <!--Line 1  -->
@@ -80,6 +84,7 @@
   <!-- Bluetooth Successful Download  Dialog -->
   <!--Line 4 in "Bluetooth Download Progress Dialog" -->
   <!-- Label for a OK button.-->
+  <string name="download_succ_ok">Agor</string>
   <!-- Bluetooth Upload Progress Dialog -->
   <!-- Bluetooth Successful Upload Progress Dialog -->
   <!--Line 4 -->
@@ -88,6 +93,7 @@
   <!-- Bluetooth Failed Upload File Transfer Dialog -->
   <!-- Label for a try again button.-->
   <!-- Label for a cancel button.-->
+  <string name="upload_fail_cancel">Cau</string>
   <!-- Bluetooth error dialog -->
   <string name="bt_error_btn_ok">Iawn</string>
   <!-- Bluetooth  Enabling progress dialog -->
@@ -98,11 +104,15 @@
   <!-- Shown when USB storage cannot be found.  [CHAR LIMIT=NONE] -->
   <!-- Bluetooth OPP Live Folder -->
   <!-- Bluetooth OPP Transfer History -->
+  <string name="opp_notification_group">Rhannu Bluetooth</string>
+  <string name="transfer_menu_open">Agor</string>
   <!-- Do not translate. file name used for sharing. -->
   <!-- Used to run Bluetooth.apk in another process if needed -->
   <!-- Do not translate. android:sharedUserId string of this application. -->
   <!-- Do not translate. android:process of this application. -->
+  <string name="bluetooth_map_settings_cancel">Diddymu</string>
   <string name="bluetooth_map_settings_intro">Dewisa\'r cyfrifon wyt am eu rhannu trwy Bluetooth. Mi fydd dal yn rhaid caniatáu unrhyw fynediad i\'r cyfrifon wrth gysylltu.</string>
   <string name="bluetooth_connected">Sain Bluetooth wedi\'i chysylltu</string>
   <string name="bluetooth_disconnected">Sain Bluetooth wedi\'i datgysylltu</string>
+  <string name="a2dp_sink_mbs_label">Sain Bluetooth</string>
 </resources>
