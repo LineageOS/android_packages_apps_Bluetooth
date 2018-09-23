@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea5e1ac2_206336c9",
+        "filename": "src/com/android/bluetooth/a2dp/A2dpService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 934,
+      "author": {
+        "id": 2936
+      },
+      "writtenOn": "2018-09-23T18:05:58Z",
+      "side": 1,
+      "message": "This is a really weird check to read, especially because config.isMandatoryCodec is only checking if mCodecType \u003d\u003d SOURCE_CODEC_TYPE_SBC. You might as well just be checking for the channel mode only, or alternately, consider a writing different helper function in BluetoothCodecConfig to use instead of isMandatoryCodec.",
+      "range": {
+        "startLine": 931,
+        "startChar": 26,
+        "endLine": 934,
+        "endChar": 79
+      },
+      "revId": "56a8a580365a53314dd9bf89e72bc45616630e0e",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
+    }
+  ]
+}
