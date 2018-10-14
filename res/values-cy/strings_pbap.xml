@@ -10,6 +10,7 @@
   <string name="auth_notif_title">Allwedd Sesiwn</string>
   <!-- Notification message when a Bluetooth device wants to pair with us -->
   <string name="auth_notif_message">Rho\'r allwedd sesiwn ar gyfer %1$s.</string>
+  <string name="defaultname">Cit car</string>
   <string name="unknownName">Enw anhysbys</string>
   <string name="localPhoneName">Fy enw i</string>
 </resources>

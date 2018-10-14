@@ -22,6 +22,7 @@
         permission controls access to the Bluetooth Share Manager by
         applications that initiate Bluetooth share.
     -->
+  <string name="permlab_bluetoothShareManager">Mynediad at y rheolwr lawrlwytho</string>
   <!--
         This is the long description of a permission associated with the
         Android Download Manager. It is displayed as part of the description
@@ -30,21 +31,27 @@
         that initiate downloads.
     -->
   <!-- string showed on "Share picutre via" dialog -->
+  <string name="bt_share_picker_label">Bluetooth</string>
   <!-- string for "unknown device" -->
+  <string name="unknown_device">Dyfais anhysbys</string>
   <!-- string for "unknown" phone number" -->
   <!-- string for "the title of airplane mode error" -->
+  <string name="airplane_error_title">Modd awyren</string>
   <!-- string for "error message in airplane mode" -->
+  <string name="airplane_error_msg">Nid yw\'n bosib defnyddio Bluetooth tra ym modd awyren.</string>
   <!-- Activate Bluetooth Confirmation Dialog -->
   <!--Title -->
   <!--Line 1 -->
   <!--Line 2 -->
   <!-- Label for a cancel button. -->
+  <string name="bt_enable_cancel">Diddymu</string>
   <!-- Label for a confirm button.-->
   <!-- Bluetooth File Transfer Acceptance Dialog -->
   <!--Title -->
   <!--content -->
   <!-- Label for a cancel button. -->
   <!-- Label for a confirm button.-->
+  <string name="incoming_file_confirm_ok">Derbyn</string>
   <!-- Label for timeout OK button.-->
   <string name="incoming_file_confirm_timeout_ok">Iawn</string>
   <!-- content for timeout-->
@@ -54,7 +61,9 @@
   <!-- Inbound File Transfer Progress Notification item -->
   <!-- label for the notification item of receiving file -->
   <!-- label for the notification item of received file -->
+  <string name="notification_received">Rhannu Bluetooth: Wedi derbyn <xliff:g id="file">%1$s</xliff:g></string>
   <!-- label for the notification item of failed receiving file -->
+  <string name="notification_received_fail">Rhannu Bluetooth: Ffeil <xliff:g id="file">%1$s</xliff:g> heb ei derbyn</string>
   <!-- Outbound File Transfer Progress Notification item -->
   <!-- label for the notification item of sending file -->
   <!-- label for the notification item of sent file -->
@@ -70,6 +79,7 @@
   <!-- Label for a hide button.-->
   <!--Line 1 -->
   <!--Line 2 -->
+  <string name="incoming_line2">Enw\'r ffeil</string>
   <!--Line 3 -->
   <!-- Bluetooth failed Download  Dialog -->
   <!--Line 1  -->
@@ -80,6 +90,7 @@
   <!-- Bluetooth Successful Download  Dialog -->
   <!--Line 4 in "Bluetooth Download Progress Dialog" -->
   <!-- Label for a OK button.-->
+  <string name="download_succ_ok">Agor</string>
   <!-- Bluetooth Upload Progress Dialog -->
   <!-- Bluetooth Successful Upload Progress Dialog -->
   <!--Line 4 -->
@@ -88,20 +99,28 @@
   <!-- Bluetooth Failed Upload File Transfer Dialog -->
   <!-- Label for a try again button.-->
   <!-- Label for a cancel button.-->
+  <string name="upload_fail_cancel">Cau</string>
   <!-- Bluetooth error dialog -->
   <string name="bt_error_btn_ok">Iawn</string>
   <!-- Bluetooth  Enabling progress dialog -->
+  <string name="enabling_progress_content">Yn troi Bluetooth ymlaen\u2026</string>
   <!-- Bluetooth Toast Message -->
   <!-- Bluetooth System Messages [CHAR LIMIT=NONE] -->
   <!-- Bluetooth System Messages -->
   <!-- Bluetooth Transfer Failure Reason -->
   <!-- Shown when USB storage cannot be found.  [CHAR LIMIT=NONE] -->
   <!-- Bluetooth OPP Live Folder -->
+  <string name="btopp_live_folder">Bluetooth wedi\'i derbyn</string>
   <!-- Bluetooth OPP Transfer History -->
+  <string name="no_transfers">Does dim hanes trosglwyddo.</string>
+  <string name="inbound_noti_title">Rhannu Bluetooth: Ffeiliau wedi\'u derbyn</string>
+  <string name="transfer_menu_open">Agor</string>
   <!-- Do not translate. file name used for sharing. -->
   <!-- Used to run Bluetooth.apk in another process if needed -->
   <!-- Do not translate. android:sharedUserId string of this application. -->
   <!-- Do not translate. android:process of this application. -->
+  <string name="bluetooth_map_settings_save">Cadw</string>
+  <string name="bluetooth_map_settings_cancel">Diddymu</string>
   <string name="bluetooth_map_settings_intro">Dewisa\'r cyfrifon wyt am eu rhannu trwy Bluetooth. Mi fydd dal yn rhaid caniatáu unrhyw fynediad i\'r cyfrifon wrth gysylltu.</string>
   <string name="bluetooth_connected">Sain Bluetooth wedi\'i chysylltu</string>
   <string name="bluetooth_disconnected">Sain Bluetooth wedi\'i datgysylltu</string>
