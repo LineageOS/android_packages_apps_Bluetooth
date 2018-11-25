@@ -31,7 +31,7 @@
         that initiate downloads.
     -->
     <string name="permdesc_bluetoothShareManager">Permite que l\'aplicación acceda
-        al xestor BluetoothShare y usalu pa tresferir ficheros.</string>
+        al xestor BluetoothShare y usalu pa tresferir ficheros. </string>
     <!-- string showed on "Share picutre via" dialog -->
     <string name="bt_share_picker_label">Bluetooth</string>
     <!-- string for "unknown device" -->
@@ -56,7 +56,7 @@
     <!--Title -->
     <string name="incoming_file_confirm_title">Tresferencia de ficheros</string>
     <!--content -->
-    <string name="incoming_file_confirm_content">¿Aceutar ficheru entrante?</string>
+    <string name="incoming_file_confirm_content">¿Aceutar ficheru entrante? </string>
     <!-- Label for a cancel button. -->
     <string name="incoming_file_confirm_cancel">Refugar</string>
     <!-- Label for a confirm button.-->
