@@ -174,8 +174,8 @@
     <!-- Bluetooth OPP Live Folder -->
     <string name="btopp_live_folder">Bluetooth empfaangen</string>
     <!-- Bluetooth OPP Transfer History -->
-    <string name="download_success"><xliff:g id="file_size">%1$s</xliff:g> vollstänneg empfaangen.</string>
-    <string name="upload_success"><xliff:g id="file_size">%1$s</xliff:g> vollstänneg geschéckt.</string>
+    <string name="download_success"> <xliff:g id="file_size">%1$s</xliff:g> vollstänneg empfaangen.</string>
+    <string name="upload_success"> <xliff:g id="file_size">%1$s</xliff:g> vollstänneg geschéckt.</string>
     <string name="inbound_history_title">Erakommend Iwwerdroungen</string>
     <string name="outbound_history_title">Erausgoend Iwwerdroungen</string>
     <string name="no_transfers">Den Iwwerdroungshistorique ass eidel.</string>

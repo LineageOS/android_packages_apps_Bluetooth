@@ -134,7 +134,7 @@
     <string name="bt_error_btn_ok">جەزملە</string>
     <string name="unknown_file">يوچۇن ھۆججەت</string>
     <string name="unknown_file_desc">بۇ تىپتىكى ھۆججەتنى بىر تەرەپ قىلىدىغان ئەپ تېپىلمىدى. \n</string>
-    <string name="not_exist_file">ھۆججەت  يوق</string>
+    <string name="not_exist_file"> ھۆججەت  يوق</string>
     <string name="not_exist_file_desc">ھۆججەت مەۋجۇت ئەمەس. \n</string>
     <!-- Bluetooth  Enabling progress dialog -->
     <string name="enabling_progress_title">سەل كۈتۈڭ…</string>

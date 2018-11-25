@@ -69,6 +69,7 @@
     <!-- label for the notification item of sent file -->
     <!-- label for the notification item of sent file -status -->
     <!-- label for the notification item of failed sending file -->
+    <string name="notification_sent_fail">Rhannu Bluetooth: Ffeil <xliff:g id="file">%1$s</xliff:g> heb ei anfon</string>
     <!-- Bluetooth Download Progress Dialog -->
     <!--Title -->
     <!--Line 1 -->
@@ -97,6 +98,7 @@
     <!-- Label for a confirm button.-->
     <string name="upload_succ_ok">Iawn</string>
     <!-- Bluetooth Failed Upload File Transfer Dialog -->
+    <string name="upload_fail_line1">Ni chafodd y ffeil ei anfon at \u0022<xliff:g id="recipient">%1$s</xliff:g>\u0022.</string>
     <!-- Label for a try again button.-->
     <!-- Label for a cancel button.-->
     <string name="upload_fail_cancel">Cau</string>
