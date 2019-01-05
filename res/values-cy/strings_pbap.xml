@@ -13,5 +13,6 @@
     <string name="defaultname">Cit car</string>
     <string name="unknownName">Enw anhysbys</string>
     <string name="localPhoneName">Fy enw i</string>
+    <string name="defaultnumber">000000</string>
     <string name="pbap_notification_group">Rhannu Cysylltiad Bluetooth</string>
 </resources>
