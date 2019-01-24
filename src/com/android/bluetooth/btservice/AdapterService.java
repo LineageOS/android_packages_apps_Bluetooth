@@ -28,6 +28,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.IBluetooth;
 import android.bluetooth.IBluetoothCallback;
+import android.bluetooth.IBluetoothMetadataListener;
 import android.bluetooth.IBluetoothSocketManager;
 import android.bluetooth.OobData;
 import android.bluetooth.UidTraffic;
@@ -63,6 +64,8 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StatsLog;
+
+import androidx.room.Room;
 
 import com.android.bluetooth.BluetoothMetricsProto;
 import com.android.bluetooth.Utils;
@@ -169,6 +172,8 @@ public class AdapterService extends Service {
 
     private boolean mNativeAvailable;
     private boolean mCleaningUp;
+    private final HashMap<BluetoothDevice, ArrayList<IBluetoothMetadataListener>>
+            mMetadataListeners = new HashMap<>();
     private final HashMap<String, Integer> mProfileServicesState = new HashMap<String, Integer>();
     //Only BluetoothManagerService should be registered
     private RemoteCallbackList<IBluetoothCallback> mCallbacks;
@@ -186,6 +191,7 @@ public class AdapterService extends Service {
     private ProfileObserver mProfileObserver;
     private PhonePolicy mPhonePolicy;
     private ActiveDeviceManager mActiveDeviceManager;
+    private DatabaseManager mDatabaseManager;
     private AppOpsManager mAppOps;
 
     /**
@@ -414,6 +420,12 @@ public class AdapterService extends Service {
 
         mActiveDeviceManager = new ActiveDeviceManager(this, new ServiceFactory());
         mActiveDeviceManager.start();
+
+        mDatabaseManager = new DatabaseManager(this);
+        MetadataDatabase database = Room.databaseBuilder(this,
+                MetadataDatabase.class, MetadataDatabase.DATABASE_NAME).build();
+        mDatabaseManager.start(database);
+
 
         setAdapterService(this);
 
@@ -666,6 +678,10 @@ public class AdapterService extends Service {
                 }
                 mWakeLock = null;
             }
+        }
+
+        if (mDatabaseManager != null) {
+            mDatabaseManager.cleanup();
         }
 
         if (mAdapterStateMachine != null) {
@@ -1621,6 +1637,43 @@ public class AdapterService extends Service {
         }
 
         @Override
+        public boolean registerMetadataListener(IBluetoothMetadataListener listener,
+                BluetoothDevice device) {
+            AdapterService service = getService();
+            if (service == null) {
+                return false;
+            }
+            return service.registerMetadataListener(listener, device);
+        }
+
+        @Override
+        public boolean unregisterMetadataListener(BluetoothDevice device) {
+            AdapterService service = getService();
+            if (service == null) {
+                return false;
+            }
+            return service.unregisterMetadataListener(device);
+        }
+
+        @Override
+        public boolean setMetadata(BluetoothDevice device, int key, String value) {
+            AdapterService service = getService();
+            if (service == null) {
+                return false;
+            }
+            return service.setMetadata(device, key, value);
+        }
+
+        @Override
+        public String getMetadata(BluetoothDevice device, int key) {
+            AdapterService service = getService();
+            if (service == null) {
+                return null;
+            }
+            return service.getMetadata(device, key);
+        }
+
+        @Override
         public void requestActivityInfo(ResultReceiver result) {
             Bundle bundle = new Bundle();
             bundle.putParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, reportActivityInfo());
@@ -1866,6 +1919,16 @@ public class AdapterService extends Service {
     public BluetoothDevice[] getBondedDevices() {
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return mAdapterProperties.getBondedDevices();
+    }
+
+    /**
+     * Get the database manager to access Bluetooth storage
+     *
+     * @return {@link DatabaseManager} or null on error
+     */
+    @VisibleForTesting
+    public DatabaseManager getDatabase() {
+        return mDatabaseManager;
     }
 
     int getAdapterConnectionState() {
@@ -2221,6 +2284,9 @@ public class AdapterService extends Service {
 
     boolean factoryReset() {
         enforceCallingOrSelfPermission(BLUETOOTH_PRIVILEGED, "Need BLUETOOTH permission");
+        if (mDatabaseManager != null) {
+            mDatabaseManager.factoryReset();
+        }
         return factoryResetNative();
     }
 
@@ -2518,6 +2584,64 @@ public class AdapterService extends Service {
         verboseLog("energyInfoCallback() status = " + status + "txTime = " + txTime + "rxTime = "
                 + rxTime + "idleTime = " + idleTime + "energyUsed = " + energyUsed + "ctrlState = "
                 + ctrlState + "traffic = " + Arrays.toString(data));
+    }
+
+    boolean registerMetadataListener(IBluetoothMetadataListener listener,
+            BluetoothDevice device) {
+        if (mMetadataListeners == null) {
+            return false;
+        }
+
+        ArrayList<IBluetoothMetadataListener> list = mMetadataListeners.get(device);
+        if (list == null) {
+            list = new ArrayList<>();
+        } else if (list.contains(listener)) {
+            // The device is already registered with this listener
+            return true;
+        }
+        list.add(listener);
+        mMetadataListeners.put(device, list);
+        return true;
+    }
+
+    boolean unregisterMetadataListener(BluetoothDevice device) {
+        if (mMetadataListeners == null) {
+            return false;
+        }
+        if (mMetadataListeners.containsKey(device)) {
+            mMetadataListeners.remove(device);
+        }
+        return true;
+    }
+
+    boolean setMetadata(BluetoothDevice device, int key, String value) {
+        if (value.length() > BluetoothDevice.METADATA_MAX_LENGTH) {
+            Log.e(TAG, "setMetadata: value length too long " + value.length());
+            return false;
+        }
+        return mDatabaseManager.setCustomMeta(device, key, value);
+    }
+
+    String getMetadata(BluetoothDevice device, int key) {
+        return mDatabaseManager.getCustomMeta(device, key);
+    }
+
+    /**
+     * Update metadata change to registered listeners
+     */
+    @VisibleForTesting
+    public void metadataChanged(String address, int key, String value) {
+        BluetoothDevice device = mRemoteDevices.getDevice(address.getBytes());
+        if (mMetadataListeners.containsKey(device)) {
+            ArrayList<IBluetoothMetadataListener> list = mMetadataListeners.get(device);
+            for (IBluetoothMetadataListener listener : list) {
+                try {
+                    listener.onMetadataChanged(device, key, value);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "RemoteException when onMetadataChanged");
+                }
+            }
+        }
     }
 
     private int getIdleCurrentMa() {
