@@ -32,6 +32,8 @@
     -->
     <string name="permdesc_bluetoothShareManager">Permite que l\'aplicación acceda
         al xestor BluetoothShare y usalu pa tresferir ficheros. </string>
+    <string name="permlab_bluetoothWhitelist">Accesu de preseos Bluetooth autorizaos</string>
+    <string name="permdesc_bluetoothWhitelist">Permíte-y a l’aplicación autorizar temporalmente un preséu Bluetooth pa poder unviar ficheros a esti preséu ensin la confirmación del usuariu.</string>
     <!-- string showed on "Share picutre via" dialog -->
     <string name="bt_share_picker_label">Bluetooth</string>
     <!-- string for "unknown device" -->
@@ -168,11 +170,14 @@
     <!-- Shown when USB storage cannot be found.  [CHAR LIMIT=NONE] -->
     <string name="status_no_sd_card" product="nosdcard">Ensin almacenamientu USB.</string>
     <string name="status_no_sd_card" product="default">Ensin tarxeta SD. Inxerta una pa guardar los ficheros tresferíos.</string>
+    <string name="status_connection_error">Conexón incorreuta</string>
     <string name="status_protocol_error">La solicitú nun pudo remanase correutamente.</string>
     <string name="status_unknown_error">Fallu desconocíu.</string>
     <!-- Bluetooth OPP Live Folder -->
     <string name="btopp_live_folder">Recibío per Bluetooth</string>
     <!-- Bluetooth OPP Transfer History -->
+    <string name="download_success">Receición de <xliff:g id="FILE_SIZE">%1$s</xliff:g> completada</string>
+    <string name="upload_success">Unviu de <xliff:g id="FILE_SIZE">%1$s</xliff:g> completáu</string>
     <string name="inbound_history_title">Tresferencies entrantes</string>
     <string name="outbound_history_title">Tresferencies salientes</string>
     <string name="no_transfers">L\'historial de tresferencies ta baleru.</string>
@@ -182,6 +187,10 @@
     <plurals name="noti_caption_unsuccessful">
         <item quantity="one"><xliff:g id="unsuccessful_number">%1$d</xliff:g> falló.</item>
         <item quantity="other"><xliff:g id="unsuccessful_number">%1$d</xliff:g> fallaron.</item>
+    </plurals>
+    <plurals name="noti_caption_success">
+        <item quantity="one"><xliff:g id="successful_number">%1$d</xliff:g> correutu, %2$s</item>
+        <item quantity="other"><xliff:g id="successful_number">%1$d</xliff:g> correutos, %2$s</item>
     </plurals>
     <string name="transfer_menu_clear_all">Llimpiar llistáu</string>
     <string name="transfer_menu_open">Abrir</string>
