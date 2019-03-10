@@ -16,5 +16,5 @@
      limitations under the License.
 -->
 <resources>
-  <string name="upload_fail_waiting">Neizdevās nosūtīt failu, atkārtoju\u2026</string>
+    <string name="upload_fail_waiting">Neizdevās nosūtīt failu, atkārtoju\u2026</string>
 </resources>

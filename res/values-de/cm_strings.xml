@@ -16,6 +16,6 @@
      limitations under the License.
 -->
 <resources>
-  <string name="incoming_file_toast_msg">Eingehende Datei von einem anderen Gerät. Bestätigen, wenn Sie diese Datei empfangen möchten.</string>
-  <string name="upload_fail_waiting">Datei kann nicht versendet werden. Erneuter Versuch\u2026</string>
+    <string name="incoming_file_toast_msg">Eingehende Datei von einem anderen Gerät. Bestätigen, wenn Sie diese Datei empfangen möchten.</string>
+    <string name="upload_fail_waiting">Datei kann nicht versendet werden. Erneuter Versuch\u2026</string>
 </resources>

@@ -16,6 +16,6 @@
      limitations under the License.
 -->
 <resources>
-  <string name="incoming_file_toast_msg">Fitxer entrant des d\'un altre dispositiu. Confirma que vols rebre aquest fitxer.</string>
-  <string name="upload_fail_waiting">No es pot enviar el fitxer, s\'està reintentant\u2026</string>
+    <string name="incoming_file_toast_msg">Fitxer entrant des d\'un altre dispositiu. Confirma que vols rebre aquest fitxer.</string>
+    <string name="upload_fail_waiting">No es pot enviar el fitxer, s\'està reintentant\u2026</string>
 </resources>

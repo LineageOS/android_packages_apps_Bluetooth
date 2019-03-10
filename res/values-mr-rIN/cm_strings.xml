@@ -16,5 +16,5 @@
      limitations under the License.
 -->
 <resources>
-  <string name="upload_fail_waiting">फाइल पाठवण्यात अक्षम, पुन्हा प्रयत्न करत आहे\u2026</string>
+    <string name="upload_fail_waiting">फाइल पाठवण्यात अक्षम, पुन्हा प्रयत्न करत आहे\u2026</string>
 </resources>

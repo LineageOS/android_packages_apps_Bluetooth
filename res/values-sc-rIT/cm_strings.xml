@@ -16,6 +16,6 @@
      limitations under the License.
 -->
 <resources>
-  <string name="incoming_file_toast_msg">B\'est unu documentu in arrivu dae un\'àteru dispositivu. Cunfirma chi lu cheres retzire.</string>
-  <string name="upload_fail_waiting">Impossìbile imbiare su documentu, torrende a proare\u2026</string>
+    <string name="incoming_file_toast_msg">B\'est unu documentu in arrivu dae un\'àteru dispositivu. Cunfirma chi lu cheres retzire.</string>
+    <string name="upload_fail_waiting">Impossìbile imbiare su documentu, torrende a proare\u2026</string>
 </resources>

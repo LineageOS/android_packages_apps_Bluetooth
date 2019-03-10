@@ -16,6 +16,6 @@
      limitations under the License.
 -->
 <resources>
-  <string name="incoming_file_toast_msg">Входящий файл с другого устройства. Подтвердите, что вы хотите получить этот файл.</string>
-  <string name="upload_fail_waiting">Не удалось отправить файл. Повторная попытка\u2026</string>
+    <string name="incoming_file_toast_msg">Входящий файл с другого устройства. Подтвердите, что вы хотите получить этот файл.</string>
+    <string name="upload_fail_waiting">Не удалось отправить файл. Повторная попытка\u2026</string>
 </resources>

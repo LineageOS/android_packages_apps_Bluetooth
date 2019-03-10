@@ -16,6 +16,6 @@
      limitations under the License.
 -->
 <resources>
-  <string name="incoming_file_toast_msg">Është duke ju ardhur një skedar nga një pajisje tjetër. Jep konfirmim që dëshiron ta marrësh këtë skedar.</string>
-  <string name="upload_fail_waiting">Dërgimi i dokumentit nuk është i mundur! Duke provuar përsëri\u2026</string>
+    <string name="incoming_file_toast_msg">Është duke ju ardhur një skedar nga një pajisje tjetër. Jep konfirmim që dëshiron ta marrësh këtë skedar.</string>
+    <string name="upload_fail_waiting">Dërgimi i dokumentit nuk është i mundur! Duke provuar përsëri\u2026</string>
 </resources>

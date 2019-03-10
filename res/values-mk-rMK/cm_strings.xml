@@ -16,5 +16,5 @@
      limitations under the License.
 -->
 <resources>
-  <string name="incoming_file_toast_msg">Дојдовен фајл од друг уред. Потврдете ако сакате да ја примите оваа датотека.</string>
+    <string name="incoming_file_toast_msg">Дојдовен фајл од друг уред. Потврдете ако сакате да ја примите оваа датотека.</string>
 </resources>

@@ -16,6 +16,6 @@
      limitations under the License.
 -->
 <resources>
-  <string name="incoming_file_toast_msg">File in arrivo da un altro dispositivo. Conferma che vuoi ricevere questo file.</string>
-  <string name="upload_fail_waiting">Impossibile inviare file, riprovo\u2026</string>
+    <string name="incoming_file_toast_msg">File in arrivo da un altro dispositivo. Conferma che vuoi ricevere questo file.</string>
+    <string name="upload_fail_waiting">Impossibile inviare file, riprovo\u2026</string>
 </resources>

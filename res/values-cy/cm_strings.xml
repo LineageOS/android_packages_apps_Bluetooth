@@ -16,5 +16,6 @@
      limitations under the License.
 -->
 <resources>
-  <string name="incoming_file_toast_msg">Mae ffeil yn dod mewn o ddyfais arall. Cadarnha dy fod am dderbyn y ffeil hon.</string>
+    <string name="incoming_file_toast_msg">Mae ffeil yn dod mewn o ddyfais arall. Cadarnha dy fod am dderbyn y ffeil hon.</string>
+    <string name="upload_fail_waiting">Methu ag anfon y ffeil. Yn rhoi cynnig arall arni\u2026</string>
 </resources>

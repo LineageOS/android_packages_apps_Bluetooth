@@ -16,6 +16,6 @@
      limitations under the License.
 -->
 <resources>
-  <string name="incoming_file_toast_msg">Fitxategi bat dator beste gailu batetik. Berretsi fitxategi hau jasu nahi duzula.</string>
-  <string name="upload_fail_waiting">Ezin izan da fitxategia bidali, berriro saiatzen\u2026</string>
+    <string name="incoming_file_toast_msg">Fitxategi bat dator beste gailu batetik. Berretsi fitxategi hau jasu nahi duzula.</string>
+    <string name="upload_fail_waiting">Ezin izan da fitxategia bidali, berriro saiatzen\u2026</string>
 </resources>

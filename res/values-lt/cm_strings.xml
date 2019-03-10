@@ -16,5 +16,5 @@
      limitations under the License.
 -->
 <resources>
-  <string name="upload_fail_waiting">Nepavyko išsiųsti failo, bandoma dar kartą\u2026</string>
+    <string name="upload_fail_waiting">Nepavyko išsiųsti failo, bandoma dar kartą\u2026</string>
 </resources>

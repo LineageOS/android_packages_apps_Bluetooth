@@ -16,6 +16,6 @@
      limitations under the License.
 -->
 <resources>
-  <string name="incoming_file_toast_msg">Dolazna datoteka s drugog uređaja. Potvrdite ako želite primiti ovu datoteku.</string>
-  <string name="upload_fail_waiting">Nije moguće poslati datoteku, ponovno pokušavanje\u2026</string>
+    <string name="incoming_file_toast_msg">Dolazna datoteka s drugog uređaja. Potvrdite ako želite primiti ovu datoteku.</string>
+    <string name="upload_fail_waiting">Nije moguće poslati datoteku, ponovno pokušavanje\u2026</string>
 </resources>

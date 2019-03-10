@@ -16,5 +16,5 @@
      limitations under the License.
 -->
 <resources>
-  <string name="upload_fail_waiting">ไม่สามารถส่งไฟล์ได้ กำลังลองอีกครั้ง\u2026</string>
+    <string name="upload_fail_waiting">ไม่สามารถส่งไฟล์ได้ กำลังลองอีกครั้ง\u2026</string>
 </resources>
