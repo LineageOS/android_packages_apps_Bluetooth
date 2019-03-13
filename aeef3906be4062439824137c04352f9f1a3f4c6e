@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c25994fb_7507a92b",
+        "filename": "src/com/android/bluetooth/a2dp/A2dpCodecConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2019-03-13T09:45:06Z",
+      "side": 1,
+      "message": "Align this comment with line that comes afterwards and use // instead to match the style used in the rest of the file.",
+      "range": {
+        "startLine": 73,
+        "startChar": 12,
+        "endLine": 73,
+        "endChar": 79
+      },
+      "revId": "aeef3906be4062439824137c04352f9f1a3f4c6e",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
+    }
+  ]
+}
