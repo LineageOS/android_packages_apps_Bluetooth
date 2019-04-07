@@ -129,4 +129,5 @@
     <string name="bluetooth_map_settings_no_account_slots_left">Nun pues esbillar la cuenta. Nun queden ralures</string>
     <string name="bluetooth_connected">Coneutóse l\'audiu Bluetooth</string>
     <string name="bluetooth_disconnected">Desconeutóse l\'audiu Bluetooth</string>
+    <string name="bluetooth_opp_file_limit_exceeded">Los ficheros más grandes que 4GB nun se pueden tresferir</string>
 </resources>
