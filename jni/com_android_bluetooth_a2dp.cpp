@@ -260,7 +260,8 @@ static std::vector<btav_a2dp_codec_config_t> prepareCodecPreferences(
 
 static void initNative(JNIEnv* env, jobject object,
                        jint maxConnectedAudioDevices,
-                       jobjectArray codecConfigArray) {
+                       jobjectArray codecConfigArray,
+                       jobjectArray codecConfigOffload) {
   std::unique_lock<std::shared_timed_mutex> interface_lock(interface_mutex);
   std::unique_lock<std::shared_timed_mutex> callbacks_lock(callbacks_mutex);
 
@@ -306,8 +307,10 @@ static void initNative(JNIEnv* env, jobject object,
   std::vector<btav_a2dp_codec_config_t> codec_priorities =
       prepareCodecPreferences(env, object, codecConfigArray);
 
+  std::vector<btav_a2dp_codec_config_t> offload_codec_supported =
+      prepareCodecPreferences(env, object, codecConfigOffload);
   bt_status_t status = sBluetoothA2dpInterface->init(
-      &sBluetoothA2dpCallbacks, maxConnectedAudioDevices, codec_priorities);
+      &sBluetoothA2dpCallbacks, maxConnectedAudioDevices, codec_priorities, offload_codec_supported);
   if (status != BT_STATUS_SUCCESS) {
     ALOGE("%s: Failed to initialize Bluetooth A2DP, status: %d", __func__,
           status);
@@ -475,7 +478,7 @@ static jboolean setCodecConfigPreferenceNative(JNIEnv* env, jobject object,
 
 static JNINativeMethod sMethods[] = {
     {"classInitNative", "()V", (void*)classInitNative},
-    {"initNative", "(I[Landroid/bluetooth/BluetoothCodecConfig;)V",
+    {"initNative", "(I[Landroid/bluetooth/BluetoothCodecConfig;[Landroid/bluetooth/BluetoothCodecConfig;)V",
      (void*)initNative},
     {"cleanupNative", "()V", (void*)cleanupNative},
     {"connectA2dpNative", "([B)Z", (void*)connectA2dpNative},
