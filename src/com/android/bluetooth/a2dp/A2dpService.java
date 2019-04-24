@@ -122,8 +122,12 @@ public class A2dpService extends ProfileService {
         mA2dpCodecConfig = new A2dpCodecConfig(this, mA2dpNativeInterface);
 
         // Step 5: Initialize native interface
+        List<BluetoothCodecConfig> codecConfigOffload = mAudioManager.getHwOffloadEncodingFormatsSupportedForA2DP();
+        BluetoothCodecConfig[] offloadCodecConfig = new BluetoothCodecConfig[codecConfigOffload.size()];
+        offloadCodecConfig = codecConfigOffload.toArray(offloadCodecConfig);
         mA2dpNativeInterface.init(mMaxConnectedAudioDevices,
-                                  mA2dpCodecConfig.codecConfigPriorities());
+                                  mA2dpCodecConfig.codecConfigPriorities(),
+                                  offloadCodecConfig);
 
         // Step 6: Check if A2DP is in offload mode
         mA2dpOffloadEnabled = mAdapterService.isA2dpOffloadEnabled();
