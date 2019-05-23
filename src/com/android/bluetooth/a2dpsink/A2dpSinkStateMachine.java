@@ -728,7 +728,9 @@ final class A2dpSinkStateMachine extends StateMachine {
         else if((BluetoothProfile.PRIORITY_OFF < priority) ||
                 ((BluetoothProfile.PRIORITY_UNDEFINED == priority) &&
                 (device.getBondState() != BluetoothDevice.BOND_NONE))){
-                    ret= true;
+            if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+                return true;
+            }
         }
         log("Exit okToConnect");
         return ret;
