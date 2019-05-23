@@ -1647,7 +1647,8 @@ final class A2dpStateMachine extends StateMachine {
         if((adapterService == null) ||
            ((adapterService.isQuietModeEnabled() == true) &&
            (mTargetDevice == null))){
-            ret = false;
+             ret = false;
+           }
         }
         // check priority and accept or reject the connection. if priority is undefined
         // it is likely that our SDP has not completed and peer is initiating the
@@ -1655,7 +1656,8 @@ final class A2dpStateMachine extends StateMachine {
         else if((BluetoothProfile.PRIORITY_OFF < priority) ||
                 ((BluetoothProfile.PRIORITY_UNDEFINED == priority) &&
                 (device.getBondState() != BluetoothDevice.BOND_NONE))){
-            ret= true;
+            if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+                ret = true;
         }
         log("Exit okToConnect() ");
         return ret;
