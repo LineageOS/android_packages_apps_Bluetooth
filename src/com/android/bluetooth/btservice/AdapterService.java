@@ -1216,6 +1216,17 @@ public class AdapterService extends Service {
         }
 
         @Override
+        public void setBondingInitiatedLocally(BluetoothDevice device, boolean localInitiated) {
+            // don't check caller, may be called from system UI
+            AdapterService service = getService();
+            if (service == null) {
+                return;
+            }
+            service.setBondingInitiatedLocally(device,localInitiated);
+            return;
+        }
+
+        @Override
         public long getSupportedProfiles() {
             AdapterService service = getService();
             if (service == null) {
@@ -2135,6 +2146,17 @@ public class AdapterService extends Service {
             return false;
         }
         return deviceProp.isBondingInitiatedLocally();
+    }
+
+    void setBondingInitiatedLocally(BluetoothDevice device, boolean localInitiated) {
+        enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        DeviceProperties deviceProp = mRemoteDevices.getDeviceProperties(device);
+        if (deviceProp == null) {
+            return;
+        }
+        Log.w(TAG," localInitiated " + localInitiated);
+        deviceProp.setBondingInitiatedLocally(localInitiated);
+        return;
     }
 
     long getSupportedProfiles() {
