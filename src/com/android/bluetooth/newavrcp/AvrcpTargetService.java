@@ -65,6 +65,8 @@ public class AvrcpTargetService extends ProfileService {
             MediaPlayerList.FolderUpdateCallback {
         @Override
         public void run(MediaData data) {
+            if (mNativeInterface == null) return;
+
             boolean metadata = !Objects.equals(mCurrentData.metadata, data.metadata);
             boolean state = !MediaPlayerWrapper.playstateEquals(mCurrentData.state, data.state);
             boolean queue = !Objects.equals(mCurrentData.queue, data.queue);
@@ -81,6 +83,8 @@ public class AvrcpTargetService extends ProfileService {
         @Override
         public void run(boolean availablePlayers, boolean addressedPlayers,
                 boolean uids) {
+            if (mNativeInterface == null) return;
+
             mNativeInterface.sendFolderUpdate(availablePlayers, addressedPlayers, uids);
         }
     }
