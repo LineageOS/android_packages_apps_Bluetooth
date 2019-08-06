@@ -16,6 +16,6 @@
      limitations under the License.
 -->
 <resources>
-    <string name="incoming_file_toast_msg">Başqa cihazdan fayl gəlir. Qəbul etmə istəyinizi təsdiq edin.</string>
-    <string name="upload_fail_waiting">Fayl göndərilə bilmədi, yenidən sınanır\u2026</string>
+    <string name="incoming_file_toast_msg">Ynkommend bestân fan in oar apparaat ôf. Befêstigje dat jo dit bestân ûntfange wolle.</string>
+    <string name="upload_fail_waiting">Kin bestân net ferstjoere, opnij probearje\u2026</string>
 </resources>

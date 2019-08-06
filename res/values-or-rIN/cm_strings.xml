@@ -16,5 +16,5 @@
      limitations under the License.
 -->
 <resources>
-  <string name="upload_fail_waiting">ଫାଇଲ୍‍ ପଠାଇବା ପାଇଁ ଅଷମ ହେଉଛୁ, ପୁନର୍ବାର ଚେଷ୍ଟା କରୁଛି\u2026</string>
+    <string name="upload_fail_waiting">ଫାଇଲ୍‍ ପଠାଇବା ପାଇଁ ଅଷମ ହେଉଛୁ, ପୁନର୍ବାର ଚେଷ୍ଟା କରୁଛି\u2026</string>
 </resources>
