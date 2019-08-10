@@ -16,19 +16,7 @@
      limitations under the License.
 -->
 <resources>
-  <!--
-        This is the short description of a permission associated with the
-        Bluetooth Avrcp Data Manager. It is displayed as part of the description of
-        any application that was granted that permission. This specific
-        permission controls access to the Bluetooth Avrcp Data Manager.
-    -->
-  <string name="permlab_bluetoothAvrcpDataManager">存取 AVRCP 中繼資料</string>
-  <!--
-        This is the long description of a permission associated with the
-        Bluetooth Avrcp Data Manager. It is displayed as part of the description of
-        any application that was granted that permission. This specific
-        permission controls access to the Bluetooth Avrcp Data Manager.
-    -->
-  <string name="permdesc_bluetoothAvrcpDataManager">允許應用程式存取藍牙 AVRCP 中繼資料並顯示於使用者介面上。</string>
-  <string name="upload_fail_waiting">無法傳送檔案，正在重試\u2026</string>
+    <string name="permlab_bluetoothAvrcpDataManager">存取 AVRCP 中繼資料</string>
+    <string name="permdesc_bluetoothAvrcpDataManager">允許應用程式存取藍牙 AVRCP 中繼資料並顯示於使用者介面上。</string>
+    <string name="upload_fail_waiting">無法傳送檔案，正在重試\u2026</string>
 </resources>
