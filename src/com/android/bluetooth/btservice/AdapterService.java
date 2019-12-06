@@ -1225,6 +1225,20 @@ public class AdapterService extends Service {
             BluetoothAdapter.getDefaultAdapter().disableBluetoothGetStateCache();
         }
 
+        // TODO(b/140404592): Either implement these custom methods, or remove them from IBluetooth.
+        @Override
+        public void setBondingInitiatedLocally(BluetoothDevice device, boolean localInitiated) {}
+        @Override
+        public boolean isTwsPlusDevice(BluetoothDevice device) { return false; }
+        @Override
+        public String getTwsPlusPeerAddress(BluetoothDevice device) { return null; }
+        @Override
+        public void updateQuietModeStatus(boolean quietMode) {}
+        @Override
+        public int setSocketOpt(int type, int port, int optionName, byte [] optionVal, int optionLen) { return -1; }
+        @Override
+        public int getSocketOpt(int type, int port, int optionName, byte [] optionVal) { return -1; }
+
         public void cleanup() {
             mService = null;
         }
