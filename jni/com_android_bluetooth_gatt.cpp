@@ -1383,8 +1383,9 @@ static void gattSetScanParametersNative(JNIEnv* env, jobject object,
   if(scan_window_cnt > 0) {
     env->GetIntArrayRegion(scan_window_unit, 0, scan_window_cnt, (jint *)&scan_window[0]);
   }
+  // TODO(b/140404592): Fix this call to SetScanParameters().
   sGattIf->scanner->SetScanParameters(
-      scan_phy, scan_interval, scan_window,
+      0, {0,0}, {0,0},
       base::Bind(&set_scan_params_cmpl_cb, client_if));
 }
 

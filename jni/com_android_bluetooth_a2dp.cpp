@@ -337,9 +337,9 @@ static void initNative(JNIEnv* env, jobject object,
   std::vector<btav_a2dp_codec_config_t> codec_offloading =
       prepareCodecPreferences(env, object, codecOffloadingArray);
 
+  // TODO(b/140404592): Fix this call to sBluetoothA2dpInterface->init()
   bt_status_t status = sBluetoothA2dpInterface->init(
-      &sBluetoothA2dpCallbacks, maxConnectedAudioDevices, codec_priorities,
-      codec_offloading);
+      &sBluetoothA2dpCallbacks, maxConnectedAudioDevices, codec_priorities, {});
   if (status != BT_STATUS_SUCCESS) {
     ALOGE("%s: Failed to initialize Bluetooth A2DP, status: %d", __func__,
           status);
