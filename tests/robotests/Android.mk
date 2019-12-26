@@ -1,3 +1,5 @@
+ifneq ($(TARGET_USE_QTI_BT_STACK),true)
+
 #############################################################
 # Bluetooth Robolectric test target.                        #
 #############################################################
@@ -49,3 +51,5 @@ LOCAL_TEST_PACKAGE := Bluetooth
 LOCAL_INSTRUMENT_SOURCE_DIRS := $(dir $(LOCAL_PATH))../src
 
 include external/robolectric-shadows/run_robotests.mk
+
+endif
