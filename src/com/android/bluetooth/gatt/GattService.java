@@ -1961,10 +1961,15 @@ public class GattService extends ProfileService {
                 Utils.checkCallerHasNetworkSetupWizardPermission(this);
 
         AppScanStats app = mScannerMap.getAppScanStatsById(scannerId);
+        ScannerMap.App cbApp = mScannerMap.getById(scannerId);
         if (app != null) {
             scanClient.stats = app;
             boolean isFilteredScan = (filters != null) && !filters.isEmpty();
-            app.recordScanStart(settings, isFilteredScan, scannerId);
+            boolean isCallbackScan = false;
+            if (cbApp != null) {
+                isCallbackScan = cbApp.callback != null;
+            }
+            app.recordScanStart(settings, filters, isFilteredScan, isCallbackScan, scannerId);
         }
 
         mScanManager.startScan(scanClient);
@@ -1989,6 +1994,13 @@ public class GattService extends ProfileService {
         piInfo.settings = settings;
         piInfo.filters = filters;
         piInfo.callingPackage = callingPackage;
+
+        // Don't start scan if the Pi scan already in mScannerMap.
+        if (mScannerMap.getByContextInfo(piInfo) != null) {
+            Log.d(TAG, "Don't startScan(PI) since the same Pi scan already in mScannerMap.");
+            return;
+        }
+
         ScannerMap.App app = mScannerMap.add(uuid, null, null, piInfo, this);
         app.mUserHandle = UserHandle.of(UserHandle.getCallingUserId());
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
@@ -2026,7 +2038,8 @@ public class GattService extends ProfileService {
         if (scanStats != null) {
             scanClient.stats = scanStats;
             boolean isFilteredScan = (piInfo.filters != null) && !piInfo.filters.isEmpty();
-            scanStats.recordScanStart(piInfo.settings, isFilteredScan, scannerId);
+            scanStats.recordScanStart(
+                    piInfo.settings, piInfo.filters, isFilteredScan, false, scannerId);
         }
 
         mScanManager.startScan(scanClient);
@@ -3162,6 +3175,22 @@ public class GattService extends ProfileService {
         return uuids;
     }
 
+    void dumpRegisterId(StringBuilder sb) {
+        sb.append("  Scanner:\n");
+        for (Integer appId : mScannerMap.getAllAppsIds()) {
+            println(sb, "    app_if: " + appId + ", appName: " + mScannerMap.getById(appId).name);
+        }
+        sb.append("  Client:\n");
+        for (Integer appId : mClientMap.getAllAppsIds()) {
+            println(sb, "    app_if: " + appId + ", appName: " + mClientMap.getById(appId).name);
+        }
+        sb.append("  Server:\n");
+        for (Integer appId : mServerMap.getAllAppsIds()) {
+            println(sb, "    app_if: " + appId + ", appName: " + mServerMap.getById(appId).name);
+        }
+        sb.append("\n\n");
+    }
+
     @Override
     public void dump(StringBuilder sb) {
         super.dump(sb);
@@ -3172,7 +3201,10 @@ public class GattService extends ProfileService {
 
         println(sb, "mMaxScanFilters: " + mMaxScanFilters);
 
-        sb.append("\nGATT Scanner Map\n");
+        sb.append("\nRegistered App\n");
+        dumpRegisterId(sb);
+
+        sb.append("GATT Scanner Map\n");
         mScannerMap.dump(sb);
 
         sb.append("GATT Client Map\n");
