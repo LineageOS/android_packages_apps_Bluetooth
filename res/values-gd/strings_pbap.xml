@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="pbap_session_key_dialog_title">Sgrìobh iuchair an t-seisein airson %1$s</string>
+    <string name="pbap_session_key_dialog_header">Tha feum air iuchair seisean Bluetooth</string>
+    <string name="auth_notif_message">Sgrìobh iuchair an t-seisein airson %1$s</string>
+    <string name="defaultname">Acainn càr</string>
+</resources>
