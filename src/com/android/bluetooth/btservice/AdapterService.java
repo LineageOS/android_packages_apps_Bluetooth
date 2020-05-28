@@ -1530,6 +1530,14 @@ public class AdapterService extends Service {
             return service.sdpSearch(device, uuid);
         }
 
+        public boolean isTwsPlusDevice(BluetoothDevice device) {
+            return false;
+        }
+
+        public String getTwsPlusPeerAddress(BluetoothDevice device) {
+            return null;
+        }
+
         @Override
         public int getBatteryLevel(BluetoothDevice device) {
             if (!Utils.checkCaller()) {
