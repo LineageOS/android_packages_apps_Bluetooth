@@ -1875,6 +1875,14 @@ public class AdapterService extends Service {
             return true;
         }
 
+        public boolean isTwsPlusDevice(BluetoothDevice device) {
+            return false;
+        }
+
+        public String getTwsPlusPeerAddress(BluetoothDevice device) {
+            return null;
+        }
+
         @Override
         public int getBatteryLevel(BluetoothDevice device) {
             AdapterService service = getService();
