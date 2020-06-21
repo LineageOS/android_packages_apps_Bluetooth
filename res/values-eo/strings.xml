@@ -25,7 +25,6 @@
     <string name="upload_fail_cancel">Fermi</string>
     <string name="status_unknown_error">Nekonata eraro.</string>
     <string name="transfer_menu_open">Malfermi</string>
-    <string name="bluetooth_share_file_name" translate="false">bluetooth_content_share</string>
     <string name="bluetooth_map_settings_save">Save</string>
     <string name="bluetooth_map_settings_cancel">Nuligi</string>
 </resources>
