@@ -215,6 +215,7 @@ public class SapServer extends Thread implements Callback {
     {
         String title, text, button, ticker;
         Notification notification;
+        flags |= PendingIntent.FLAG_IMMUTABLE;
         if(VERBOSE) Log.v(TAG, "setNotification type: " + type);
         /* For PTS TC_SERVER_DCN_BV_03_I we need to expose the option to send immediate disconnect
          * without first sending a graceful disconnect.
