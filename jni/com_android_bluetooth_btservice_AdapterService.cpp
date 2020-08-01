@@ -737,7 +737,7 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     }
 }
 
-static bool initNative(JNIEnv* env, jobject obj) {
+static bool initNative(JNIEnv* env, jobject obj, jboolean isAtvDevice) {
     ALOGV("%s:",__FUNCTION__);
 
     android_bluetooth_UidTraffic.clazz = (jclass) env->NewGlobalRef(
@@ -751,7 +751,7 @@ static bool initNative(JNIEnv* env, jobject obj) {
     }
 
     if (sBluetoothInterface) {
-        int ret = sBluetoothInterface->init(&sBluetoothCallbacks);
+        int ret = sBluetoothInterface->init(&sBluetoothCallbacks, isAtvDevice == JNI_TRUE ? 1 : 0);
         if (ret != BT_STATUS_SUCCESS && ret != BT_STATUS_DONE) {
             ALOGE("Error while setting the callbacks: %d\n", ret);
             sBluetoothInterface = NULL;
@@ -1444,7 +1444,7 @@ static void interopDatabaseAddNative(JNIEnv *env, jobject obj, int feature,
 static JNINativeMethod sMethods[] = {
     /* name, signature, funcPtr */
     {"classInitNative", "()V", (void *) classInitNative},
-    {"initNative", "()Z", (void *) initNative},
+    {"initNative", "(Z)Z", (void*)initNative},
     {"cleanupNative", "()V", (void*) cleanupNative},
     {"enableNative", "(Z)Z",  (void*) enableNative},
     {"disableNative", "()Z",  (void*) disableNative},
