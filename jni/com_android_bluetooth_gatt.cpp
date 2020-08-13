@@ -942,10 +942,11 @@ static int gattClientGetDeviceTypeNative(JNIEnv* env, jobject object,
 
 static void gattClientRegisterAppNative(JNIEnv* env, jobject object,
                                         jlong app_uuid_lsb,
-                                        jlong app_uuid_msb) {
+                                        jlong app_uuid_msb,
+                                        jboolean eatt_support) {
   if (!sGattIf) return;
   Uuid uuid = from_java_uuid(app_uuid_msb, app_uuid_lsb);
-  sGattIf->client->register_client(uuid);
+  sGattIf->client->register_client(uuid, eatt_support);
 }
 
 static void gattClientUnregisterAppNative(JNIEnv* env, jobject object,
@@ -1476,10 +1477,11 @@ static void gattClientReadScanReportsNative(JNIEnv* env, jobject object,
  */
 static void gattServerRegisterAppNative(JNIEnv* env, jobject object,
                                         jlong app_uuid_lsb,
-                                        jlong app_uuid_msb) {
+                                        jlong app_uuid_msb,
+                                        jboolean eatt_support) {
   if (!sGattIf) return;
   Uuid uuid = from_java_uuid(app_uuid_msb, app_uuid_lsb);
-  sGattIf->server->register_server(uuid);
+  sGattIf->server->register_server(uuid, eatt_support);
 }
 
 static void gattServerUnregisterAppNative(JNIEnv* env, jobject object,
@@ -2156,7 +2158,7 @@ static JNINativeMethod sMethods[] = {
     {"cleanupNative", "()V", (void*)cleanupNative},
     {"gattClientGetDeviceTypeNative", "(Ljava/lang/String;)I",
      (void*)gattClientGetDeviceTypeNative},
-    {"gattClientRegisterAppNative", "(JJ)V",
+    {"gattClientRegisterAppNative", "(JJZ)V",
      (void*)gattClientRegisterAppNative},
     {"gattClientUnregisterAppNative", "(I)V",
      (void*)gattClientUnregisterAppNative},
@@ -2195,7 +2197,7 @@ static JNINativeMethod sMethods[] = {
      (void*)gattClientConfigureMTUNative},
     {"gattConnectionParameterUpdateNative", "(ILjava/lang/String;IIIIII)V",
      (void*)gattConnectionParameterUpdateNative},
-    {"gattServerRegisterAppNative", "(JJ)V",
+    {"gattServerRegisterAppNative", "(JJZ)V",
      (void*)gattServerRegisterAppNative},
     {"gattServerUnregisterAppNative", "(I)V",
      (void*)gattServerUnregisterAppNative},
