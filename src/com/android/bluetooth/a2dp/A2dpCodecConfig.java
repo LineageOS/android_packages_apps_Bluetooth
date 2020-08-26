@@ -28,6 +28,8 @@ import com.android.bluetooth.R;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Function;
+
 /*
  * A2DP Codec Configuration setup.
  */
@@ -154,59 +156,32 @@ class A2dpCodecConfig {
             return null;
         }
 
+        Function<int, int> getPriority = (id) -> {
+            int priority;
+            try {
+                priority = resources.getInteger(id);
+            } catch (NotFoundException e) {
+                return BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
+            }
+            if ((priority >= BluetoothCodecConfig.CODEC_PRIORITY_DISABLED)
+                    && (priority < BluetoothCodecConfig.CODEC_PRIORITY_HIGHEST)) {
+                return priority;
+            }
+            return BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
+        };
+
         int[] priorities = new int[BluetoothCodecConfig.SOURCE_CODEC_TYPE_MAX];
         Arrays.fill(priorities, BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT);
-
-        int value;
-        try {
-            value = resources.getInteger(R.integer.a2dp_source_codec_priority_sbc);
-        } catch (NotFoundException e) {
-            value = BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
-        }
-        if ((value >= BluetoothCodecConfig.CODEC_PRIORITY_DISABLED) && (value
-                < BluetoothCodecConfig.CODEC_PRIORITY_HIGHEST)) {
-            priorities[BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC] = value;
-        }
-
-        try {
-            value = resources.getInteger(R.integer.a2dp_source_codec_priority_aac);
-        } catch (NotFoundException e) {
-            value = BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
-        }
-        if ((value >= BluetoothCodecConfig.CODEC_PRIORITY_DISABLED) && (value
-                < BluetoothCodecConfig.CODEC_PRIORITY_HIGHEST)) {
-            priorities[BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC] = value;
-        }
-
-        try {
-            value = resources.getInteger(R.integer.a2dp_source_codec_priority_aptx);
-        } catch (NotFoundException e) {
-            value = BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
-        }
-        if ((value >= BluetoothCodecConfig.CODEC_PRIORITY_DISABLED) && (value
-                < BluetoothCodecConfig.CODEC_PRIORITY_HIGHEST)) {
-            priorities[BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX] = value;
-        }
-
-        try {
-            value = resources.getInteger(R.integer.a2dp_source_codec_priority_aptx_hd);
-        } catch (NotFoundException e) {
-            value = BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
-        }
-        if ((value >= BluetoothCodecConfig.CODEC_PRIORITY_DISABLED) && (value
-                < BluetoothCodecConfig.CODEC_PRIORITY_HIGHEST)) {
-            priorities[BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD] = value;
-        }
-
-        try {
-            value = resources.getInteger(R.integer.a2dp_source_codec_priority_ldac);
-        } catch (NotFoundException e) {
-            value = BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
-        }
-        if ((value >= BluetoothCodecConfig.CODEC_PRIORITY_DISABLED) && (value
-                < BluetoothCodecConfig.CODEC_PRIORITY_HIGHEST)) {
-            priorities[BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC] = value;
-        }
+        priorities[BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC] =
+            getPriority.apply(R.integer.a2dp_source_codec_priority_sbc);
+        priorities[BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC] =
+            getPriority.apply(R.integer.a2dp_source_codec_priority_aac);
+        priorities[BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX] =
+            getPriority.apply(R.integer.a2dp_source_codec_priority_aptx);
+        priorities[BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD] =
+            getPriority.apply(R.integer.a2dp_source_codec_priority_aptx_hd);
+        priorities[BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC] =
+            getPriority.apply(R.integer.a2dp_source_codec_priority_ldac);
 
         BluetoothCodecConfig[] codecConfigArray =
                 new BluetoothCodecConfig[BluetoothCodecConfig.SOURCE_CODEC_TYPE_MAX];
