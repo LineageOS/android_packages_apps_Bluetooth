@@ -46,8 +46,11 @@ class PeriodicScanManager {
     private final AdapterService mAdapterService;
     private final BluetoothAdapter mAdapter;
     Map<IBinder, SyncInfo> mSyncs = new ConcurrentHashMap<>();
+    Map<IBinder, SyncTransferInfo> mSyncTransfers = Collections.synchronizedMap(new HashMap<>());
 
     static int sTempRegistrationId = -1;
+    private int PA_SOURCE_LOCAL = 1;
+    private int PA_SOURCE_REMOTE = 2;
 
     /**
      * Constructor of {@link SyncManager}.
@@ -96,6 +99,28 @@ class PeriodicScanManager {
             this.deathRecipient = deathRecipient;
             this.callback = callback;
         }
+    }
+
+    class SyncTransferInfo {
+        public String address;
+        public SyncDeathRecipient deathRecipient;
+        public IPeriodicAdvertisingCallback callback;
+
+        SyncTransferInfo(String address, IPeriodicAdvertisingCallback callback) {
+            this.address = address;
+            this.callback = callback;
+        }
+    }
+
+    Map.Entry<IBinder, SyncTransferInfo> findSyncTransfer(String address) {
+        Map.Entry<IBinder, SyncTransferInfo> entry = null;
+        for (Map.Entry<IBinder, SyncTransferInfo> e : mSyncTransfers.entrySet()) {
+            if (e.getValue().address.equals(address)) {
+                entry = e;
+                break;
+            }
+        }
+        return entry;
     }
 
     IBinder toBinder(IPeriodicAdvertisingCallback e) {
@@ -300,9 +325,52 @@ class PeriodicScanManager {
         Log.d(TAG,"calling stopSyncNative: " + syncHandle.intValue());
         if (syncHandle < 0) {
             Log.i(TAG, "cancelSync() - sync not established yet");
-            return;
+            // Sync will be freed once initiated in onSyncStarted()
+            cancelSyncNative(sync.adv_sid, sync.address);
+        } else {
+            stopSyncNative(syncHandle.intValue());
         }
-        stopSyncNative(syncHandle.intValue());
+    }
+
+    void onSyncTransferedCallback(int pa_source, int status, String bda) {
+        Log.d(TAG, "onSyncTransferedCallback()");
+        Map.Entry<IBinder, SyncTransferInfo>entry = findSyncTransfer(bda);
+        if (entry != null) {
+            mSyncTransfers.remove(entry);
+            IPeriodicAdvertisingCallback callback = entry.getValue().callback;
+            try {
+                callback.onSyncTransfered(mAdapter.getRemoteDevice(bda), status);
+            } catch (RemoteException e) {
+                throw new IllegalArgumentException("Can't find callback for sync transfer");
+            }
+        }
+    }
+    void transferSync(BluetoothDevice bda, int service_data, int sync_handle) {
+        Log.d(TAG, "transferSync()");
+        Map.Entry<IBinder, SyncInfo> entry = findSync(sync_handle);
+        if (entry == null) {
+            Log.d(TAG,"transferSync: callback not registered");
+        }
+        //check for duplicate transfers
+        mSyncTransfers.put(entry.getKey(), new SyncTransferInfo(bda.getAddress(),
+                entry.getValue().callback));
+        syncTransferNative(PA_SOURCE_REMOTE, bda.getAddress(), service_data, sync_handle);
+    }
+
+    void transferSetInfo(BluetoothDevice bda, int service_data,
+                  int adv_handle, IPeriodicAdvertisingCallback callback) {
+        SyncDeathRecipient deathRecipient = new SyncDeathRecipient(callback);
+        IBinder binder = toBinder(callback);
+        if (DBG) {
+            Log.d(TAG, "transferSetInfo() " + binder);
+        }
+        try {
+            binder.linkToDeath(deathRecipient, 0);
+        } catch (RemoteException e) {
+            throw new IllegalArgumentException("Can't link to periodic scanner death");
+        }
+        mSyncTransfers.put(binder, new SyncTransferInfo(bda.getAddress(), callback));
+        TransferSetInfoNative(PA_SOURCE_LOCAL, bda.getAddress(), service_data, adv_handle);
     }
 
     static {
@@ -318,4 +386,10 @@ class PeriodicScanManager {
     private native void startSyncNative(int sid, String address, int skip, int timeout, int regId);
 
     private native void stopSyncNative(int syncHandle);
+
+    private native void cancelSyncNative(int sid, String address);
+
+    private native void syncTransferNative(int pa_source, String address, int service_data, int sync_handle);
+
+    private native void TransferSetInfoNative(int pa_source, String address, int service_data, int adv_handle);
 }
