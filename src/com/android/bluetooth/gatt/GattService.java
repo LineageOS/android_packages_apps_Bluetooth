@@ -1061,6 +1061,25 @@ public class GattService extends ProfileService {
         }
 
         @Override
+        public void transferSync(BluetoothDevice bda, int service_data , int sync_handle) {
+            GattService service = getService();
+            if (service == null) {
+                return;
+            }
+            service.transferSync(bda, service_data , sync_handle);
+        }
+
+        @Override
+        public void transferSetInfo(BluetoothDevice bda, int service_data , int adv_handle,
+                IPeriodicAdvertisingCallback callback) {
+            GattService service = getService();
+            if (service == null) {
+                return;
+            }
+            service.transferSetInfo(bda, service_data , adv_handle, callback);
+        }
+
+        @Override
         public void unregisterSync(
                 IPeriodicAdvertisingCallback callback, AttributionSource attributionSource) {
             GattService service = getService();
@@ -2570,6 +2589,20 @@ public class GattService extends ProfileService {
         mPeriodicScanManager.stopSync(callback);
     }
 
+    void transferSync(BluetoothDevice bda, int service_data, int sync_handle) {
+        if (!Utils.checkScanPermissionForPreflight(this)) {
+            return;
+        }
+        mPeriodicScanManager.transferSync(bda, service_data, sync_handle);
+    }
+
+    void transferSetInfo(BluetoothDevice bda, int service_data,
+                  int adv_handle, IPeriodicAdvertisingCallback callback) {
+        if (!Utils.checkScanPermissionForPreflight(this)) {
+            return;
+        }
+        mPeriodicScanManager.transferSetInfo(bda, service_data, adv_handle, callback);
+    }
     /**************************************************************************
      * ADVERTISING SET
      *************************************************************************/
