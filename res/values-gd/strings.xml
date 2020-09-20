@@ -17,6 +17,8 @@
     <string name="airplane_error_title">Am modh itealain</string>
     <string name="bt_enable_ok">Cuir air</string>
     <string name="incoming_file_confirm_cancel">Diùlt</string>
+    <string name="incoming_file_confirm_Notification_title">Faidhle a’ tighinn a-steach</string>
+    <string name="incoming_file_confirm_Notification_content">Tha <xliff:g id="sender">%1$s</xliff:g> ullamh airson <xliff:g id="file">%2$s</xliff:g> a chur</string>
     <string name="incoming_line1">O</string>
     <string name="download_succ_line5">Faidhle air fhaighinn</string>
     <string name="upload_succ_line5">Chaidh am faidhle a chur</string>
@@ -27,5 +29,8 @@
     <string name="enabling_progress_title">Fuirich ort…</string>
     <string name="transfer_menu_clear_all">Falamhaich an liosta</string>
     <string name="bluetooth_map_settings_save">Sàbhail</string>
+    <string name="bluetooth_map_settings_intro">Tagh na cunntasan a bu toigh leat a cho-roinneadh thar Bluetooth. Feumaidh tu fhathast gabhail ri inntrigeadh sam bith dha na cunntasan nuair a nì thu ceangal.</string>
+    <string name="bluetooth_connected">Tha fuaim Bluetooth ceangailte</string>
+    <string name="bluetooth_disconnected">Chaidh ceangal fuaim Bluetooth a bhriseadh\"</string>
     <string name="bluetooth_opp_file_limit_exceeded">Cha ghabh faidhlichean a tha nas motha na 4GB a thar-chur</string>
 </resources>
