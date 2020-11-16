@@ -979,6 +979,15 @@ public class GattService extends ProfileService {
         mScanManager.callbackDone(clientIf, status);
     }
 
+    ScanClient findBatchScanClientById(int clientIf) {
+        for (ScanClient client : mScanManager.getBatchScanQueue()) {
+            if (client.clientIf == clientIf) {
+                return client;
+            }
+        }
+        return null;
+    }
+
     void onBatchScanReports(int status, int clientIf, int reportType, int numRecords,
             byte[] recordData) throws RemoteException {
         if (DBG) {
@@ -991,6 +1000,18 @@ public class GattService extends ProfileService {
             // We only support single client for truncated mode.
             ClientMap.App app = mClientMap.getById(clientIf);
             if (app == null) return;
+
+            ScanClient client = findBatchScanClientById(clientIf);
+            if (client == null) {
+                return;
+            }
+
+            // Do no report if location mode is OFF or the client has no location permission
+            // PEERS_MAC_ADDRESS permission holders always get results
+            if (!hasScanResultPermission(client)) {
+                return;
+            }
+
             app.callback.onBatchScanResults(new ArrayList<ScanResult>(results));
         } else {
             for (ScanClient client : mScanManager.getFullBatchScanQueue()) {
@@ -1005,6 +1026,13 @@ public class GattService extends ProfileService {
             RemoteException {
         ClientMap.App app = mClientMap.getById(client.clientIf);
         if (app == null) return;
+
+        // Do no report if location mode is OFF or the client has no location permission
+        // PEERS_MAC_ADDRESS permission holders always get results
+        if (!hasScanResultPermission(client)) {
+            return;
+        }
+
         if (client.filters == null || client.filters.isEmpty()) {
             app.callback.onBatchScanResults(new ArrayList<ScanResult>(allResults));
         }
