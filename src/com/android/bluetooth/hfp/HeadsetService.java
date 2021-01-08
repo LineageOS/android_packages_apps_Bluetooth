@@ -153,6 +153,7 @@ public class HeadsetService extends ProfileService {
         mStateMachinesThread.start();
         // Step 3: Initialize system interface
         mSystemInterface = HeadsetObjectsFactory.getInstance().makeSystemInterface(this);
+        mSystemInterface.init();
         // Step 4: Initialize native interface
         mMaxHeadsetConnections = mAdapterService.getMaxConnectedAudioDevices();
         mNativeInterface = HeadsetObjectsFactory.getInstance().getNativeInterface();
@@ -524,6 +525,26 @@ public class HeadsetService extends ProfileService {
         }
 
         @Override
+        public boolean isNoiseReductionSupported(BluetoothDevice device) {
+            HeadsetService service = getService();
+            if (service == null) {
+                return false;
+            }
+            enforceBluetoothPermission(service);
+            return service.isNoiseReductionSupported(device);
+        }
+
+        @Override
+        public boolean isVoiceRecognitionSupported(BluetoothDevice device) {
+            HeadsetService service = getService();
+            if (service == null) {
+                return false;
+            }
+            enforceBluetoothPermission(service);
+            return service.isVoiceRecognitionSupported(device);
+        }
+
+        @Override
         public boolean startVoiceRecognition(BluetoothDevice device) {
             HeadsetService service = getService();
             if (service == null) {
@@ -892,6 +913,14 @@ public class HeadsetService extends ProfileService {
     public int getConnectionPolicy(BluetoothDevice device) {
         return mDatabaseManager
                 .getProfileConnectionPolicy(device, BluetoothProfile.HEADSET);
+    }
+
+    boolean isNoiseReductionSupported(BluetoothDevice device) {
+        return mNativeInterface.isNoiseReductionSupported(device);
+    }
+
+    boolean isVoiceRecognitionSupported(BluetoothDevice device) {
+        return mNativeInterface.isVoiceRecognitionSupported(device);
     }
 
     boolean startVoiceRecognition(BluetoothDevice device) {
