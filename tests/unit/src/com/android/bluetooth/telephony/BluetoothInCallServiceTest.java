@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.bluetooth.hfp;
+package com.android.bluetooth.telephony;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -50,6 +50,8 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.rule.ServiceTestRule;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.bluetooth.hfp.BluetoothHeadsetProxy;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -1096,9 +1098,11 @@ public class BluetoothInCallServiceTest {
         BluetoothCall ringingCall = createRingingCall();
         when(ringingCall.getHandle()).thenReturn(Uri.parse("tel:5550000"));
 
-        Intent intent = new Intent();
+        Intent intent = new Intent(BluetoothAdapter.ACTION_STATE_CHANGED);
         intent.putExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_ON);
         clearInvocations(mMockBluetoothHeadset);
+        mBluetoothInCallService.mBluetoothAdapterReceiver
+                = mBluetoothInCallService.new BluetoothAdapterReceiver();
         mBluetoothInCallService.mBluetoothAdapterReceiver
                 .onReceive(mBluetoothInCallService, intent);
 
@@ -1176,7 +1180,7 @@ public class BluetoothInCallServiceTest {
     }
 
     private BluetoothCall getMockCall() {
-        BluetoothCall call = mock(com.android.bluetooth.hfp.BluetoothCall.class);
+        BluetoothCall call = mock(com.android.bluetooth.telephony.BluetoothCall.class);
         String uuid = UUID.randomUUID().toString();
         when(call.getTelecomCallId()).thenReturn(uuid);
         return call;
