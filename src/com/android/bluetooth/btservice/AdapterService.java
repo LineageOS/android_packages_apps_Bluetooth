@@ -1597,6 +1597,11 @@ public class AdapterService extends Service {
         }
 
         @Override
+        public boolean isBroadcastActive() {
+            return false;
+        }
+
+        @Override
         public int getRemoteType(BluetoothDevice device) {
             AdapterService service = getService();
             if (service == null || !callerIsSystemOrActiveOrManagedUser(service, TAG, "getRemoteType")) {
