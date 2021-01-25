@@ -1838,6 +1838,11 @@ public class AdapterService extends Service {
         }
 
         @Override
+        public boolean isBroadcastActive() {
+            return false;
+        }
+
+        @Override
         public int getRemoteType(BluetoothDevice device, AttributionSource attributionSource) {
             Attributable.setAttributionSource(device, attributionSource);
             AdapterService service = getService();
