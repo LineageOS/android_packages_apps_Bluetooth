@@ -878,7 +878,7 @@ class JniScanningCallbacks : ScanningCallbacks {
                                  status, scannerId, UUID_PARAMS(app_uuid));
   }
 
-  void OnScanResult(uint16_t event_type, uint8_t addr_type, RawAddress* bda,
+  void OnScanResult(uint16_t event_type, uint8_t addr_type, RawAddress bda,
                     uint8_t primary_phy, uint8_t secondary_phy,
                     uint8_t advertising_sid, int8_t tx_power, int8_t rssi,
                     uint16_t periodic_adv_int, std::vector<uint8_t> adv_data) {
@@ -886,7 +886,7 @@ class JniScanningCallbacks : ScanningCallbacks {
     if (!sCallbackEnv.valid()) return;
 
     ScopedLocalRef<jstring> address(sCallbackEnv.get(),
-                                    bdaddr2newjstr(sCallbackEnv.get(), bda));
+                                    bdaddr2newjstr(sCallbackEnv.get(), &bda));
     ScopedLocalRef<jbyteArray> jb(sCallbackEnv.get(),
                                   sCallbackEnv->NewByteArray(adv_data.size()));
     sCallbackEnv->SetByteArrayRegion(jb.get(), 0, adv_data.size(),
@@ -1136,11 +1136,11 @@ static int gattClientGetDeviceTypeNative(JNIEnv* env, jobject object,
 }
 
 static void gattClientRegisterAppNative(JNIEnv* env, jobject object,
-                                        jlong app_uuid_lsb,
-                                        jlong app_uuid_msb) {
+                                        jlong app_uuid_lsb, jlong app_uuid_msb,
+                                        jboolean eatt_support) {
   if (!sGattIf) return;
   Uuid uuid = from_java_uuid(app_uuid_msb, app_uuid_lsb);
-  sGattIf->client->register_client(uuid);
+  sGattIf->client->register_client(uuid, eatt_support);
 }
 
 static void gattClientUnregisterAppNative(JNIEnv* env, jobject object,
@@ -1657,11 +1657,11 @@ static void gattClientReadScanReportsNative(JNIEnv* env, jobject object,
  * Native server functions
  */
 static void gattServerRegisterAppNative(JNIEnv* env, jobject object,
-                                        jlong app_uuid_lsb,
-                                        jlong app_uuid_msb) {
+                                        jlong app_uuid_lsb, jlong app_uuid_msb,
+                                        jboolean eatt_support) {
   if (!sGattIf) return;
   Uuid uuid = from_java_uuid(app_uuid_msb, app_uuid_lsb);
-  sGattIf->server->register_server(uuid);
+  sGattIf->server->register_server(uuid, eatt_support);
 }
 
 static void gattServerUnregisterAppNative(JNIEnv* env, jobject object,
@@ -2334,7 +2334,7 @@ static JNINativeMethod sMethods[] = {
     {"cleanupNative", "()V", (void*)cleanupNative},
     {"gattClientGetDeviceTypeNative", "(Ljava/lang/String;)I",
      (void*)gattClientGetDeviceTypeNative},
-    {"gattClientRegisterAppNative", "(JJ)V",
+    {"gattClientRegisterAppNative", "(JJZ)V",
      (void*)gattClientRegisterAppNative},
     {"gattClientUnregisterAppNative", "(I)V",
      (void*)gattClientUnregisterAppNative},
@@ -2373,7 +2373,7 @@ static JNINativeMethod sMethods[] = {
      (void*)gattClientConfigureMTUNative},
     {"gattConnectionParameterUpdateNative", "(ILjava/lang/String;IIIIII)V",
      (void*)gattConnectionParameterUpdateNative},
-    {"gattServerRegisterAppNative", "(JJ)V",
+    {"gattServerRegisterAppNative", "(JJZ)V",
      (void*)gattServerRegisterAppNative},
     {"gattServerUnregisterAppNative", "(I)V",
      (void*)gattServerUnregisterAppNative},
