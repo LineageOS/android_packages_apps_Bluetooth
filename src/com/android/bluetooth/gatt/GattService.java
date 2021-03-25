@@ -198,12 +198,6 @@ public class GattService extends ProfileService {
     private final Object mDeviceConfigLock = new Object();
 
     /**
-     * Feature flag used to enable denylist that filters devices that are
-     * well-known to be used for physical location.
-     */
-    private static final boolean ENABLE_LOCATION_DENYLIST = false;
-
-    /**
      * Matcher that can be applied to MAC addresses to determine if a
      * {@link BluetoothDevice} is well-known to be used for physical location.
      */
@@ -1111,8 +1105,7 @@ public class GattService extends ProfileService {
 
             ScanRecord scanRecord = ScanRecord.parseFromBytes(scanRecordData);
 
-            // TODO: only apply denylist filter based on destination capabilities
-            if (ENABLE_LOCATION_DENYLIST) {
+            if (client.hasDisavowedLocation) {
                 synchronized (mDeviceConfigLock) {
                     final MacAddress parsedAddress = MacAddress.fromString(address);
                     if (mLocationDenylistMac.testMacAddress(parsedAddress)) {
@@ -1235,6 +1228,9 @@ public class GattService extends ProfileService {
         if (client.hasNetworkSettingsPermission
                 || client.hasNetworkSetupWizardPermission
                 || client.hasScanWithoutLocationPermission) {
+            return true;
+        }
+        if (client.hasDisavowedLocation) {
             return true;
         }
         return client.hasLocationPermission && !Utils.blockedByLocationOff(this, client.userHandle);
@@ -2166,8 +2162,12 @@ public class GattService extends ProfileService {
         if (DBG) {
             Log.d(TAG, "start scan with filters");
         }
-        UserHandle callingUser = UserHandle.of(UserHandle.getCallingUserId());
-        enforceAdminPermission();
+
+        if (!Utils.checkScanPermissionForDataDelivery(
+                this, callingPackage, callingFeatureId, "Starting GATT scan.")) {
+            return;
+        }
+
         if (needsPrivilegedPermissionForScan(settings)) {
             enforcePrivilegedPermission();
         }
@@ -2176,13 +2176,19 @@ public class GattService extends ProfileService {
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         scanClient.eligibleForSanitizedExposureNotification =
                 callingPackage.equals(mExposureNotificationPackage);
+
+        scanClient.hasDisavowedLocation =
+                Utils.hasDisavowedLocationForScan(this, callingPackage);
+
         scanClient.isQApp = Utils.isQApp(this, callingPackage);
-        if (scanClient.isQApp) {
-            scanClient.hasLocationPermission = Utils.checkCallerHasFineLocation(this, mAppOps,
-                    callingPackage, callingFeatureId, scanClient.userHandle);
-        } else {
-            scanClient.hasLocationPermission = Utils.checkCallerHasCoarseOrFineLocation(this,
-                    mAppOps, callingPackage, callingFeatureId, scanClient.userHandle);
+        if (!scanClient.hasDisavowedLocation) {
+            if (scanClient.isQApp) {
+                scanClient.hasLocationPermission = Utils.checkCallerHasFineLocation(this, mAppOps,
+                        callingPackage, callingFeatureId, scanClient.userHandle);
+            } else {
+                scanClient.hasLocationPermission = Utils.checkCallerHasCoarseOrFineLocation(this,
+                        mAppOps, callingPackage, callingFeatureId, scanClient.userHandle);
+            }
         }
         scanClient.hasNetworkSettingsPermission =
                 Utils.checkCallerHasNetworkSettingsPermission(this);
@@ -2212,7 +2218,12 @@ public class GattService extends ProfileService {
         if (DBG) {
             Log.d(TAG, "start scan with filters, for PendingIntent");
         }
-        enforceAdminPermission();
+
+        if (!Utils.checkScanPermissionForDataDelivery(
+                this, callingPackage, callingFeatureId, "Starting GATT scan.")) {
+            return;
+        }
+
         if (needsPrivilegedPermissionForScan(settings)) {
             enforcePrivilegedPermission();
         }
@@ -2238,18 +2249,24 @@ public class GattService extends ProfileService {
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         app.mEligibleForSanitizedExposureNotification =
                 callingPackage.equals(mExposureNotificationPackage);
+
+        app.mHasDisavowedLocation =
+                Utils.hasDisavowedLocationForScan(this, callingPackage);
+
         app.mIsQApp = Utils.isQApp(this, callingPackage);
-        try {
-            if (app.mIsQApp) {
-                app.hasLocationPermission = Utils.checkCallerHasFineLocation(
-                      this, mAppOps, callingPackage, callingFeatureId, app.mUserHandle);
-            } else {
-                app.hasLocationPermission = Utils.checkCallerHasCoarseOrFineLocation(
-                      this, mAppOps, callingPackage, callingFeatureId, app.mUserHandle);
+        if (!app.mHasDisavowedLocation) {
+            try {
+                if (app.mIsQApp) {
+                    app.hasLocationPermission = Utils.checkCallerHasFineLocation(
+                            this, mAppOps, callingPackage, callingFeatureId, app.mUserHandle);
+                } else {
+                    app.hasLocationPermission = Utils.checkCallerHasCoarseOrFineLocation(
+                            this, mAppOps, callingPackage, callingFeatureId, app.mUserHandle);
+                }
+            } catch (SecurityException se) {
+                // No need to throw here. Just mark as not granted.
+                app.hasLocationPermission = false;
             }
-        } catch (SecurityException se) {
-            // No need to throw here. Just mark as not granted.
-            app.hasLocationPermission = false;
         }
         app.mHasNetworkSettingsPermission =
                 Utils.checkCallerHasNetworkSettingsPermission(this);
@@ -2274,6 +2291,7 @@ public class GattService extends ProfileService {
         scanClient.hasNetworkSetupWizardPermission = app.mHasNetworkSetupWizardPermission;
         scanClient.hasScanWithoutLocationPermission = app.mHasScanWithoutLocationPermission;
         scanClient.associatedDevices = app.mAssociatedDevices;
+        scanClient.hasDisavowedLocation = app.mHasDisavowedLocation;
 
         AppScanStats scanStats = mScannerMap.getAppScanStatsById(scannerId);
         if (scanStats != null) {
@@ -2294,7 +2312,7 @@ public class GattService extends ProfileService {
     }
 
     void stopScan(int scannerId) {
-        enforceAdminPermission();
+        Utils.checkScanPermissionForPreflight(this);
         int scanQueueSize =
                 mScanManager.getBatchScanQueue().size() + mScanManager.getRegularScanQueue().size();
         if (DBG) {
@@ -2311,7 +2329,7 @@ public class GattService extends ProfileService {
     }
 
     void stopScan(PendingIntent intent, String callingPackage) {
-        enforceAdminPermission();
+        Utils.checkScanPermissionForPreflight(this);
         PendingIntentInfo pii = new PendingIntentInfo();
         pii.intent = intent;
         ScannerMap.App app = mScannerMap.getByContextInfo(pii);
@@ -2354,12 +2372,12 @@ public class GattService extends ProfileService {
      *************************************************************************/
     void registerSync(ScanResult scanResult, int skip, int timeout,
             IPeriodicAdvertisingCallback callback) {
-        enforceAdminPermission();
+        Utils.checkScanPermissionForPreflight(this);
         mPeriodicScanManager.startSync(scanResult, skip, timeout, callback);
     }
 
     void unregisterSync(IPeriodicAdvertisingCallback callback) {
-        enforceAdminPermission();
+        Utils.checkScanPermissionForPreflight(this);
         mPeriodicScanManager.stopSync(callback);
     }
 
@@ -2370,13 +2388,13 @@ public class GattService extends ProfileService {
             AdvertiseData scanResponse, PeriodicAdvertisingParameters periodicParameters,
             AdvertiseData periodicData, int duration, int maxExtAdvEvents,
             IAdvertisingSetCallback callback) {
-        enforceAdminPermission();
+        Utils.checkScanPermissionForPreflight(this);
         mAdvertiseManager.startAdvertisingSet(parameters, advertiseData, scanResponse,
                 periodicParameters, periodicData, duration, maxExtAdvEvents, callback);
     }
 
     void stopAdvertisingSet(IAdvertisingSetCallback callback) {
-        enforceAdminPermission();
+        Utils.checkScanPermissionForPreflight(this);
         mAdvertiseManager.stopAdvertisingSet(callback);
     }
 
@@ -2386,38 +2404,38 @@ public class GattService extends ProfileService {
     }
 
     void enableAdvertisingSet(int advertiserId, boolean enable, int duration, int maxExtAdvEvents) {
-        enforceAdminPermission();
+        Utils.checkScanPermissionForPreflight(this);
         mAdvertiseManager.enableAdvertisingSet(advertiserId, enable, duration, maxExtAdvEvents);
     }
 
     void setAdvertisingData(int advertiserId, AdvertiseData data) {
-        enforceAdminPermission();
+        Utils.checkScanPermissionForPreflight(this);
         mAdvertiseManager.setAdvertisingData(advertiserId, data);
     }
 
     void setScanResponseData(int advertiserId, AdvertiseData data) {
-        enforceAdminPermission();
+        Utils.checkScanPermissionForPreflight(this);
         mAdvertiseManager.setScanResponseData(advertiserId, data);
     }
 
     void setAdvertisingParameters(int advertiserId, AdvertisingSetParameters parameters) {
-        enforceAdminPermission();
+        Utils.checkScanPermissionForPreflight(this);
         mAdvertiseManager.setAdvertisingParameters(advertiserId, parameters);
     }
 
     void setPeriodicAdvertisingParameters(int advertiserId,
             PeriodicAdvertisingParameters parameters) {
-        enforceAdminPermission();
+        Utils.checkScanPermissionForPreflight(this);
         mAdvertiseManager.setPeriodicAdvertisingParameters(advertiserId, parameters);
     }
 
     void setPeriodicAdvertisingData(int advertiserId, AdvertiseData data) {
-        enforceAdminPermission();
+        Utils.checkScanPermissionForPreflight(this);
         mAdvertiseManager.setPeriodicAdvertisingData(advertiserId, data);
     }
 
     void setPeriodicAdvertisingEnable(int advertiserId, boolean enable) {
-        enforceAdminPermission();
+        Utils.checkScanPermissionForPreflight(this);
         mAdvertiseManager.setPeriodicAdvertisingEnable(advertiserId, enable);
     }
 
@@ -3299,10 +3317,6 @@ public class GattService extends ProfileService {
             Log.d(TAG, "getDeviceType() - device=" + device + ", type=" + type);
         }
         return type;
-    }
-
-    private void enforceAdminPermission() {
-        enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM, "Need BLUETOOTH_ADMIN permission");
     }
 
     private boolean needsPrivilegedPermissionForScan(ScanSettings settings) {
