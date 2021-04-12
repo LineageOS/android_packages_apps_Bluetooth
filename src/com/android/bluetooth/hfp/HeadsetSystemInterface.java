@@ -91,8 +91,9 @@ public class HeadsetSystemInterface {
         intent.setComponent(intent.resolveSystemService(mHeadsetService.getPackageManager(), 0));
         if (intent.getComponent() == null || !mHeadsetService.bindService(intent,
                 mPhoneProxyConnection, 0)) {
-            // Crash the stack if cannot bind to Telecom
-            Log.wtfStack(TAG, "Could not bind to IBluetoothHeadsetPhone Service, intent=" + intent);
+            // Error if cannot bind to Telecom
+            // Some targets don't build Telecom (i.e. ATV)
+            Log.e(TAG, "Could not bind to IBluetoothHeadsetPhone Service, intent=" + intent);
         }
     }
 
