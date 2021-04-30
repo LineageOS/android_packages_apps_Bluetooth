@@ -20,7 +20,6 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
-import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -943,12 +942,12 @@ public class GattService extends ProfileService {
         }
 
         @Override
-        public void getOwnAddress(int advertiserId) {
+        public void getOwnAddress(int advertiserId, AttributionSource attributionSource) {
             GattService service = getService();
             if (service == null) {
                 return;
             }
-            service.getOwnAddress(advertiserId);
+            service.getOwnAddress(advertiserId, attributionSource);
         }
 
         @Override
@@ -2270,7 +2269,8 @@ public class GattService extends ProfileService {
                 callingPackage.equals(mExposureNotificationPackage);
 
         scanClient.hasDisavowedLocation =
-                Utils.hasDisavowedLocationForScan(this, callingPackage, attributionSource);
+                Utils.hasDisavowedLocationForScan(this, callingPackage, attributionSource,
+                        isTestModeEnabled());
 
         scanClient.isQApp = Utils.isQApp(this, callingPackage);
         if (!scanClient.hasDisavowedLocation) {
@@ -2343,7 +2343,8 @@ public class GattService extends ProfileService {
                 callingPackage.equals(mExposureNotificationPackage);
 
         app.mHasDisavowedLocation =
-                Utils.hasDisavowedLocationForScan(this, callingPackage, attributionSource);
+                Utils.hasDisavowedLocationForScan(this, callingPackage, attributionSource,
+                        isTestModeEnabled());
 
         app.mIsQApp = Utils.isQApp(this, callingPackage);
         if (!app.mHasDisavowedLocation) {
@@ -2522,8 +2523,15 @@ public class GattService extends ProfileService {
         mAdvertiseManager.stopAdvertisingSet(callback);
     }
 
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
-    void getOwnAddress(int advertiserId) {
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_ADVERTISE,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
+    void getOwnAddress(int advertiserId, AttributionSource attributionSource) {
+        if (!Utils.checkAdvertisePermissionForDataDelivery(
+                this, attributionSource, "GattService getOwnAddress")) {
+            return;
+        }
         enforcePrivilegedPermission();
         mAdvertiseManager.getOwnAddress(advertiserId);
     }
