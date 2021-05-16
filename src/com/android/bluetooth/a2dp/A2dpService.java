@@ -1087,10 +1087,7 @@ public class A2dpService extends ProfileService {
             BluetoothCodecStatus codecStatus = sm.getCodecStatus();
             if (codecStatus != null) {
                 for (BluetoothCodecConfig config : codecStatus.getCodecsSelectableCapabilities()) {
-                    final boolean isMandatoryCodecWithDualChannel = config.isMandatoryCodec()
-                            && (config.getChannelMode() & config.CHANNEL_MODE_DUAL_CHANNEL)
-                                    == config.CHANNEL_MODE_DUAL_CHANNEL;
-                    if (config.isMandatoryCodec() || !isMandatoryCodecWithDualChannel) {
+                    if (config.isMandatoryCodec()) {
                         hasMandatoryCodec = true;
                     } else {
                         supportsOptional = true;
