@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "8d1a08f5_a38b6640",
+        "filename": "src/com/android/bluetooth/a2dp/A2dpCodecConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 19763
+      },
+      "writtenOn": "2021-05-20T15:16:19Z",
+      "side": 1,
+      "message": "With previous comments and a null check here (crashes otherwise) HD Audio switch becomes working again. Can\u0027t confirm for other codecs, though, as I only have SBC XQ.",
+      "range": {
+        "startLine": 131,
+        "startChar": 12,
+        "endLine": 131,
+        "endChar": 50
+      },
+      "revId": "eef20ba8fb9213eb27661c6a4fb2ee2527e44ef5",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1b43e0b3_1d0b9cfe",
         "filename": "src/com/android/bluetooth/a2dp/A2dpService.java",
         "patchSetId": 3
