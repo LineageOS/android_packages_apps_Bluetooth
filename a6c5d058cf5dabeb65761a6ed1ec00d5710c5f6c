@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ae232192_95516bf7",
+        "filename": "src/com/android/bluetooth/a2dp/A2dpCodecConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 18205
+      },
+      "writtenOn": "2021-05-20T23:05:16Z",
+      "side": 1,
+      "message": "Not sure how this can be null: see https://github.com/LineageOS/android_packages_apps_Bluetooth/blob/lineage-18.1/src/com/android/bluetooth/a2dp/A2dpCodecConfig.java#L243",
+      "revId": "a6c5d058cf5dabeb65761a6ed1ec00d5710c5f6c",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
+    }
+  ]
+}
