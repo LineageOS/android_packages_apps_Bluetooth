@@ -1090,20 +1090,13 @@ public class A2dpService extends ProfileService {
                     final boolean isMandatoryCodecWithDualChannel = config.isMandatoryCodec()
                             && (config.getChannelMode() & config.CHANNEL_MODE_DUAL_CHANNEL)
                                     == config.CHANNEL_MODE_DUAL_CHANNEL;
-                    if (config.isMandatoryCodec() || !isMandatoryCodecWithDualChannel) {
+                    if (config.isMandatoryCodec() && !isMandatoryCodecWithDualChannel) {
                         hasMandatoryCodec = true;
                     } else {
                         supportsOptional = true;
                     }
                 }
             }
-        }
-        if (!hasMandatoryCodec) {
-            // Mandatory codec(SBC) is not selectable. It could be caused by the remote device
-            // select codec before native finish get codec capabilities. Stop use this codec
-            // status as the reference to support/enable optional codecs.
-            Log.i(TAG, "updateOptionalCodecsSupport: Mandatory codec is not selectable.");
-            return;
         }
 
         if (previousSupport == BluetoothA2dp.OPTIONAL_CODECS_SUPPORT_UNKNOWN
