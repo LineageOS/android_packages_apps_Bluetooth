@@ -16,6 +16,24 @@
       "revId": "a6c5d058cf5dabeb65761a6ed1ec00d5710c5f6c",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6eaa17e5_8244a531",
+        "filename": "src/com/android/bluetooth/a2dp/A2dpCodecConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 18205
+      },
+      "writtenOn": "2021-05-21T11:12:33Z",
+      "side": 1,
+      "message": "I was missing that for qti-bt-stack we bump SOURCE_CODEC_TYPE_MAX to 7, so aosp Bluetooth will produce 2 null entries.",
+      "parentUuid": "ae232192_95516bf7",
+      "revId": "a6c5d058cf5dabeb65761a6ed1ec00d5710c5f6c",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
     }
   ]
 }
