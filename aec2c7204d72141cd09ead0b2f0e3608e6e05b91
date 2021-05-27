@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "49b9bef5_7bf38789",
+        "filename": "src/com/android/bluetooth/a2dp/A2dpCodecConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 18205
+      },
+      "writtenOn": "2021-05-27T20:14:40Z",
+      "side": 1,
+      "message": "This is the only change over aosp (or i should say over I589d63c635e29ff3cef8b688acc85637d5f096c3 ), everything else is reverts",
+      "range": {
+        "startLine": 270,
+        "startChar": 0,
+        "endLine": 276,
+        "endChar": 67
+      },
+      "revId": "aec2c7204d72141cd09ead0b2f0e3608e6e05b91",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
+    }
+  ]
+}
