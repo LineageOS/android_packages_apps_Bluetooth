@@ -266,6 +266,13 @@ class A2dpCodecConfig {
                     BluetoothCodecConfig.BITS_PER_SAMPLE_NONE,
                     BluetoothCodecConfig.CHANNEL_MODE_NONE,
                     0 /* codecSpecific1 */, 0 /* codecSpecific2 */,
+                    0 /* codecSpecific3 */, 0 /* codecSpecific4 */),
+            new BluetoothCodecConfig(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC,
+                    mA2dpSourceCodecPrioritySbc,
+                    BluetoothCodecConfig.SAMPLE_RATE_NONE,
+                    BluetoothCodecConfig.BITS_PER_SAMPLE_NONE,
+                    BluetoothCodecConfig.CHANNEL_MODE_DUAL_CHANNEL,
+                    0 /* codecSpecific1 */, 0 /* codecSpecific2 */,
                     0 /* codecSpecific3 */, 0 /* codecSpecific4 */)
         };
     }
