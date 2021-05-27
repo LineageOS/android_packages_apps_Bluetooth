@@ -1087,10 +1087,7 @@ public class A2dpService extends ProfileService {
             BluetoothCodecStatus codecStatus = sm.getCodecStatus();
             if (codecStatus != null) {
                 for (BluetoothCodecConfig config : codecStatus.getCodecsSelectableCapabilities()) {
-                    final boolean isMandatoryCodecWithDualChannel = config.isMandatoryCodec()
-                            && (config.getChannelMode() & config.CHANNEL_MODE_DUAL_CHANNEL)
-                                    == config.CHANNEL_MODE_DUAL_CHANNEL;
-                    if (config.isMandatoryCodec() && !isMandatoryCodecWithDualChannel) {
+                    if (config.isMandatoryCodec()) {
                         hasMandatoryCodec = true;
                     } else {
                         supportsOptional = true;
@@ -1098,13 +1095,20 @@ public class A2dpService extends ProfileService {
                 }
             }
         }
+        if (!hasMandatoryCodec) {
+            // Mandatory codec(SBC) is not selectable. It could be caused by the remote device
+            // select codec before native finish get codec capabilities. Stop use this codec
+            // status as the reference to support/enable optional codecs.
+            Log.i(TAG, "updateOptionalCodecsSupport: Mandatory codec is not selectable.");
+            return;
+        }
 
         if (previousSupport == BluetoothA2dp.OPTIONAL_CODECS_SUPPORT_UNKNOWN
-                || previousSupport == BluetoothA2dp.OPTIONAL_CODECS_NOT_SUPPORTED) {
+                || supportsOptional != (previousSupport
+                                    == BluetoothA2dp.OPTIONAL_CODECS_SUPPORTED)) {
             setSupportsOptionalCodecs(device, supportsOptional);
         }
-        if (supportsOptional
-                || previousSupport == BluetoothA2dp.OPTIONAL_CODECS_SUPPORTED) {
+        if (supportsOptional) {
             int enabled = getOptionalCodecsEnabled(device);
             switch (enabled) {
                 case BluetoothA2dp.OPTIONAL_CODECS_PREF_UNKNOWN:
