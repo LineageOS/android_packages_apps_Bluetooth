@@ -117,4 +117,8 @@
     <!-- Package that is providing the exposure notification service -->
     <string name="exposure_notification_package">com.google.android.gms</string>
 
+    <!-- Fix bluetooth sample rate on Samsung devices
+         On Samsung devices, we need to tell Audio HAL if we're running narrow band or wide band
+     -->
+    <bool name="samsung_samplerate_support">false</bool>
 </resources>

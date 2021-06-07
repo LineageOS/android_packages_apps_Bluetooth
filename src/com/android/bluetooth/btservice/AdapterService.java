@@ -3237,4 +3237,8 @@ public class AdapterService extends Service {
     public boolean isMock() {
         return false;
     }
+
+    public boolean getSamsungSamplerate() {
+        return getResources().getBoolean(com.android.bluetooth.R.bool.samsung_samplerate_support);
+    }
 }
