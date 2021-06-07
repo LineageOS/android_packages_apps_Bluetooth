@@ -135,4 +135,6 @@
      -->
     <bool name="enable_gd_up_to_scanning_layer">false</bool>
 
+    <!-- If true, SCO sample rate will be reported via g_sco_samplerate audio parameter -->
+    <bool name="sco_report_samplerate">false</bool>
 </resources>
