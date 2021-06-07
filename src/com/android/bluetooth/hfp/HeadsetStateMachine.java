@@ -82,6 +82,9 @@ public class HeadsetStateMachine extends StateMachine {
     private static final String HEADSET_WBS = "bt_wbs";
     private static final String HEADSET_AUDIO_FEATURE_ON = "on";
     private static final String HEADSET_AUDIO_FEATURE_OFF = "off";
+    private static final String HEADSET_G_SCO_SAMPLERATE = "g_sco_samplerate";
+    private static final String HEADSET_G_WB_SAMPLERATE = "16000";
+    private static final String HEADSET_G_NB_SAMPLERATE = "8000";
 
     static final int CONNECT = 1;
     static final int DISCONNECT = 2;
@@ -1511,6 +1514,12 @@ public class HeadsetStateMachine extends StateMachine {
                 HEADSET_WBS + "=" + mAudioParams.getOrDefault(HEADSET_WBS,
                         HEADSET_AUDIO_FEATURE_OFF)
         });
+        keyValuePairs = keyValuePairs.concat(";"
+                + HEADSET_G_SCO_SAMPLERATE
+                + "="
+                + mAudioParams.getOrDefault(
+                    HEADSET_G_SCO_SAMPLERATE,
+                    HEADSET_G_NB_SAMPLERATE));
         Log.i(TAG, "setAudioParameters for " + mDevice + ": " + keyValuePairs);
         mSystemInterface.getAudioManager().setParameters(keyValuePairs);
     }
@@ -1649,10 +1658,12 @@ public class HeadsetStateMachine extends StateMachine {
         String prevWbs = mAudioParams.getOrDefault(HEADSET_WBS, HEADSET_AUDIO_FEATURE_OFF);
         switch (wbsConfig) {
             case HeadsetHalConstants.BTHF_WBS_YES:
+                mAudioParams.put(HEADSET_G_SCO_SAMPLERATE, HEADSET_G_WB_SAMPLERATE);
                 mAudioParams.put(HEADSET_WBS, HEADSET_AUDIO_FEATURE_ON);
                 break;
             case HeadsetHalConstants.BTHF_WBS_NO:
             case HeadsetHalConstants.BTHF_WBS_NONE:
+                mAudioParams.put(HEADSET_G_SCO_SAMPLERATE, HEADSET_G_NB_SAMPLERATE);
                 mAudioParams.put(HEADSET_WBS, HEADSET_AUDIO_FEATURE_OFF);
                 break;
             default:
