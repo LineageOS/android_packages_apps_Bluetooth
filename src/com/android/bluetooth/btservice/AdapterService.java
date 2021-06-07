@@ -3971,4 +3971,8 @@ public class AdapterService extends Service {
     public boolean isMock() {
         return false;
     }
+
+    public boolean shouldReportScoSampleRate() {
+        return getResources().getBoolean(com.android.bluetooth.R.bool.sco_report_samplerate);
+    }
 }
