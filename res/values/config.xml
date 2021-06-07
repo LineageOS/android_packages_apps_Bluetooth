@@ -117,4 +117,6 @@
     <!-- Package that is providing the exposure notification service -->
     <string name="exposure_notification_package">com.google.android.gms</string>
 
+    <!-- If true, SCO sample rate will be reported via g_sco_samplerate audio parameter -->
+    <bool name="sco_report_samplerate">false</bool>
 </resources>
