@@ -21,6 +21,7 @@ import static com.android.bluetooth.Utils.enforceBluetoothPrivilegedPermission;
 
 import android.annotation.RequiresPermission;
 import android.app.Activity;
+import android.app.ActivityThread;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
@@ -30,6 +31,7 @@ import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetoothMap;
 import android.bluetooth.SdpMnsRecord;
+import android.content.Attributable;
 import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -391,7 +393,10 @@ public class BluetoothMapService extends ProfileService {
                     // handled elsewhere
                     break;
                 case DISCONNECT_MAP:
-                    disconnectMap((BluetoothDevice) msg.obj);
+                    BluetoothDevice device = (BluetoothDevice) msg.obj;
+                    Attributable.setAttributionSource(device,
+                            ActivityThread.currentAttributionSource());
+                    disconnectMap(device);
                     break;
                 case SHUTDOWN:
                     // Call close from this handler to avoid starting because of pending messages
@@ -898,7 +903,7 @@ public class BluetoothMapService extends ProfileService {
         synchronized (this) {
             if (sRemoteDevice == null) {
                 sRemoteDevice = remoteDevice;
-                sRemoteDeviceName = sRemoteDevice.getName();
+                sRemoteDeviceName = Utils.getName(sRemoteDevice);
                 // In case getRemoteName failed and return null
                 if (TextUtils.isEmpty(sRemoteDeviceName)) {
                     sRemoteDeviceName = getString(R.string.defaultname);
@@ -917,7 +922,7 @@ public class BluetoothMapService extends ProfileService {
                 }
             } else if (!sRemoteDevice.equals(remoteDevice)) {
                 Log.w(TAG, "Unexpected connection from a second Remote Device received. name: " + (
-                        (remoteDevice == null) ? "unknown" : remoteDevice.getName()));
+                        (remoteDevice == null) ? "unknown" : Utils.getName(remoteDevice)));
                 return false;
             } // Else second connection to same device, just continue
         }
@@ -1255,6 +1260,7 @@ public class BluetoothMapService extends ProfileService {
             if (VERBOSE) {
                 Log.v(TAG, "isConnected()");
             }
+            Attributable.setAttributionSource(device, source);
             BluetoothMapService service = getService(source);
             return service != null && service.getState() == BluetoothMap.STATE_CONNECTED
                     && BluetoothMapService.getRemoteDevice().equals(device);
@@ -1265,6 +1271,7 @@ public class BluetoothMapService extends ProfileService {
             if (VERBOSE) {
                 Log.v(TAG, "disconnect()");
             }
+            Attributable.setAttributionSource(device, source);
             BluetoothMapService service = getService(source);
             if (service == null) {
                 return false;
@@ -1304,6 +1311,7 @@ public class BluetoothMapService extends ProfileService {
             if (VERBOSE) {
                 Log.v(TAG, "getConnectionState()");
             }
+            Attributable.setAttributionSource(device, source);
             BluetoothMapService service = getService(source);
             if (service == null) {
                 return BluetoothProfile.STATE_DISCONNECTED;
@@ -1314,6 +1322,7 @@ public class BluetoothMapService extends ProfileService {
         @Override
         public boolean setConnectionPolicy(BluetoothDevice device, int connectionPolicy,
                 AttributionSource source) {
+            Attributable.setAttributionSource(device, source);
             BluetoothMapService service = getService(source);
             if (service == null) {
                 return false;
@@ -1323,6 +1332,7 @@ public class BluetoothMapService extends ProfileService {
 
         @Override
         public int getConnectionPolicy(BluetoothDevice device, AttributionSource source) {
+            Attributable.setAttributionSource(device, source);
             BluetoothMapService service = getService(source);
             if (service == null) {
                 return BluetoothProfile.CONNECTION_POLICY_UNKNOWN;

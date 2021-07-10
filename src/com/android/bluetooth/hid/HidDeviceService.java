@@ -20,6 +20,7 @@ import static android.Manifest.permission.BLUETOOTH_CONNECT;
 
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHidDevice;
 import android.bluetooth.BluetoothHidDeviceAppQosSettings;
@@ -27,6 +28,7 @@ import android.bluetooth.BluetoothHidDeviceAppSdpSettings;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.IBluetoothHidDevice;
 import android.bluetooth.IBluetoothHidDeviceCallback;
+import android.content.Attributable;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.content.Intent;
@@ -95,6 +97,8 @@ public class HidDeviceService extends ProfileService {
             switch (msg.what) {
                 case MESSAGE_APPLICATION_STATE_CHANGED: {
                     BluetoothDevice device = msg.obj != null ? (BluetoothDevice) msg.obj : null;
+                    Attributable.setAttributionSource(device,
+                            ActivityThread.currentAttributionSource());
                     boolean success = (msg.arg1 != 0);
 
                     if (success) {
@@ -149,6 +153,8 @@ public class HidDeviceService extends ProfileService {
 
                 case MESSAGE_CONNECT_STATE_CHANGED: {
                     BluetoothDevice device = (BluetoothDevice) msg.obj;
+                    Attributable.setAttributionSource(device,
+                            ActivityThread.currentAttributionSource());
                     int halState = msg.arg1;
                     int state = convertHalState(halState);
 
@@ -346,6 +352,7 @@ public class HidDeviceService extends ProfileService {
                 Log.d(TAG, "sendReport(): device=" + device + "  id=" + id);
             }
 
+            Attributable.setAttributionSource(device, source);
             HidDeviceService service = getService(source);
             if (service == null) {
                 return false;
@@ -361,6 +368,7 @@ public class HidDeviceService extends ProfileService {
                 Log.d(TAG, "replyReport(): device=" + device + " type=" + type + " id=" + id);
             }
 
+            Attributable.setAttributionSource(device, source);
             HidDeviceService service = getService(source);
             if (service == null) {
                 return false;
@@ -375,6 +383,7 @@ public class HidDeviceService extends ProfileService {
                 Log.d(TAG, "unplug(): device=" + device);
             }
 
+            Attributable.setAttributionSource(device, source);
             HidDeviceService service = getService(source);
             if (service == null) {
                 return false;
@@ -389,6 +398,7 @@ public class HidDeviceService extends ProfileService {
                 Log.d(TAG, "connect(): device=" + device);
             }
 
+            Attributable.setAttributionSource(device, source);
             HidDeviceService service = getService(source);
             if (service == null) {
                 return false;
@@ -403,6 +413,7 @@ public class HidDeviceService extends ProfileService {
                 Log.d(TAG, "disconnect(): device=" + device);
             }
 
+            Attributable.setAttributionSource(device, source);
             HidDeviceService service = getService(source);
             if (service == null) {
                 return false;
@@ -419,6 +430,7 @@ public class HidDeviceService extends ProfileService {
                         + connectionPolicy);
             }
 
+            Attributable.setAttributionSource(device, source);
             HidDeviceService service = getService(source);
             if (service == null) {
                 return false;
@@ -433,6 +445,7 @@ public class HidDeviceService extends ProfileService {
                 Log.d(TAG, "reportError(): device=" + device + " error=" + error);
             }
 
+            Attributable.setAttributionSource(device, source);
             HidDeviceService service = getService(source);
             if (service == null) {
                 return false;
@@ -447,6 +460,7 @@ public class HidDeviceService extends ProfileService {
                 Log.d(TAG, "getConnectionState(): device=" + device);
             }
 
+            Attributable.setAttributionSource(device, source);
             HidDeviceService service = getService(source);
             if (service == null) {
                 return BluetoothHidDevice.STATE_DISCONNECTED;
