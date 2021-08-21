@@ -11,4 +11,5 @@
     <string name="unknownName">Ainm nach aithne dhuinn</string>
     <string name="localPhoneName">M’ ainm</string>
     <string name="defaultnumber">000000</string>
+    <string name="pbap_notification_group">Co-roinneadh luchd-aithne Bluetooth</string>
 </resources>
