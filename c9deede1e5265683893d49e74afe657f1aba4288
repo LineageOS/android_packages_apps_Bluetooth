@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b3ebbb33_67dca948",
+        "filename": "src/com/android/bluetooth/hfp/HeadsetStateMachine.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 10067
+      },
+      "writtenOn": "2021-09-22T17:21:55Z",
+      "side": 1,
+      "message": "does it have to be persistent?",
+      "range": {
+        "startLine": 91,
+        "startChar": 13,
+        "endLine": 91,
+        "endChar": 20
+      },
+      "revId": "c9deede1e5265683893d49e74afe657f1aba4288",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4acb7375_d04bde96",
+        "filename": "src/com/android/bluetooth/hfp/HeadsetStateMachine.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1527,
+      "author": {
+        "id": 10067
+      },
+      "writtenOn": "2021-09-22T17:21:55Z",
+      "side": 1,
+      "message": "too many spaces",
+      "range": {
+        "startLine": 1522,
+        "startChar": 0,
+        "endLine": 1527,
+        "endChar": 79
+      },
+      "revId": "c9deede1e5265683893d49e74afe657f1aba4288",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
+    }
+  ]
+}
