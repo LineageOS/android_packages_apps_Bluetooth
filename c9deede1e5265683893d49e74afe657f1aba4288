@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2e2fc758_c5060caf",
+        "filename": "src/com/android/bluetooth/hfp/HeadsetStateMachine.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 19907
+      },
+      "writtenOn": "2021-09-24T06:38:59Z",
+      "side": 1,
+      "message": "Tried without it and seems to be working fine",
+      "parentUuid": "b3ebbb33_67dca948",
+      "range": {
+        "startLine": 91,
+        "startChar": 13,
+        "endLine": 91,
+        "endChar": 20
+      },
+      "revId": "c9deede1e5265683893d49e74afe657f1aba4288",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4acb7375_d04bde96",
         "filename": "src/com/android/bluetooth/hfp/HeadsetStateMachine.java",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2021-09-22T17:21:55Z",
       "side": 1,
       "message": "too many spaces",
+      "range": {
+        "startLine": 1522,
+        "startChar": 0,
+        "endLine": 1527,
+        "endChar": 79
+      },
+      "revId": "c9deede1e5265683893d49e74afe657f1aba4288",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fda8ae2c_8e219f89",
+        "filename": "src/com/android/bluetooth/hfp/HeadsetStateMachine.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1527,
+      "author": {
+        "id": 19907
+      },
+      "writtenOn": "2021-09-24T06:38:59Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "4acb7375_d04bde96",
       "range": {
         "startLine": 1522,
         "startChar": 0,
