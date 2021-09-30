@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39d7167c_25370255",
+        "filename": "src/com/android/bluetooth/hfp/HeadsetStateMachine.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 10067
+      },
+      "writtenOn": "2021-09-30T22:24:48Z",
+      "side": 1,
+      "message": "maybe would be better as overlay?",
+      "range": {
+        "startLine": 90,
+        "startChar": 32,
+        "endLine": 90,
+        "endChar": 67
+      },
+      "revId": "ef7628be5d150176b4b8a201949f850630a9107d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
+    }
+  ]
+}
