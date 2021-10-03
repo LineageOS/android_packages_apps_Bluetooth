@@ -22,6 +22,30 @@
       "revId": "ef7628be5d150176b4b8a201949f850630a9107d",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "61f0036c_223aa587",
+        "filename": "src/com/android/bluetooth/hfp/HeadsetStateMachine.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 19907
+      },
+      "writtenOn": "2021-10-03T06:00:44Z",
+      "side": 1,
+      "message": "Can you upload patchset of it?",
+      "parentUuid": "39d7167c_25370255",
+      "range": {
+        "startLine": 90,
+        "startChar": 32,
+        "endLine": 90,
+        "endChar": 67
+      },
+      "revId": "ef7628be5d150176b4b8a201949f850630a9107d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
     }
   ]
 }
