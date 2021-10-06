@@ -1850,7 +1850,7 @@ public class AdapterService extends Service {
         }
 
         @Override
-        public boolean isBroadcastActive() {
+        public boolean isBroadcastActive(AttributionSource attributionSource) {
             return false;
         }
 
