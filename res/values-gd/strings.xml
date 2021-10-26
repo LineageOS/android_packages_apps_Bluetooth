@@ -44,7 +44,7 @@
     <string name="notification_sending">Co-roinneadh Bluetooth: A’ cur <xliff:g id="file">%1$s</xliff:g></string>
     <string name="notification_sent">Co-roinneadh Bluetooth: Chaidh <xliff:g id="file">%1$s</xliff:g> a chur</string>
     <string name="notification_sent_complete">100% coileanta</string>
-    <string name="notification_sent_fail">Co-roinneadh Bluetooth: Cha deach a faidhle <xliff:g id="file">%1$s</xliff:g> a chur</string>
+    <string name="notification_sent_fail">Co-roinneadh Bluetooth: Cha deach am faidhle <xliff:g id="file">%1$s</xliff:g> a chur</string>
     <string name="download_title">Tar-chur fhaidhlichean</string>
     <string name="download_line1">O: \u0022<xliff:g id="sender">%1$s</xliff:g>\u0022</string>
     <string name="download_line2">Faidhle: <xliff:g id="file">%1$s</xliff:g></string>

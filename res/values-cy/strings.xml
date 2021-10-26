@@ -128,7 +128,7 @@
     <string name="bluetooth_a2dp_sink_queue_name">Yn Chwarae Nawr</string>
     <string name="bluetooth_map_settings_save">Cadw</string>
     <string name="bluetooth_map_settings_cancel">Diddymu</string>
-    <string name="bluetooth_map_settings_intro">Dewisa\'r cyfrifon wyt am eu rhannu trwy Bluetooth. Mi fydd dal yn rhaid caniatáu unrhyw fynediad i\'r cyfrifon wrth gysylltu.</string>
+    <string name="bluetooth_map_settings_intro">Dewisa\'r cyfrifon wyt am eu rhannu trwy Bluetooth. Mi fydd dal yn rhaid caniatáu unrhyw fynediad at y cyfrifon wrth gysylltu.</string>
     <string name="bluetooth_map_settings_count">Slotiau yn weddill:</string>
     <string name="bluetooth_map_settings_app_icon">Eicon yr ap</string>
     <string name="bluetooth_map_settings_title">Gosodiadau Rhannu Negeseuon Bluetooth</string>
