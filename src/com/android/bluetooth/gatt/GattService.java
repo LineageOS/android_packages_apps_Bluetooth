@@ -1144,7 +1144,7 @@ public class GattService extends ProfileService {
     void onScanResultInternal(int eventType, int addressType, String address, int primaryPhy,
             int secondaryPhy, int advertisingSid, int txPower, int rssi, int periodicAdvInt,
             byte[] advData) {
-        if (VDBG) {
+        if (VDBG || mAdapterService.getIsVerboseLoggingEnabledForAll()) {
             Log.d(TAG, "onScanResult() - eventType=0x" + Integer.toHexString(eventType)
                     + ", addressType=" + addressType + ", address=" + address + ", primaryPhy="
                     + primaryPhy + ", secondaryPhy=" + secondaryPhy + ", advertisingSid=0x"
@@ -1157,6 +1157,9 @@ public class GattService extends ProfileService {
         for (ScanClient client : mScanManager.getRegularScanQueue()) {
             ScannerMap.App app = mScannerMap.getById(client.scannerId);
             if (app == null) {
+                if (VDBG || mAdapterService.getIsVerboseLoggingEnabledForAll()) {
+                    Log.d(TAG, "App is null for scanner ID " + client.scannerId);
+                }
                 continue;
             }
 
@@ -1168,6 +1171,8 @@ public class GattService extends ProfileService {
             if (settings.getLegacy()) {
                 if ((eventType & ET_LEGACY_MASK) == 0) {
                     // If this is legacy scan, but nonlegacy result - skip.
+                    Log.i(TAG, "Non legacy result in legacy scan, skipping scanner id "
+                               + client.scannerId + ", eventType=" + eventType);
                     continue;
                 } else {
                     // Some apps are used to fixed-size advertise data.
@@ -1185,6 +1190,10 @@ public class GattService extends ProfileService {
 
             if (client.hasDisavowedLocation) {
                 if (mLocationDenylistPredicate.test(result)) {
+                    if (VDBG || mAdapterService.getIsVerboseLoggingEnabledForAll()) {
+                        Log.d(TAG, "Result in location deny list, skipping scanner id "
+                                + client.scannerId);
+                    }
                     continue;
                 }
             }
@@ -1205,11 +1214,24 @@ public class GattService extends ProfileService {
                     result = sanitized;
                 }
             }
-            if (!hasPermission || !matchesFilters(client, result)) {
+            if (!hasPermission) {
+                if (VDBG || mAdapterService.getIsVerboseLoggingEnabledForAll()) {
+                    Log.d(TAG, "scanner id " + client.scannerId + " has no result permission");
+                }
+                continue;
+            }
+            if (!matchesFilters(client, result)) {
+                if (VDBG || mAdapterService.getIsVerboseLoggingEnabledForAll()) {
+                    Log.d(TAG, "result did not match filter for scanner id " + client.scannerId);
+                }
                 continue;
             }
 
             if ((settings.getCallbackType() & ScanSettings.CALLBACK_TYPE_ALL_MATCHES) == 0) {
+                if (VDBG || mAdapterService.getIsVerboseLoggingEnabledForAll()) {
+                    Log.d(TAG, "callback type " + settings.getCallbackType()
+                            + " is not ALL_MATCHES for scanner id " + client.scannerId);
+                }
                 continue;
             }
 
@@ -1225,7 +1247,7 @@ public class GattService extends ProfileService {
                             ScanSettings.CALLBACK_TYPE_ALL_MATCHES);
                 }
             } catch (RemoteException | PendingIntent.CanceledException e) {
-                Log.e(TAG, "Exception: " + e);
+                Log.e(TAG, "Stop scan for scanner id " + client.scannerId + " due to : " + e);
                 mScannerMap.remove(client.scannerId);
                 mScanManager.stopScan(client.scannerId);
             }
