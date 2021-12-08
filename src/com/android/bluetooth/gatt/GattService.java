@@ -109,6 +109,28 @@ public class GattService extends ProfileService {
     private static final int TRUNCATED_RESULT_SIZE = 11;
     private static final int TIME_STAMP_LENGTH = 2;
 
+    private enum MatchOrigin {
+        PSEUDO_ADDRESS,
+        ORIGINAL_ADDRESS
+    }
+
+    private static class MatchResult {
+        private final boolean matches;
+        private final MatchOrigin origin;
+        private MatchResult(boolean matches, MatchOrigin origin) {
+            this.matches = matches;
+            this.origin = origin;
+        }
+
+        public boolean getMatches() {
+            return matches;
+        }
+
+        public MatchOrigin getMatchOrigin() {
+            return origin;
+        }
+    }
+
     /**
      * The default floor value for LE batch scan report delays greater than 0
      */
@@ -1222,11 +1244,20 @@ public class GattService extends ProfileService {
                 }
                 continue;
             }
-            if (!matchesFilters(client, result)) {
+
+            MatchResult matchResult = matchesFilters(client, result, originalAddress);
+            if (!matchResult.getMatches()) {
                 if (VDBG || mAdapterService.getIsVerboseLoggingEnabledForAll()) {
                     Log.d(TAG, "result did not match filter for scanner id " + client.scannerId);
                 }
                 continue;
+            }
+
+            if (matchResult.getMatchOrigin() == MatchOrigin.ORIGINAL_ADDRESS) {
+                result = new ScanResult(getAnonymousDevice(originalAddress), eventType, primaryPhy,
+                        secondaryPhy, advertisingSid, txPower, rssi, periodicAdvInt, scanRecord,
+                            SystemClock.elapsedRealtimeNanos());
+
             }
 
             if ((settings.getCallbackType() & ScanSettings.CALLBACK_TYPE_ALL_MATCHES) == 0) {
@@ -1332,16 +1363,29 @@ public class GattService extends ProfileService {
     }
 
     // Check if a scan record matches a specific filters.
-    private boolean matchesFilters(ScanClient client, ScanResult scanResult) {
+    private MatchResult matchesFilters(ScanClient client, ScanResult scanResult) {
+        return matchesFilters(client, scanResult, null);
+    }
+
+
+    // Check if a scan record matches a specific filters.
+    private MatchResult matchesFilters(ScanClient client, ScanResult scanResult,
+            String originalAddress) {
         if (client.filters == null || client.filters.isEmpty()) {
-            return true;
+            // TODO: Do we really wanna return true here?
+            return new MatchResult(true, MatchOrigin.PSEUDO_ADDRESS);
         }
         for (ScanFilter filter : client.filters) {
+            // Need to check the filter matches, and the original address without changing the API
             if (filter.matches(scanResult)) {
-                return true;
+                return new MatchResult(true, MatchOrigin.PSEUDO_ADDRESS);
+            }
+            if (originalAddress != null
+                    && originalAddress.equalsIgnoreCase(filter.getDeviceAddress())) {
+                return new MatchResult(true, MatchOrigin.ORIGINAL_ADDRESS);
             }
         }
-        return false;
+        return new MatchResult(false, MatchOrigin.PSEUDO_ADDRESS);
     }
 
     void onClientRegistered(int status, int clientIf, long uuidLsb, long uuidMsb)
@@ -1924,7 +1968,7 @@ public class GattService extends ProfileService {
         // Reconstruct the scan results.
         ArrayList<ScanResult> results = new ArrayList<ScanResult>();
         for (ScanResult scanResult : permittedResults) {
-            if (matchesFilters(client, scanResult)) {
+            if (matchesFilters(client, scanResult).getMatches()) {
                 results.add(scanResult);
             }
         }
