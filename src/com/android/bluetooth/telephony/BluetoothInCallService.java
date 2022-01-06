@@ -190,6 +190,10 @@ public class BluetoothInCallService extends InCallService {
             if (call.isExternalCall()) {
                 return;
             }
+            if (state == Call.STATE_DISCONNECTING) {
+                mLastState = state;
+                return;
+            }
 
             // If a BluetoothCall is being put on hold because of a new connecting call, ignore the
             // CONNECTING since the BT state update needs to send out the numHeld = 1 + dialing
@@ -608,7 +612,8 @@ public class BluetoothInCallService extends InCallService {
         }
 
         BluetoothCall conferenceCall = getBluetoothCallById(call.getParentId());
-        if (!mCallInfo.isNullCall(conferenceCall)) {
+        if (!mCallInfo.isNullCall(conferenceCall)
+                && conferenceCall.hasProperty(Call.Details.PROPERTY_GENERIC_CONFERENCE)) {
             isPartOfConference = true;
 
             // Run some alternative states for Conference-level merge/swap support.
