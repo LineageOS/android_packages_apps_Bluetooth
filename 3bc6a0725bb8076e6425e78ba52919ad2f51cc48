@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6ca0152f_5bbd9c48",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 10067
+      },
+      "writtenOn": "2022-01-06T14:06:33Z",
+      "side": 1,
+      "message": "upload change to sync Bluetooth from LineageOS org.",
+      "revId": "3bc6a0725bb8076e6425e78ba52919ad2f51cc48",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
