@@ -15,9 +15,9 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="permlab_bluetoothShareManager">Mynediad at y rheolwr lawrlwytho</string>
-    <string name="permdesc_bluetoothShareManager">Mae\'n caniatáu i\'r ap gael mynediad at reolwr BluetoothShare a\'i defnyddio i drosglwyddo ffeiliau.</string>
+    <string name="permdesc_bluetoothShareManager">Mae\'n caniatáu yr ap i gael mynediad at reolwr BluetoothShare a\'i defnyddio i drosglwyddo ffeiliau.</string>
     <string name="permlab_bluetoothWhitelist">Caniatáu mynediad dyfais Bluetooth.</string>
-    <string name="permdesc_bluetoothWhitelist">Mae\'n caniatáu i\'r ap ychwanegu dyfais Bluetooth i restr wen dros dro er mwyn anfon ffeiliau i\'r ddyfais hon heb gadarnhad defnyddiwr.</string>
+    <string name="permdesc_bluetoothWhitelist">Mae\'n caniatáu yr ap i ychwanegu dyfais Bluetooth i restr wen dros dro er mwyn anfon ffeiliau i\'r ddyfais hon heb gadarnhad defnyddiwr.</string>
     <string name="bt_share_picker_label">Bluetooth</string>
     <string name="unknown_device">Dyfais anhysbys</string>
     <string name="unknownNumber">Anhysybys</string>
