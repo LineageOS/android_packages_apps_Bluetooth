@@ -701,6 +701,26 @@ public class HeadsetService extends ProfileService {
         }
 
         @Override
+        public void phoneStateChangedDsDa(int numActive, int numHeld, int callState, String number,
+                int type, String name, AttributionSource source) {
+            HeadsetService service = getService(source);
+            if (service == null) {
+                return;
+            }
+            service.phoneStateChanged(numActive, numHeld, callState, number, type, name, false);
+        }
+
+        @Override
+        public void clccResponseDsDa(int index, int direction, int status, int mode, boolean mpty,
+                String number, int type, AttributionSource source) {
+            HeadsetService service = getService(source);
+            if (service == null) {
+                return;
+            }
+            service.clccResponse(index, direction, status, mode, mpty, number, type);
+        }
+
+        @Override
         public boolean sendVendorSpecificResultCode(BluetoothDevice device, String command,
                 String arg, AttributionSource source) {
             Attributable.setAttributionSource(device, source);
