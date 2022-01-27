@@ -16,6 +16,23 @@
       "message": "Just skip the previous 3 commits that are getting reverted here",
       "revId": "425fe3931db7fdac28ba43e86ea11f4c31e53064",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "20321a9d_3ad237d5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2022-01-27T19:35:10Z",
+      "side": 1,
+      "message": "I am really unsure if it makes sense to pick the whole chain. I would skip all commits and pick only this one.",
+      "revId": "425fe3931db7fdac28ba43e86ea11f4c31e53064",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
