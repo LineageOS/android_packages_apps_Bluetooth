@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d4f827c8_10437643",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2022-01-27T18:47:22Z",
+      "side": 1,
+      "message": "Just skip the previous 3 commits that are getting reverted here",
+      "revId": "425fe3931db7fdac28ba43e86ea11f4c31e53064",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
