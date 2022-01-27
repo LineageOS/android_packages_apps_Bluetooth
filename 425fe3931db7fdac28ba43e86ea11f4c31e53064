@@ -33,6 +33,24 @@
       "message": "I am really unsure if it makes sense to pick the whole chain. I would skip all commits and pick only this one.",
       "revId": "425fe3931db7fdac28ba43e86ea11f4c31e53064",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "03abed8d_063a73ab",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2022-01-27T20:02:05Z",
+      "side": 1,
+      "message": "Alternative: https://review.lineageos.org/c/LineageOS/android_packages_apps_Bluetooth/+/322838",
+      "parentUuid": "20321a9d_3ad237d5",
+      "revId": "425fe3931db7fdac28ba43e86ea11f4c31e53064",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
