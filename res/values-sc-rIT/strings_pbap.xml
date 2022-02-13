@@ -7,4 +7,8 @@
     <string name="auth_notif_ticker">Rechesta de autenticatzione Obex</string>
     <string name="auth_notif_title">Crae de sessione</string>
     <string name="auth_notif_message">Iscrie sa crae de sessione pro %1$s</string>
+    <string name="defaultname">Pachete de vetura</string>
+    <string name="unknownName">Nùmene disconnotu</string>
+    <string name="localPhoneName">Nùmene miu</string>
+    <string name="defaultnumber">000000</string>
 </resources>
