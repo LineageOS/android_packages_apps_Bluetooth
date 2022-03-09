@@ -125,9 +125,9 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.util.ArrayUtils;
 
-import libcore.util.SneakyThrow;
-
 import com.google.protobuf.InvalidProtocolBufferException;
+
+import libcore.util.SneakyThrow;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -3704,6 +3704,7 @@ public class AdapterService extends Service {
         if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_BLUETOOTH,
                 LOGGING_DEBUG_ENABLED_FOR_ALL_FLAG, false)) {
             initFlags.add(String.format("%s=%s", LOGGING_DEBUG_ENABLED_FOR_ALL_FLAG, "true"));
+            mIsVerboseLoggingEnabledForAll = true;
         }
         String debugLoggingEnabledTags = DeviceConfig.getString(DeviceConfig.NAMESPACE_BLUETOOTH,
                 LOGGING_DEBUG_ENABLED_FOR_TAGS_FLAG, "");
@@ -3721,6 +3722,12 @@ public class AdapterService extends Service {
             initFlags.add(String.format("%s=%s", BTAA_HCI_LOG_FLAG, "true"));
         }
         return initFlags.toArray(new String[0]);
+    }
+
+    private boolean mIsVerboseLoggingEnabledForAll = false;
+
+    public boolean getIsVerboseLoggingEnabledForAll() {
+        return mIsVerboseLoggingEnabledForAll;
     }
 
     private final Object mDeviceConfigLock = new Object();
