@@ -51,7 +51,7 @@
     <string name="download_line3" msgid="4384821622908676061">"اندازه فایل: <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="download_line4" msgid="8535996869722666525"></string>
     <string name="download_line5" msgid="3069560415845295386">"درحال دریافت فایل…"</string>
-    <string name="download_cancel" msgid="9177305996747500768">"توقف"</string>
+    <string name="download_cancel" msgid="9177305996747500768">"متوقف کردن"</string>
     <string name="download_ok" msgid="5000360731674466039">"پنهان کردن"</string>
     <string name="incoming_line1" msgid="2127419875681087545">"از"</string>
     <string name="incoming_line2" msgid="3348994249285315873">"نام فایل"</string>
