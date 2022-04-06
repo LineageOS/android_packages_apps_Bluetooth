@@ -1483,7 +1483,8 @@ public class AdapterService extends Service {
     }
 
      boolean setScanMode(int mode, int duration) {
-        enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        enforceCallingOrSelfPermission(
+                BLUETOOTH_PRIVILEGED, "Need BLUETOOTH PRIVILEGED permission");
 
         setDiscoverableTimeout(duration);
 
