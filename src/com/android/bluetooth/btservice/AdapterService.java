@@ -1947,7 +1947,8 @@ public class AdapterService extends Service {
     }
 
     boolean setDiscoverableTimeout(int timeout) {
-        enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        enforceCallingOrSelfPermission(
+                BLUETOOTH_PRIVILEGED, "Need BLUETOOTH PRIVILEGED permission");
 
         return mAdapterProperties.setDiscoverableTimeout(timeout);
     }
