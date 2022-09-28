@@ -47,6 +47,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.os.Environment;
+import android.util.EventLog;
 import android.util.Log;
 
 import java.io.File;
@@ -67,7 +68,11 @@ public class BluetoothOppUtility {
             = new ConcurrentHashMap<Uri, BluetoothOppSendFileInfo>();
 
     public static boolean isBluetoothShareUri(Uri uri) {
-        return uri.toString().startsWith(BluetoothShare.CONTENT_URI.toString());
+        if (uri.toString().startsWith(BluetoothShare.CONTENT_URI.toString())
+                && !uri.getAuthority().equals(BluetoothShare.CONTENT_URI.getAuthority())) {
+            EventLog.writeEvent(0x534e4554, "225880741", -1, "");
+        }
+        return uri.getAuthority().equals(BluetoothShare.CONTENT_URI.getAuthority());
     }
 
     public static BluetoothOppTransferInfo queryRecord(Context context, Uri uri) {
