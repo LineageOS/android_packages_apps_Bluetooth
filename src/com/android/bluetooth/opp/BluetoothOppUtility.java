@@ -56,6 +56,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import android.support.v4.content.FileProvider;
@@ -72,10 +73,10 @@ public class BluetoothOppUtility {
 
     public static boolean isBluetoothShareUri(Uri uri) {
         if (uri.toString().startsWith(BluetoothShare.CONTENT_URI.toString())
-                && !uri.getAuthority().equals(BluetoothShare.CONTENT_URI.getAuthority())) {
+                && !Objects.equals(uri.getAuthority(), BluetoothShare.CONTENT_URI.getAuthority())) {
             EventLog.writeEvent(0x534e4554, "225880741", -1, "");
         }
-        return uri.getAuthority().equals(BluetoothShare.CONTENT_URI.getAuthority());
+        return Objects.equals(uri.getAuthority(), BluetoothShare.CONTENT_URI.getAuthority());
     }
 
     public static BluetoothOppTransferInfo queryRecord(Context context, Uri uri) {
