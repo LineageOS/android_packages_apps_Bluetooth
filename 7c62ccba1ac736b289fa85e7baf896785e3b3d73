@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "51bd4159_b47545df",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 12604
+      },
+      "writtenOn": "2023-02-08T00:04:47Z",
+      "side": 1,
+      "message": "This commit requires https://review.lineageos.org/c/LineageOS/android_packages_apps_Bluetooth/+/345525",
+      "revId": "7c62ccba1ac736b289fa85e7baf896785e3b3d73",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
