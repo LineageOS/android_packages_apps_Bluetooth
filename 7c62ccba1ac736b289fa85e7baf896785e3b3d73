@@ -16,6 +16,23 @@
       "message": "This commit requires https://review.lineageos.org/c/LineageOS/android_packages_apps_Bluetooth/+/345525",
       "revId": "7c62ccba1ac736b289fa85e7baf896785e3b3d73",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "07272e97_2abea7a6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 25691
+      },
+      "writtenOn": "2023-02-11T18:24:28Z",
+      "side": 1,
+      "message": "Entire topic, together with all other topics back to 2021-09, builds for and runs on Moto G5 Cedric. THANK YOU!",
+      "revId": "7c62ccba1ac736b289fa85e7baf896785e3b3d73",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
