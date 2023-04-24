@@ -65,6 +65,7 @@
     <string name="transfer_menu_clear_all">Sfeḍ tabdart</string>
     <string name="transfer_menu_open">Ldi</string>
     <string name="transfer_clear_dlg_title">Sfeḍ</string>
+    <string name="bluetooth_a2dp_sink_queue_name">Itturaren tura</string>
     <string name="bluetooth_map_settings_save">Sekles</string>
     <string name="bluetooth_map_settings_cancel">Sefsex</string>
 </resources>
