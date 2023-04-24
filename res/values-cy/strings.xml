@@ -83,7 +83,7 @@
     <string name="bt_sm_2_1_default">Does dim digon o le ar y cerdyn SD i gadw\'r ffeil hon.</string>
     <string name="bt_sm_2_2">Lle sydd ei angen: <xliff:g id="size">%1$s</xliff:g></string>
     <string name="ErrorTooManyRequests">Mae gormod o geisiadau yn cael eu prosesu. Ceisia eto\'n hwyrach.</string>
-    <string name="status_pending">Heb ddechrau\'r trosglwyddo ffeil(iau) eto.</string>
+    <string name="status_pending">Heb gychwyn y  trosglwyddo ffeil(iau) eto.</string>
     <string name="status_running">Mae trosglwyddiad ffeil(iau) ar y gweill.</string>
     <string name="status_success">Cwblhawyd y trosglwyddiad ffeil yn llwyddiannus.</string>
     <string name="status_not_accept">Ni chefnogir y cynnwys.</string>
