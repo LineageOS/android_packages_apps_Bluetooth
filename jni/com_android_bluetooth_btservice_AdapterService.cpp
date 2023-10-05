@@ -406,6 +406,7 @@ static void callback_thread_event(bt_cb_thread_evt event) {
       return;
     }
     vm->DetachCurrentThread();
+    callbackEnv = NULL;
   }
 }
 
