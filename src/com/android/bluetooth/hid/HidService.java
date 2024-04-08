@@ -166,7 +166,10 @@ public class HidService extends ProfileService {
                 case MESSAGE_DISCONNECT:
                 {
                     BluetoothDevice device = (BluetoothDevice) msg.obj;
-                    if (!disconnectHidNative(Utils.getByteAddress(device)) ) {
+                    int connectionPolicy = getPriority(device);
+                    boolean reconnectAllowed =
+                            connectionPolicy == BluetoothProfile.PRIORITY_ON;
+                    if (!disconnectHidNative(Utils.getByteAddress(device), reconnectAllowed)) {
                         broadcastConnectionState(device, BluetoothProfile.STATE_DISCONNECTING);
                         broadcastConnectionState(device, BluetoothProfile.STATE_DISCONNECTED);
                         break;
@@ -186,7 +189,10 @@ public class HidService extends ProfileService {
                        prevState == BluetoothInputDevice.STATE_DISCONNECTED &&
                        (!okToConnect(device))) {
                         if (DBG) Log.d(TAG,"Incoming HID connection rejected");
-                        disconnectHidNative(Utils.getByteAddress(device));
+                        int connectionPolicy = getPriority(device);
+                        boolean reconnectAllowed =
+                                connectionPolicy == BluetoothProfile.PRIORITY_ON;
+                        disconnectHidNative(Utils.getByteAddress(device), reconnectAllowed);
                     } else {
                         broadcastConnectionState(device, convertHalState(halState));
                     }
@@ -774,7 +780,7 @@ public class HidService extends ProfileService {
     private native void initializeNative();
     private native void cleanupNative();
     private native boolean connectHidNative(byte[] btAddress);
-    private native boolean disconnectHidNative(byte[] btAddress);
+    private native boolean disconnectHidNative(byte[] btAddress, boolean reconnectAllowed);
     private native boolean getProtocolModeNative(byte[] btAddress);
     private native boolean virtualUnPlugNative(byte[] btAddress);
     private native boolean setProtocolModeNative(byte[] btAddress, byte protocolMode);
