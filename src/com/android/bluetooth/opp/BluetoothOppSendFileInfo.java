@@ -32,6 +32,8 @@
 
 package com.android.bluetooth.opp;
 
+import static android.os.UserHandle.myUserId;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -39,6 +41,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.provider.OpenableColumns;
+import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 
@@ -48,6 +51,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * This class stores information about a single sending file It will only be
@@ -113,6 +117,11 @@ public class BluetoothOppSendFileInfo {
             if (fromExternal && BluetoothOppUtility.isForbiddenContent(uri)) {
                 EventLog.writeEvent(0x534e4554, "179910660", -1, uri.toString());
                 Log.e(TAG, "Content from forbidden URI is not allowed.");
+                return SEND_FILE_INFO_ERROR;
+            }
+
+            if (isContentUriForOtherUser(uri)) {
+                Log.e(TAG, "Uri: " + uri + " is invalid for user " + myUserId());
                 return SEND_FILE_INFO_ERROR;
             }
 
@@ -245,6 +254,12 @@ public class BluetoothOppSendFileInfo {
         }
 
         return new BluetoothOppSendFileInfo(fileName, contentType, length, is, 0);
+    }
+
+    private static boolean isContentUriForOtherUser(Uri uri) {
+        String uriUserId = uri.getUserInfo();
+        return !TextUtils.isEmpty(uriUserId)
+                && !Objects.equals(uriUserId, String.valueOf(myUserId()));
     }
 
     private static long getStreamSize(FileInputStream is) throws IOException {
