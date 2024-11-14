@@ -410,6 +410,13 @@ final class BondStateMachine extends StateMachine {
             }
         }
 
+        if (newState == BluetoothDevice.BOND_NONE) {
+            // Remove the permissions for unbonded devices
+            mAdapterService.setMessageAccessPermission(device, BluetoothDevice.ACCESS_UNKNOWN);
+            mAdapterService.setPhonebookAccessPermission(device, BluetoothDevice.ACCESS_UNKNOWN);
+            mAdapterService.setSimAccessPermission(device, BluetoothDevice.ACCESS_UNKNOWN);
+        }
+
         Intent intent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
         intent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, newState);
