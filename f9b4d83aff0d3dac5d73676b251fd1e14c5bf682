@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4f0c7b9d_067a20ba",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 33479
+      },
+      "writtenOn": "2024-12-12T14:08:37Z",
+      "side": 1,
+      "message": "vendor/qcom/opensource/commonsys/packages/apps/Bluetooth/src/com/android/bluetooth/hid/HidHostService.java:187: error: cannot find symbol\n                            int connectionPolicy \u003d getConnectionPolicy(device);\n                                                   ^\n  symbol: method getConnectionPolicy(BluetoothDevice)\nvendor/qcom/opensource/commonsys/packages/apps/Bluetooth/src/com/android/bluetooth/hid/HidHostService.java:189: error: cannot find symbol\n                                    connectionPolicy \u003d\u003d BluetoothProfile.CONNECTION_POLICY_ALLOWED;\n                                                                        ^\n  symbol:   variable CONNECTION_POLICY_ALLOWED\n  location: interface BluetoothProfile\n2 errors\n20:13:11 ninja failed with: exit status 1\n\n#### failed to build some targets (02:49:41 (hh:mm:ss)) ####\n\ni get this error in compilation or brunch at \n[ 99% 114160/115283] Target Java: out/target/common/obj/APPS/BluetoothQti_intermediates/classes-full-debug.jar",
+      "revId": "f9b4d83aff0d3dac5d73676b251fd1e14c5bf682",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
