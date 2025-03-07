@@ -256,8 +256,29 @@ public class BluetoothOppSendFileInfo {
         return new BluetoothOppSendFileInfo(fileName, contentType, length, is, 0);
     }
 
+   /**
+     * Determine if the given {@link Uri} is a content uri for another user.
+     *
+     * <p>RFC 2396 s.3.2. states that <tt>'@'</tt> is reserved in the authority component. Its
+     * encoded form should be interpreted as data within the authority component. However,
+     * ContentProvider APIs use the decoded {@link Uri#getAuthority()} with {@link
+     * ContentProvider#getUserIdFromAuthority(String, int)} to determine the <tt>userId</tt> in the
+     * userInfo, rather than {@link Uri#getUserInfo()}. An encoded <tt>'@'</tt>, which is
+     * <tt>'%40'</tt>, is interpreted by ContentProvider as the separator for userInfo and host.
+     *
+     * <p>As an unbundled module, Bluetooth cannot access ContentProvider#getUserIdFromAuthority, so
+     * parse userInfo here from the authority.
+     */
     private static boolean isContentUriForOtherUser(Uri uri) {
-        String uriUserId = uri.getUserInfo();
+        String authority = uri.getAuthority();
+        if (authority == null) {
+            return false;
+        }
+        int atIndex = authority.lastIndexOf('@');
+        if (atIndex == -1) {
+            return false;
+        }
+        String uriUserId = authority.substring(0, atIndex);
         return !TextUtils.isEmpty(uriUserId)
                 && !Objects.equals(uriUserId, String.valueOf(myUserId()));
     }
