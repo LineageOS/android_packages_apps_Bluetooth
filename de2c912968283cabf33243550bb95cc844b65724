@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bdfe3fea_03356f89",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 25691
+      },
+      "writtenOn": "2025-06-09T16:47:37Z",
+      "side": 1,
+      "message": "Builds for and runs on Moto G5 Cedric. Thanks again!",
+      "revId": "de2c912968283cabf33243550bb95cc844b65724",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
