@@ -52,6 +52,23 @@
       "parentUuid": "4f0c7b9d_067a20ba",
       "revId": "f9b4d83aff0d3dac5d73676b251fd1e14c5bf682",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bee4d763_60111785",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 36504
+      },
+      "writtenOn": "2026-01-27T07:43:42Z",
+      "side": 1,
+      "message": "Doesn\u0027t build for me. \n```\npackages/apps/Bluetooth/jni/com_android_bluetooth_hid_host.cpp:292:61: error: too many arguments to function cal\nl, expected 1, have 2\n```",
+      "revId": "f9b4d83aff0d3dac5d73676b251fd1e14c5bf682",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ],
   "submitRequirementResults": []
